@@ -17,13 +17,15 @@ db.sqlite3
 media/
 staticfiles/
 
-# Backup
+# Backup SQL (escludi backup, MA non gli script di setup)
 backups/
-*.sql
-*.sql.gz
+backups/*.sql
+backups/*.sql.gz
+fix_columns.sql
 
-# IDE
-.vscode/
+# IDE - Escludi quasi tutto ECCETTO settings.json di progetto
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
