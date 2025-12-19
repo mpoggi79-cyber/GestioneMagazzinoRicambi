@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load magazzino_tags %}
+
+{% block title %}Matricole Macchine SCM - GMR{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-barcode"></i> Matricole Macchine SCM</h2>
+        <a href="{% url 'magazzino:matricola_scm_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nuova Matricola
+        </a>
+    </div>
+
+    <!-- Barra di ricerca e filtri -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-5">
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Cerca per numero matricola o modello..." 
+                           value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-5">
+                    <select name="modello" class="form-select">
+                        <option value="">Tutti i modelli</option>
+                        {% for modello in modelli %}
+                            <option value="{{ modello.id_modello }}" 
+                                    {% if request.GET.modello == modello.id_modello|stringformat:"s" %}selected{% endif %}>
+                                {{ modello.nome_modello }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Cerca
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabella matricole -->
+    <div class="card">
+        <div class="card-body">
+            {% if matricole %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 8%;">ID</th>
+                                <th style="width: 30%;">{% order_link 'modello__nome_modello' 'Modello' %}</th>
+                                <th style="width: 25%;">{% order_link 'matricola_macchina' 'Matricola' %}</th>
+                                <th style="width: 12%;">{% order_link 'anno' 'Anno' %}</th>
+                                <th style="width: 10%;">Stato</th>
+                                <th style="width: 15%;">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for matricola in matricole %}
+                            <tr>
+                                <td>{{ matricola.id_matricola }}</td>
+                                <td>
+                                    <i class="fas fa-industry text-muted"></i>
+                                    {{ matricola.modello.nome_modello }}
+                                    {% if matricola.modello.gamma %}
+                                        <br><small class="text-muted">{{ matricola.modello.gamma }}</small>
+                                    {% endif %}
+                                </td>
+                                <td><strong class="font-monospace">{{ matricola.matricola_macchina }}</strong></td>
+                                <td>{{ matricola.anno|default:"—" }}</td>
+                                <td>
+                                    {% if matricola.stato_attivo %}
+                                        <span class="badge bg-success">Attivo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inattivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'magazzino:matricola_scm_update' matricola.id_matricola %}" 
+                                       class="btn btn-sm btn-warning" title="Modifica">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'magazzino:matricola_scm_delete' matricola.id_matricola %}" 
+                                       class="btn btn-sm btn-danger" title="Elimina">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginazione -->
+                {% if is_paginated %}
+                <nav aria-label="Navigazione pagine">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.modello %}&modello={{ request.GET.modello }}{% endif %}">Prima</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.modello %}&modello={{ request.GET.modello }}{% endif %}">Precedente</a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">Pagina {{ page_obj.number }} di {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.modello %}&modello={{ request.GET.modello }}{% endif %}">Successiva</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.modello %}&modello={{ request.GET.modello }}{% endif %}">Ultima</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Nessuna matricola trovata. 
+                    <a href="{% url 'magazzino:matricola_scm_create' %}">Creane una nuova</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

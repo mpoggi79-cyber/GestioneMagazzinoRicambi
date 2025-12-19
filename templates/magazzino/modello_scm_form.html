@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Modifica{% else %}Nuovo{% endif %} Modello SCM - GMR{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-industry"></i>
+                        {% if object %}Modifica Modello{% else %}Nuovo Modello Macchina SCM{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_nome_modello" class="form-label">
+                                Nome Modello <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="nome_modello" class="form-control" 
+                                   id="id_nome_modello" required maxlength="100"
+                                   value="{{ form.nome_modello.value|default:'' }}"
+                                   placeholder="Es. RD100NT TVN">
+                            {% if form.nome_modello.errors %}
+                                <div class="text-danger">{{ form.nome_modello.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_gamma" class="form-label">Gamma</label>
+                            <input type="text" name="gamma" class="form-control" 
+                                   id="id_gamma" maxlength="100"
+                                   value="{{ form.gamma.value|default:'' }}"
+                                   placeholder="Es. RD, RECORD, ACCORD (opzionale)">
+                            <small class="form-text text-muted">
+                                Famiglia o linea di prodotto (opzionale)
+                            </small>
+                            {% if form.gamma.errors %}
+                                <div class="text-danger">{{ form.gamma.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if object %}
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" name="stato_attivo" class="form-check-input" 
+                                   id="id_stato_attivo" {% if form.stato_attivo.value %}checked{% endif %}>
+                            <label class="form-check-label" for="id_stato_attivo">
+                                Modello attivo
+                            </label>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salva
+                            </button>
+                            <a href="{% url 'magazzino:modello_scm_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Annulla
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

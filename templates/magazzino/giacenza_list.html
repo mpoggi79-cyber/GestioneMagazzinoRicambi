@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load magazzino_tags %}
+
+{% block title %}Giacenze - Gestione Magazzino Ricambi{% endblock %}
+
+{% block content %}
+
+<style>
+    .table-compact th,
+    .table-compact td {
+        padding: 0.3rem 0.25rem !important;
+        white-space: nowrap;
+    }
+</style>
+
+<h1 class="page-title">
+    <i class="fas fa-chart-pie"></i> Giacenze
+</h1>
+
+<!-- FILTRI -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Ricerca per codice articolo..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-3">
+                <select name="soglia" class="form-select">
+                    <option value="">Tutte le giacenze</option>
+                    <option value="sotto" {% if request.GET.soglia == 'sotto' %}selected{% endif %}>Sotto soglia minima</option>
+                    <option value="sopra" {% if request.GET.soglia == 'sopra' %}selected{% endif %}>Sopra soglia massima</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Filtra
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TABELLA GIACENZE -->
+<div class="card">
+    <div class="card-body p-0">
+        {% if giacenze %}
+        <div class="table-responsive">
+            <table class="table table-hover table-sm table-compact mb-0">
+                <thead>
+                    <tr>
+                        <th>{% order_link 'articolo__codice_interno' 'Codice' %}</th>
+                        <th>{% order_link 'articolo__descrizione' 'Descrizione' %}</th>
+                        <th>Categoria</th>
+                        <th>{% order_link 'quantita_disponibile' 'Disponibile' %}</th>
+                        <th>{% order_link 'quantita_impegnata' 'Impegnata' %}</th>
+                        <th>Prenotata</th>
+                        <th>{% order_link 'quantita_libera' 'Libera' %}</th>
+                        <th>Min/Max</th>
+                        <th>Stato</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for giacenza in giacenze %}
+                    <tr>
+                        <td>
+                            <strong>
+                                <a href="{% url 'magazzino:articolo_detail' giacenza.articolo.id_articolo %}">
+                                    {{ giacenza.articolo.codice_interno }}
+                                </a>
+                            </strong>
+                        </td>
+                        <td>
+                            {{ giacenza.articolo.descrizione|truncatewords:3 }}
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ giacenza.articolo.categoria.nome_categoria }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ giacenza.quantita_disponibile }}</span>
+                        </td>
+                        <td>
+                            {% if giacenza.quantita_impegnata > 0 %}
+                            <span class="badge bg-warning">{{ giacenza.quantita_impegnata }}</span>
+                            {% else %}
+                            <span class="text-muted">0</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if giacenza.quantita_prenotata > 0 %}
+                            <span class="badge bg-info">{{ giacenza.quantita_prenotata }}</span>
+                            {% else %}
+                            <span class="text-muted">0</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if giacenza.quantita_libera > 0 %}
+                            <span class="badge bg-success">{{ giacenza.quantita_libera }}</span>
+                            {% else %}
+                            <span class="badge bg-danger">0</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ giacenza.articolo.giacenza_minima }}/{{ giacenza.articolo.giacenza_massima }}
+                        </td>
+                        <td>
+                            {% if giacenza.quantita_disponibile < giacenza.articolo.giacenza_minima %}
+                            <span class="badge bg-danger">⚠️ Sotto soglia</span>
+                            {% elif giacenza.quantita_disponibile > giacenza.articolo.giacenza_massima %}
+                            <span class="badge bg-warning">⚠️ Sopra soglia</span>
+                            {% else %}
+                            <span class="badge bg-success">OK</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'magazzino:giacenza_detail' giacenza.id_giacenza %}" class="btn btn-sm btn-info" title="Visualizza">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted">
+            <i class="fas fa-inbox" style="font-size: 3rem;"></i>
+            <p class="mt-3">Nessuna giacenza trovata</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- PAGINAZIONE (se necessaria) -->
+{% if is_paginated %}
+<nav class="mt-4" aria-label="Paginazione">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1">Prima</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Precedente</a>
+        </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">Pagina {{ page_obj.number }} di {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Successiva</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Ultima</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

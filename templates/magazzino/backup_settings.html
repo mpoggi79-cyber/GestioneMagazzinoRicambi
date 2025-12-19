@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Impostazioni Backup - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- HEADER -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>
+                        <i class="fas fa-cog text-primary"></i>
+                        Impostazioni Backup
+                    </h2>
+                    <p class="text-muted">Configura le opzioni di backup del database</p>
+                </div>
+                <div>
+                    <a href="{% url 'magazzino:backup_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Torna ai Backup
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ALERT INFO -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <strong>Configurazione Real-time:</strong> Le modifiche vengono salvate nel database e applicate immediatamente, senza bisogno di riavviare il server.
+            </div>
+        </div>
+    </div>
+    
+    <!-- FORM SETTINGS -->
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-sliders-h"></i> Configurazione
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Cartella Backup -->
+                        <div class="mb-4">
+                            <label for="{{ form.backup_dir.id_for_label }}" class="form-label">
+                                <i class="fas fa-folder-open"></i> {{ form.backup_dir.label }}
+                                {% if form.backup_dir.field.required %}
+                                <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+                            {{ form.backup_dir }}
+                            {% if form.backup_dir.help_text %}
+                            <small class="form-text text-muted">
+                                <i class="fas fa-question-circle"></i> {{ form.backup_dir.help_text }}
+                            </small>
+                            {% endif %}
+                            {% if form.backup_dir.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.backup_dir.errors %}
+                                <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="alert alert-warning mt-2">
+                                <small>
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Importante:</strong>
+                                    <ul class="mb-0 mt-1">
+                                        <li>Usa un percorso su un disco diverso dal sistema per maggiore sicurezza</li>
+                                        <li>Verifica che ci sia spazio sufficiente (ogni backup può essere 10-100+ MB)</li>
+                                        <li>La cartella verrà creata automaticamente se non esiste</li>
+                                    </ul>
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Giorni di Conservazione -->
+                        <div class="mb-4">
+                            <label for="{{ form.retention_days.id_for_label }}" class="form-label">
+                                <i class="fas fa-calendar-alt"></i> {{ form.retention_days.label }}
+                                {% if form.retention_days.field.required %}
+                                <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+                            {{ form.retention_days }}
+                            {% if form.retention_days.help_text %}
+                            <small class="form-text text-muted">
+                                <i class="fas fa-question-circle"></i> {{ form.retention_days.help_text }}
+                            </small>
+                            {% endif %}
+                            {% if form.retention_days.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.retention_days.errors %}
+                                <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="alert alert-info mt-2">
+                                <small>
+                                    <i class="fas fa-lightbulb"></i>
+                                    <strong>Suggerimento:</strong> 30 giorni è un buon compromesso tra spazio e sicurezza
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Percorso MySQL -->
+                        <div class="mb-4">
+                            <label for="{{ form.mysql_bin_path.id_for_label }}" class="form-label">
+                                <i class="fas fa-database"></i> {{ form.mysql_bin_path.label }}
+                                {% if form.mysql_bin_path.field.required %}
+                                <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+                            {{ form.mysql_bin_path }}
+                            {% if form.mysql_bin_path.help_text %}
+                            <small class="form-text text-muted">
+                                <i class="fas fa-question-circle"></i> {{ form.mysql_bin_path.help_text }}
+                            </small>
+                            {% endif %}
+                            {% if form.mysql_bin_path.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.mysql_bin_path.errors %}
+                                <i class="fas fa-exclamation-circle"></i> {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="alert alert-secondary mt-2">
+                                <small>
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Percorsi comuni:</strong>
+                                    <ul class="mb-0 mt-1">
+                                        <li><code>C:\xampp\mysql\bin</code> - XAMPP</li>
+                                        <li><code>C:\Program Files\MySQL\MySQL Server 8.0\bin</code> - MySQL Server</li>
+                                        <li><code>C:\wamp64\bin\mysql\mysql8.0.x\bin</code> - WAMP</li>
+                                    </ul>
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Pulsanti -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'magazzino:backup_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Annulla
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salva Impostazioni
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- INFO AGGIUNTIVE -->
+    <div class="row mt-4">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <i class="fas fa-database"></i> Persistenza Configurazione
+                </div>
+                <div class="card-body">
+                    <p>
+                        <i class="fas fa-info-circle text-primary"></i>
+                        Le impostazioni vengono salvate nella tabella <code>configurazioni</code> del database.
+                    </p>
+                    <p class="mb-0">
+                        <strong>Vantaggi:</strong>
+                    </p>
+                    <ul>
+                        <li><i class="fas fa-bolt text-warning"></i> Modifiche applicate <strong>immediatamente</strong></li>
+                        <li><i class="fas fa-history text-info"></i> Tracciamento di chi ha modificato ogni impostazione</li>
+                        <li><i class="fas fa-shield-alt text-success"></i> Persistenza automatica nei backup del database</li>
+                        <li><i class="fas fa-users text-primary"></i> Modificabili dagli amministratori senza accesso al server</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

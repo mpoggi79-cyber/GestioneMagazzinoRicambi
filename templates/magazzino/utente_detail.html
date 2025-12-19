@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dettaglio Utente: {{ utente_obj.username }} - Magazzino Ricambi{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-user-circle"></i> {{ utente_obj.get_full_name|default:utente_obj.username }}
+                </h1>
+                <div class="page-actions">
+                    {% if user.profilo.è_admin %}
+                    <a href="{% url 'magazzino:utente_update' utente_obj.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Modifica
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'magazzino:utente_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Torna alla Lista
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- INFORMAZIONI UTENTE -->
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user"></i> Informazioni Utente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-user-circle fa-5x text-primary"></i>
+                    </div>
+                    
+                    <table class="table table-sm">
+                        <tr>
+                            <th><i class="fas fa-user"></i> Username:</th>
+                            <td><strong>{{ utente_obj.username }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-id-card"></i> Nome:</th>
+                            <td>{{ utente_obj.first_name|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-id-card"></i> Cognome:</th>
+                            <td>{{ utente_obj.last_name|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-envelope"></i> Email:</th>
+                            <td><a href="mailto:{{ utente_obj.email }}">{{ utente_obj.email }}</a></td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-user-tag"></i> Ruolo:</th>
+                            <td>
+                                <span class="badge 
+                                    {% if utente_obj.profilo.ruolo == 'ADMIN' %}bg-danger
+                                    {% elif utente_obj.profilo.ruolo == 'GESTORE_MAGAZZINO' %}bg-warning
+                                    {% elif utente_obj.profilo.ruolo == 'OPERATORE' %}bg-info
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ utente_obj.profilo.get_ruolo_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-building"></i> Dipartimento:</th>
+                            <td>{{ utente_obj.profilo.dipartimento|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-toggle-on"></i> Stato:</th>
+                            <td>
+                                {% if utente_obj.is_active %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check"></i> Attivo
+                                </span>
+                                {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times"></i> Inattivo
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-shield-alt"></i> Staff:</th>
+                            <td>
+                                {% if utente_obj.is_staff %}
+                                <span class="badge bg-warning">Sì</span>
+                                {% else %}
+                                <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-crown"></i> Superuser:</th>
+                            <td>
+                                {% if utente_obj.is_superuser %}
+                                <span class="badge bg-danger">Sì</span>
+                                {% else %}
+                                <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- STATISTICHE ACCESSI -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Statistiche Accesso</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <th><i class="fas fa-calendar-plus"></i> Creato il:</th>
+                            <td>{{ utente_obj.date_joined|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-sign-in-alt"></i> Ultimo accesso:</th>
+                            <td>
+                                {% if utente_obj.last_login %}
+                                {{ utente_obj.last_login|date:"d/m/Y H:i" }}
+                                {% else %}
+                                <span class="text-muted">Mai</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-list"></i> Accessi totali:</th>
+                            <td><strong>{{ ultimi_accessi|length }}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ATTIVITÀ E LOG -->
+        <div class="col-md-8">
+            <!-- ULTIMI ACCESSI -->
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Ultimi Accessi</h5>
+                </div>
+                <div class="card-body">
+                    {% if ultimi_accessi %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Data/Ora</th>
+                                    <th>Esito</th>
+                                    <th>IP</th>
+                                    <th>User Agent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for accesso in ultimi_accessi %}
+                                <tr>
+                                    <td>{{ accesso.data_accesso|date:"d/m/Y H:i:s" }}</td>
+                                    <td>
+                                        {% if accesso.success %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-sign-in-alt"></i> Successo
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times"></i> Fallito
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td><code>{{ accesso.ip_address|default:"-" }}</code></td>
+                                    <td><small>{{ accesso.user_agent|truncatechars:50|default:"-" }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle"></i> Nessun accesso registrato
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- MOVIMENTI RECENTI -->
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-exchange-alt"></i> Movimenti Recenti</h5>
+                </div>
+                <div class="card-body">
+                    {% if movimenti_recenti %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Tipo</th>
+                                    <th>Articolo</th>
+                                    <th>Quantità</th>
+                                    <th>Note</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movimento in movimenti_recenti %}
+                                <tr>
+                                    <td>{{ movimento.data_movimento|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if movimento.tipo_movimento == 'CARICO' %}
+                                        <span class="badge bg-success">Carico</span>
+                                        {% elif movimento.tipo_movimento == 'SCARICO' %}
+                                        <span class="badge bg-danger">Scarico</span>
+                                        {% else %}
+                                        <span class="badge bg-info">{{ movimento.get_tipo_movimento_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'magazzino:articolo_detail' movimento.articolo.pk %}">
+                                            {{ movimento.articolo.codice_articolo }}
+                                        </a>
+                                    </td>
+                                    <td><strong>{{ movimento.quantita }}</strong></td>
+                                    <td><small>{{ movimento.note|truncatechars:50|default:"-" }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle"></i> Nessun movimento registrato
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

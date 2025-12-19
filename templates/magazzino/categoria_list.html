@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Categorie - Gestione Magazzino Ricambi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tree-view {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    .tree-view ul {
+        list-style: none;
+        padding-left: 1.5rem;
+    }
+    
+    .tree-item {
+        margin: 0.3rem 0;
+        padding: 0.5rem 0.75rem;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        cursor: move;
+        transition: all 0.2s;
+    }
+    
+    .tree-item:hover {
+        background: #f8f9fa;
+        border-color: var(--secondary-color);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .tree-item.dragging {
+        opacity: 0.5;
+        border-style: dashed;
+    }
+    
+    .tree-item.drag-over {
+        background: #e3f2fd;
+        border-color: var(--primary-color);
+        border-width: 2px;
+    }
+    
+    .categoria-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .categoria-icon {
+        font-size: 1rem;
+        min-width: 20px;
+        text-align: center;
+    }
+    
+    .categoria-nome {
+        flex: 1;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+    
+    .categoria-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .categoria-actions {
+        display: flex;
+        gap: 0.25rem;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    
+    .tree-item:hover .categoria-actions {
+        opacity: 1;
+    }
+    
+    .level-0 .categoria-icon { color: #2563eb; }  /* Blue */
+    .level-1 .categoria-icon { color: #16a34a; }  /* Green */
+    .level-2 .categoria-icon { color: #ea580c; }  /* Orange */
+    
+    .collapse-toggle {
+        cursor: pointer;
+        user-select: none;
+        margin-right: 0.5rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .collapse-toggle:hover {
+        color: var(--primary-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">
+    <i class="fas fa-sitemap"></i> Categorie Gerarchiche
+</h1>
+
+<!-- FILTRI E RICERCA -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Ricerca per nome..." value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <select name="stato" class="form-select">
+                    <option value="">Tutti gli stati</option>
+                    <option value="attivo" {% if stato == 'attivo' %}selected{% endif %}>Attivo</option>
+                    <option value="inattivo" {% if stato == 'inattivo' %}selected{% endif %}>Inattivo</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Filtra
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- BOTTONI AZIONI -->
+<div class="mb-3 d-flex gap-2">
+    <a href="{% url 'magazzino:categoria_create' %}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Aggiungi Categoria
+    </a>
+    <button class="btn btn-outline-secondary" onclick="expandAll()">
+        <i class="fas fa-expand"></i> Espandi Tutto
+    </button>
+    <button class="btn btn-outline-secondary" onclick="collapseAll()">
+        <i class="fas fa-compress"></i> Comprimi Tutto
+    </button>
+</div>
+
+<!-- LEGENDA -->
+<div class="alert alert-info mb-3" style="font-size: 0.9rem;">
+    <strong><i class="fas fa-info-circle"></i> Istruzioni:</strong><br>
+    <div class="row mt-2">
+        <div class="col-md-6">
+            <i class="fas fa-arrows-alt text-primary"></i> <strong>Drag & Drop:</strong> Trascina le categorie per riorganizzarle<br>
+            <i class="fas fa-plus-circle text-success"></i> <strong>Aggiungi:</strong> Crea sottocategoria all'interno<br>
+            <i class="fas fa-edit text-warning"></i> <strong>Modifica:</strong> Cambia nome e descrizione<br>
+            <i class="fas fa-trash text-danger"></i> <strong>Elimina:</strong> Rimuovi categoria (se vuota)
+        </div>
+        <div class="col-md-6">
+            <strong>Gerarchia (max 3 livelli):</strong><br>
+            <span class="level-0"><i class="fas fa-folder categoria-icon"></i> Macrocategoria</span> (livello 1)<br>
+            <span class="level-1"><i class="fas fa-folder-open categoria-icon"></i> Categoria</span> (livello 2)<br>
+            <span class="level-2"><i class="fas fa-file-alt categoria-icon"></i> Sottocategoria</span> (livello 3)
+        </div>
+    </div>
+</div>
+
+<!-- TREE VIEW CATEGORIE -->
+<div class="card">
+    <div class="card-body">
+        {% if categorie %}
+            {% if is_search %}
+                <!-- MODALITÀ RICERCA: Lista piatta -->
+                <div class="alert alert-warning">
+                    <i class="fas fa-search"></i> Modalità ricerca attiva - visualizzazione piatta. 
+                    <a href="{% url 'magazzino:categoria_list' %}">Torna alla vista ad albero</a>
+                </div>
+                <ul class="list-group">
+                    {% for categoria in categorie %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="{{ categoria.get_icon }} categoria-icon level-{{ categoria.livello }}"></i>
+                            <strong>{{ categoria.get_breadcrumb }}</strong>
+                            {% if categoria.descrizione %}
+                                <br><small class="text-muted">{{ categoria.descrizione }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-1">
+                            <span class="badge bg-secondary">{{ categoria.count_articoli }} articoli</span>
+                            <a href="{% url 'magazzino:categoria_update' categoria.id_categoria %}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'magazzino:categoria_delete' categoria.id_categoria %}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <!-- MODALITÀ TREE VIEW -->
+                <ul class="tree-view">
+                    {% for categoria in categorie %}
+                        {% include 'magazzino/categoria_tree_item.html' with categoria=categoria %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% else %}
+        <div class="p-4 text-center text-muted">
+            <i class="fas fa-inbox" style="font-size: 3rem;"></i>
+            <p class="mt-3">Nessuna categoria trovata</p>
+            <a href="{% url 'magazzino:categoria_create' %}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus"></i> Crea la prima categoria
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// DRAG & DROP
+let draggedItem = null;
+
+function initDragDrop() {
+    const items = document.querySelectorAll('.tree-item');
+    
+    items.forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('drop', handleDrop);
+        item.addEventListener('dragend', handleDragEnd);
+        item.addEventListener('dragleave', handleDragLeave);
+    });
+}
+
+function handleDragStart(e) {
+    // IMPORTANTE: Ferma la propagazione per evitare che elementi genitori catturino l'evento
+    e.stopPropagation();
+    
+    draggedItem = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    
+    if (this !== draggedItem) {
+        this.classList.add('drag-over');
+    }
+    
+    return false;
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    
+    this.classList.remove('drag-over');
+    
+    if (draggedItem !== this) {
+        const categoriaId = draggedItem.dataset.categoriaId;
+        const nuovoPadreId = this.dataset.categoriaId;
+        
+        // Chiamata AJAX per spostare
+        fetch('{% url "magazzino:categoria_move" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                categoria_id: categoriaId,
+                nuovo_padre_id: nuovoPadreId,
+                nuovo_ordine: 0
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Errore: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Errore nella comunicazione con il server');
+            console.error(error);
+        });
+    }
+    
+    return false;
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.drag-over').forEach(item => {
+        item.classList.remove('drag-over');
+    });
+}
+
+// EXPAND/COLLAPSE
+function expandAll() {
+    document.querySelectorAll('.tree-children').forEach(el => {
+        el.style.display = 'block';
+    });
+    document.querySelectorAll('.collapse-toggle i').forEach(icon => {
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-down');
+    });
+}
+
+function collapseAll() {
+    document.querySelectorAll('.tree-children').forEach(el => {
+        el.style.display = 'none';
+    });
+    document.querySelectorAll('.collapse-toggle i').forEach(icon => {
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-right');
+    });
+}
+
+function toggleChildren(element) {
+    const children = element.parentElement.nextElementSibling;
+    const icon = element.querySelector('i');
+    
+    if (children && children.classList.contains('tree-children')) {
+        if (children.style.display === 'none') {
+            children.style.display = 'block';
+            icon.classList.remove('fa-chevron-right');
+            icon.classList.add('fa-chevron-down');
+        } else {
+            children.style.display = 'none';
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-right');
+        }
+    }
+}
+
+// CSRF Token Helper
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+    initDragDrop();
+});
+</script>
+{% endblock %}

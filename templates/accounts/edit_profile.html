@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Modifica Profilo - Gestione Magazzino Ricambi{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="page-title">
+                <i class="fas fa-user-edit"></i> Modifica Profilo
+            </h1>
+        </div>
+        <div class="col-lg-4 text-end">
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Indietro
+            </a>
+        </div>
+    </div>
+
+    <!-- MESSAGI DI ERRORE E SUCCESSO -->
+    {% if messages %}
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-form"></i> Informazioni Personali
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.username.id_for_label }}" class="form-label">
+                                    Nome Utente
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="{{ form.username.id_for_label }}" 
+                                       value="{{ user.username }}"
+                                       disabled>
+                                <small class="text-muted">Non modificabile</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    Email
+                                    {% if form.email.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {% if form.email.errors %}
+                                <input type="email" 
+                                       class="form-control is-invalid" 
+                                       id="{{ form.email.id_for_label }}"
+                                       name="email"
+                                       value="{{ form.email.value|default:'' }}"
+                                       placeholder="esempio@email.com">
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.email.errors %}
+                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="{{ form.email.id_for_label }}"
+                                       name="email"
+                                       value="{{ form.email.value|default:'' }}"
+                                       placeholder="esempio@email.com">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                    Nome
+                                    {% if form.first_name.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {% if form.first_name.errors %}
+                                <input type="text" 
+                                       class="form-control is-invalid" 
+                                       id="{{ form.first_name.id_for_label }}"
+                                       name="first_name"
+                                       value="{{ form.first_name.value|default:'' }}"
+                                       placeholder="Nome">
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.first_name.errors %}
+                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="{{ form.first_name.id_for_label }}"
+                                       name="first_name"
+                                       value="{{ form.first_name.value|default:'' }}"
+                                       placeholder="Nome">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                    Cognome
+                                    {% if form.last_name.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {% if form.last_name.errors %}
+                                <input type="text" 
+                                       class="form-control is-invalid" 
+                                       id="{{ form.last_name.id_for_label }}"
+                                       name="last_name"
+                                       value="{{ form.last_name.value|default:'' }}"
+                                       placeholder="Cognome">
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.last_name.errors %}
+                                    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="{{ form.last_name.id_for_label }}"
+                                       name="last_name"
+                                       value="{{ form.last_name.value|default:'' }}"
+                                       placeholder="Cognome">
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- PULSANTI DI AZIONE -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salva Modifiche
+                            </button>
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Annulla
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFORMAZIONI RUOLO (SIDEBAR) -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-shield-alt"></i> Informazioni Ruolo
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small d-block mb-2">Ruolo</label>
+                        <p>
+                            {% if profilo.ruolo == 'ADMIN' %}
+                            <span class="badge bg-danger">{{ profilo.get_ruolo_display }}</span>
+                            {% elif profilo.ruolo == 'GESTORE_MAGAZZINO' %}
+                            <span class="badge bg-warning">{{ profilo.get_ruolo_display }}</span>
+                            {% elif profilo.ruolo == 'OPERATORE' %}
+                            <span class="badge bg-info">{{ profilo.get_ruolo_display }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ profilo.get_ruolo_display }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-muted small d-block mb-2">Stato</label>
+                        <p>
+                            {% if profilo.attivo %}
+                            <span class="badge bg-success">Attivo</span>
+                            {% else %}
+                            <span class="badge bg-danger">Inattivo</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-muted small d-block mb-2">Dipartimento</label>
+                        <p class="h6">{{ profilo.dipartimento|default:"Non assegnato" }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-muted small d-block mb-2">Numero Dipendente</label>
+                        <p class="h6">{{ profilo.numero_dipendente|default:"Non assegnato" }}</p>
+                    </div>
+
+                    <hr>
+
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle"></i>
+                        <small>
+                            Per modificare ruolo, dipartimento o numero dipendente, contatta l'amministratore.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-title {
+        color: #1a5f7a;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 1rem;
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        color: #1a5f7a;
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .btn-primary {
+        background-color: #2a8db8;
+        border-color: #2a8db8;
+    }
+
+    .btn-primary:hover {
+        background-color: #1a5f7a;
+        border-color: #1a5f7a;
+    }
+
+    .is-invalid {
+        border-color: #dc3545;
+    }
+
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,148 @@
+=============================================================================
+GESTIONE MAGAZZINO RICAMBI - STRUTTURA TABELLE
+nome del DB MySQL : GMR
+127.0.0.1/5000
+=============================================================================
+
+1. CATEGORIE
+-----------------------------------------------------------------------------
+Classificazione logica dei ricambi (meccanica, elettrica, pneumatica, Accessori di consumo, ecc.)
+
+Campi:
+- id_categoria: INT PK
+- nome_categoria: VARCHAR(50)
+- descrizione: VARCHAR(200)
+- stato_attivo: TINYINT
+
+-----------------------------------------------------------------------------
+
+2. PEZZI DI RICAMBIO
+-----------------------------------------------------------------------------
+Anagrafica completa degli articoli a magazzino
+
+Campi:
+- id_articolo: INT PK
+- codice_interno: VARCHAR(50) UNIQUE
+- codice_scm: VARCHAR(50)
+- codice_fornitore: VARCHAR(50)
+- codice_alternativo: VARCHAR(50)
+- descrizione: VARCHAR(200)
+- id_categoria: INT FK → Categorie
+- id_unita_misura: INT FK → Unità di misura
+- giacenza_minima: INT (soglia riordino)
+- giacenza_massima: INT (scorta ottimale)
+- prezzo_acquisto: DECIMAL(10,2)
+- prezzo_acquisto_scm: DECIMAL(10,2)
+- stato_attivo: TINYINT
+- creato_il: TIMESTAMP
+- modificato_il: TIMESTAMP
+
+-----------------------------------------------------------------------------
+
+3. UNITÀ DI MISURA
+-----------------------------------------------------------------------------
+Tabella di supporto per standardizzare le unità
+
+Campi:
+- id_unita: INT PK
+- codice: VARCHAR(10) (pz, cf, mt, kg, lt)
+- descrizione: VARCHAR(50)
+
+-----------------------------------------------------------------------------
+
+4. FORNITORI
+-----------------------------------------------------------------------------
+Anagrafica fornitori
+
+Campi:
+- id_fornitore: INT PK
+- ragione_sociale: VARCHAR(100)
+- indirizzo: VARCHAR(150)
+- citta: VARCHAR(50)
+- cap: VARCHAR(10)
+- provincia: VARCHAR(2)
+- telefono: VARCHAR(30)
+- email: VARCHAR(100)
+- partita_iva: VARCHAR(20)
+- tempo_medio_consegna_giorni: INT
+- note: TEXT
+- stato_attivo: TINYINT
+- creato_il: TIMESTAMP
+
+-----------------------------------------------------------------------------
+
+5. MOVIMENTI DI MAGAZZINO
+-----------------------------------------------------------------------------
+Registro completo di tutte le movimentazioni
+
+Campi:
+- id_movimento: INT PK
+- id_articolo: INT FK → Pezzi di ricambio
+- data_movimento: DATETIME
+- tipo_movimento: ENUM('CARICO','SCARICO','RETTIFICA','RESO_FORNITORE')
+- quantita: INT
+- id_fornitore: INT FK → Fornitori (opzionale)
+- causale: VARCHAR(150)
+- numero_documento: VARCHAR(50) (DDT, fattura, ordine)
+- operatore: VARCHAR(50)
+- note: TEXT
+
+-----------------------------------------------------------------------------
+
+6. GIACENZE (vista o tabella materializzata)
+-----------------------------------------------------------------------------
+Situazione aggiornata dello stock
+
+Campi:
+- id_articolo: INT FK → Pezzi di ricambio
+- quantita_disponibile: INT
+- quantita_impegnata: INT (per ordini aperti)
+- quantita_prenotata: INT (per lavorazioni)
+- ultimo_aggiornamento: DATETIME
+
+-----------------------------------------------------------------------------
+
+7. INVENTARI
+-----------------------------------------------------------------------------
+Registrazione inventari fisici periodici
+
+Campi:
+- id_inventario: INT PK
+- data_inventario: DATE
+- operatore: VARCHAR(50)
+- stato: ENUM('IN_CORSO','CHIUSO','APPROVATO')
+- note: TEXT
+
+-----------------------------------------------------------------------------
+
+8. DETTAGLIO INVENTARIO
+-----------------------------------------------------------------------------
+Conteggio articolo per articolo
+
+Campi:
+- id_dettaglio: INT PK
+- id_inventario: INT FK → Inventari
+- id_articolo: INT FK → Pezzi di ricambio
+- quantita_rilevata: INT
+- quantita_sistema: INT
+- differenza: INT (calcolato)
+- note: VARCHAR(200)
+
+-----------------------------------------------------------------------------
+
+9. DOCUMENTI ALLEGATI
+-----------------------------------------------------------------------------
+Archivio digitale documenti
+
+Campi:
+- id_documento: INT PK
+- tipo_entita: ENUM('ARTICOLO','MOVIMENTO','FORNITORE')
+- id_entita: INT (riferimento flessibile)
+- tipo_documento: VARCHAR(50) (fattura, scheda tecnica, manuale)
+- nome_file: VARCHAR(150)
+- percorso_file: VARCHAR(250)
+- data_caricamento: TIMESTAMP
+- operatore: VARCHAR(50)
+- note: TEXT
+
+=============================================================================

@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load magazzino_tags %}
+
+{% block title %}Articoli - Gestione Magazzino Ricambi{% endblock %}
+
+{% block content %}
+
+<style>
+    .table-compact th,
+    .table-compact td {
+        padding: 0.3rem 0.25rem !important;
+        white-space: nowrap;
+    }
+</style>
+
+<h1 class="page-title">
+    <i class="fas fa-cube"></i> Articoli / Pezzi di Ricambio
+</h1>
+
+<!-- FILTRI E RICERCA -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Ricerca per codice o descrizione..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-3">
+                <select name="categoria" class="form-select">
+                    <option value="">Tutte le categorie</option>
+                    {% for cat in categorie %}
+                    <option value="{{ cat.id_categoria }}" {% if request.GET.categoria|add:"0" == cat.id_categoria %}selected{% endif %}>{{ cat.nome_categoria }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Filtra
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- BOTTONE AGGIUNGI ARTICOLO -->
+<div class="mb-3">
+    <a href="{% url 'magazzino:articolo_create' %}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Aggiungi Articolo
+    </a>
+</div>
+
+<!-- TABELLA ARTICOLI -->
+<div class="card">
+    <div class="card-body p-0">
+        {% if articoli %}
+        <div class="table-responsive">
+            <table class="table table-hover table-sm table-compact mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 12%;">{% order_link 'codice_interno' 'Codice Interno' %}</th>
+                        <th style="width: 12%;">Codice SCM</th>
+                        <th>{% order_link 'descrizione' 'Descrizione' %}</th>
+                        <th>{% order_link 'categoria__nome_categoria' 'Categoria' %}</th>
+                        <th>Unità Misura</th>
+                        <th>{% order_link 'giacenza__quantita_disponibile' 'Quantità Libera' %}</th>
+                        <th>{% order_link 'stato_disponibilita' 'Disponibilità' %}</th>
+                        <th style="width: 10%;">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for articolo in articoli %}
+                    <tr>
+                        <td>
+                            <strong><a href="{% url 'magazzino:articolo_detail' articolo.id_articolo %}">{{ articolo.codice_interno }}</a></strong>
+                        </td>
+                        <td>
+                            {% if articolo.codice_scm %}
+                            <code>{{ articolo.codice_scm }}</code>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ articolo.descrizione|truncatewords:5 }}
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ articolo.categoria.nome_categoria }}</span>
+                        </td>
+                        <td>
+                            {{ articolo.unita_misura.codice }}
+                        </td>
+                        <td>
+                            {% if articolo.giacenza %}
+                                {% if articolo.giacenza.quantita_libera > 0 %}
+                                <span class="badge bg-success">{{ articolo.giacenza.quantita_libera }}</span>
+                                {% elif articolo.giacenza.quantita_disponibile > 0 %}
+                                <span class="badge bg-warning">{{ articolo.giacenza.quantita_disponibile }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">0</span>
+                                {% endif %}
+                            {% else %}
+                            <span class="badge bg-secondary">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if articolo.stato_disponibilita == 'DISP' %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Disponibile</span>
+                            {% elif articolo.stato_disponibilita == 'ORD' %}
+                            <span class="badge bg-warning text-dark"><i class="fas fa-shipping-fast"></i> Ordinato</span>
+                            {% elif articolo.stato_disponibilita == 'ESAU' %}
+                            <span class="badge bg-danger"><i class="fas fa-exclamation-triangle"></i> Esaurito</span>
+                            {% elif articolo.stato_disponibilita == 'FP' %}
+                            <span class="badge bg-secondary"><i class="fas fa-ban"></i> Fuori produzione</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'magazzino:articolo_detail' articolo.id_articolo %}" class="btn btn-sm btn-info" title="Visualizza">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'magazzino:articolo_update' articolo.id_articolo %}" class="btn btn-sm btn-warning" title="Modifica">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'magazzino:movimento_create' %}?articolo={{ articolo.id_articolo }}" class="btn btn-sm btn-success" title="Registra Movimento">
+                                <i class="fas fa-arrow-right-arrow-left"></i>
+                            </a>
+                            <a href="{% url 'magazzino:articolo_delete' articolo.id_articolo %}" class="btn btn-sm btn-danger" title="Elimina">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted">
+            <i class="fas fa-inbox" style="font-size: 3rem;"></i>
+            <p class="mt-3">Nessun articolo trovato</p>
+            <a href="{% url 'magazzino:articolo_create' %}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus"></i> Crea il primo articolo
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- PAGINAZIONE (se necessaria) -->
+{% if is_paginated %}
+<nav class="mt-4" aria-label="Paginazione">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1">Prima</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Precedente</a>
+        </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">Pagina {{ page_obj.number }} di {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Successiva</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Ultima</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

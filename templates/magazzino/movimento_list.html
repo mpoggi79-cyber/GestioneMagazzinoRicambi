@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load magazzino_tags %}
+
+{% block title %}Movimenti di Magazzino - Gestione Magazzino Ricambi{% endblock %}
+
+{% block content %}
+
+<style>
+    .table-compact th,
+    .table-compact td {
+        padding: 0.3rem 0.25rem !important;
+        white-space: nowrap;
+    }
+</style>
+
+<h1 class="page-title">
+    <i class="fas fa-exchange-alt"></i> Movimenti di Magazzino
+</h1>
+
+<!-- FILTRI -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <select name="tipo" class="form-select">
+                    <option value="">Tutti i tipi</option>
+                    <option value="CARICO" {% if request.GET.tipo == 'CARICO' %}selected{% endif %}>Carico</option>
+                    <option value="SCARICO" {% if request.GET.tipo == 'SCARICO' %}selected{% endif %}>Scarico</option>
+                    <option value="RETTIFICA" {% if request.GET.tipo == 'RETTIFICA' %}selected{% endif %}>Rettifica</option>
+                    <option value="RESO_FORNITORE" {% if request.GET.tipo == 'RESO_FORNITORE' %}selected{% endif %}>Reso a Fornitore</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="data_da" class="form-control" placeholder="Da" value="{{ request.GET.data_da }}">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="data_a" class="form-control" placeholder="A" value="{{ request.GET.data_a }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Filtra
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- BOTTONE AGGIUNGI MOVIMENTO -->
+<div class="mb-3">
+    <a href="{% url 'magazzino:movimento_create' %}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Registra Movimento
+    </a>
+</div>
+
+<!-- TABELLA MOVIMENTI -->
+<div class="card">
+    <div class="card-body p-0">
+        {% if movimenti %}
+        <div class="table-responsive">
+            <table class="table table-hover table-sm table-compact mb-0">
+                <thead>
+                    <tr>
+                        <th>{% order_link 'data_movimento' 'Data' %}</th>
+                        <th>{% order_link 'articolo__codice_interno' 'Articolo' %}</th>
+                        <th>{% order_link 'tipo_movimento' 'Tipo' %}</th>
+                        <th>{% order_link 'quantita' 'Quantità' %}</th>
+                        <th>{% order_link 'fornitore__ragione_sociale' 'Fornitore' %}</th>
+                        <th>Operatore</th>
+                        <th>Documento</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movimento in movimenti %}
+                    <tr>
+                        <td>{{ movimento.data_movimento|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'magazzino:articolo_detail' movimento.articolo.id_articolo %}">
+                                {{ movimento.articolo.codice_interno }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if movimento.tipo_movimento == 'CARICO' %}
+                            <span class="badge bg-success">{{ movimento.get_tipo_movimento_display }}</span>
+                            {% elif movimento.tipo_movimento == 'SCARICO' %}
+                            <span class="badge bg-danger">{{ movimento.get_tipo_movimento_display }}</span>
+                            {% elif movimento.tipo_movimento == 'RETTO' %}
+                            <span class="badge bg-warning">{{ movimento.get_tipo_movimento_display }}</span>
+                            {% else %}
+                            <span class="badge bg-info">{{ movimento.get_tipo_movimento_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ movimento.quantita }}</strong></td>
+                        <td>
+                            {% if movimento.fornitore %}
+                            <a href="{% url 'magazzino:fornitore_detail' movimento.fornitore.id_fornitore %}">
+                                {{ movimento.fornitore.ragione_sociale }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ movimento.operatore }}</td>
+                        <td>{{ movimento.numero_documento|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'magazzino:movimento_detail' movimento.id_movimento %}" class="btn btn-sm btn-info" title="Visualizza">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted">
+            <i class="fas fa-inbox" style="font-size: 3rem;"></i>
+            <p class="mt-3">Nessun movimento trovato</p>
+            <a href="{% url 'magazzino:movimento_create' %}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus"></i> Registra il primo movimento
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- PAGINAZIONE (se necessaria) -->
+{% if is_paginated %}
+<nav class="mt-4" aria-label="Paginazione">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1">Prima</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Precedente</a>
+        </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">Pagina {{ page_obj.number }} di {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Successiva</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Ultima</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

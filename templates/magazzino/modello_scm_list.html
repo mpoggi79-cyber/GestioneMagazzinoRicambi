@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load magazzino_tags %}
+
+{% block title %}Modelli Macchine SCM - GMR{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-industry"></i> Modelli Macchine SCM</h2>
+        <a href="{% url 'magazzino:modello_scm_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nuovo Modello
+        </a>
+    </div>
+
+    <!-- Barra di ricerca -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-10">
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Cerca per nome modello o gamma..." 
+                           value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Cerca
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabella modelli -->
+    <div class="card">
+        <div class="card-body">
+            {% if modelli %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">ID</th>
+                                <th style="width: 40%;">{% order_link 'nome_modello' 'Nome Modello' %}</th>
+                                <th style="width: 25%;">{% order_link 'gamma' 'Gamma' %}</th>
+                                <th style="width: 10%;">Stato</th>
+                                <th style="width: 15%;">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for modello in modelli %}
+                            <tr>
+                                <td>{{ modello.id_modello }}</td>
+                                <td><strong>{{ modello.nome_modello }}</strong></td>
+                                <td>{{ modello.gamma|default:"—" }}</td>
+                                <td>
+                                    {% if modello.stato_attivo %}
+                                        <span class="badge bg-success">Attivo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inattivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'magazzino:modello_scm_update' modello.id_modello %}" 
+                                       class="btn btn-sm btn-warning" title="Modifica">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'magazzino:modello_scm_delete' modello.id_modello %}" 
+                                       class="btn btn-sm btn-danger" title="Elimina">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginazione -->
+                {% if is_paginated %}
+                <nav aria-label="Navigazione pagine">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Prima</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Precedente</a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">Pagina {{ page_obj.number }} di {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Successiva</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Ultima</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Nessun modello trovato. 
+                    <a href="{% url 'magazzino:modello_scm_create' %}">Creane uno nuovo</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

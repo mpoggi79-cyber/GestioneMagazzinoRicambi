@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registrazione - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4><i class="fas fa-user-plus"></i> Registrazione Nuovo Utente</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Nota:</strong> La registrazione è disabilitata. 
+                        Contatta un amministratore per creare un nuovo account utente.
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'accounts:login' %}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Vai al Login
+                        </a>
+                        <a href="{% url 'magazzino:dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Torna alla Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

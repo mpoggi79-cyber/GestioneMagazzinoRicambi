@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ articolo.descrizione }} - Gestione Magazzino{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">
+    <i class="fas fa-cube"></i> {{ articolo.descrizione }}
+</h1>
+
+<!-- BOTTONI AZIONI -->
+<div class="mb-3">
+    <a href="{% url 'magazzino:articolo_update' articolo.id_articolo %}" class="btn btn-warning">
+        <i class="fas fa-edit"></i> Modifica
+    </a>
+    <a href="{% url 'magazzino:articolo_delete' articolo.id_articolo %}" class="btn btn-danger">
+        <i class="fas fa-trash"></i> Elimina
+    </a>
+    <a href="{% url 'magazzino:articolo_list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Indietro
+    </a>
+</div>
+
+<div class="row">
+    <!-- INFORMAZIONI PRINCIPALE -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Informazioni Articolo
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Codice Interno:</dt>
+                    <dd class="col-sm-8"><strong>{{ articolo.codice_interno }}</strong></dd>
+
+                    <dt class="col-sm-4">Descrizione:</dt>
+                    <dd class="col-sm-8">{{ articolo.descrizione }}</dd>
+
+                    <dt class="col-sm-4">Categoria:</dt>
+                    <dd class="col-sm-8">{{ articolo.categoria.nome_categoria }}</dd>
+
+                    <dt class="col-sm-4">Unità Misura:</dt>
+                    <dd class="col-sm-8">{{ articolo.unita_misura.descrizione }} ({{ articolo.unita_misura.codice }})</dd>
+
+                    <dt class="col-sm-4">Giacenza Minima:</dt>
+                    <dd class="col-sm-8">{{ articolo.giacenza_minima }}</dd>
+
+                    <dt class="col-sm-4">Giacenza Massima:</dt>
+                    <dd class="col-sm-8">{{ articolo.giacenza_massima }}</dd>
+
+                    <dt class="col-sm-4">Prezzo Acquisto:</dt>
+                    <dd class="col-sm-8">
+                        {% if articolo.prezzo_acquisto %}
+                        € {{ articolo.prezzo_acquisto }}
+                        {% else %}
+                        <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Disponibilità:</dt>
+                    <dd class="col-sm-8">
+                        {% if articolo.stato_disponibilita == 'DISP' %}
+                        <span class="badge bg-success"><i class="fas fa-check-circle"></i> Disponibile in magazzino</span>
+                        {% elif articolo.stato_disponibilita == 'ORD' %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-shipping-fast"></i> Ordinato - In arrivo</span>
+                        {% elif articolo.stato_disponibilita == 'ESAU' %}
+                        <span class="badge bg-danger"><i class="fas fa-exclamation-triangle"></i> Esaurito - Da riordinare</span>
+                        {% elif articolo.stato_disponibilita == 'FP' %}
+                        <span class="badge bg-secondary"><i class="fas fa-ban"></i> Fuori produzione</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Stato:</dt>
+                    <dd class="col-sm-8">
+                        {% if articolo.stato_attivo %}
+                        <span class="badge bg-success">Attivo</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inattivo</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Creato il:</dt>
+                    <dd class="col-sm-8">{{ articolo.creato_il|date:"d/m/Y H:i" }}</dd>
+
+                    <dt class="col-sm-4">Modificato il:</dt>
+                    <dd class="col-sm-8">{{ articolo.modificato_il|date:"d/m/Y H:i" }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- CODICI E DATI SCM -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="fas fa-barcode"></i> Codici e Dati SCM
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Codice SCM:</dt>
+                    <dd class="col-sm-8">{{ articolo.codice_scm|default:"N/A" }}</dd>
+
+                    <dt class="col-sm-4">Descrizione SCM:</dt>
+                    <dd class="col-sm-8">{{ articolo.descrizione_scm|default:"N/A" }}</dd>
+
+                    <dt class="col-sm-4">Modello Macchina:</dt>
+                    <dd class="col-sm-8">
+                        {% if articolo.modello_macchina_scm %}
+                        <span class="badge bg-info">{{ articolo.modello_macchina_scm }}</span>
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Matricola Macchina:</dt>
+                    <dd class="col-sm-8">
+                        {% if articolo.matricola_macchina_scm %}
+                        <span class="badge bg-secondary">{{ articolo.matricola_macchina_scm }}</span>
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Codice Fornitore:</dt>
+                    <dd class="col-sm-8">{{ articolo.codice_fornitore|default:"N/A" }}</dd>
+                </dl>
+            </div>
+        </div>
+        
+        <!-- FORNITORE -->
+        {% if articolo.fornitore %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="fas fa-truck"></i> Fornitore Principale
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Ragione Sociale:</dt>
+                    <dd class="col-sm-8">
+                        <a href="{% url 'magazzino:fornitore_detail' articolo.fornitore.id_fornitore %}">
+                            {{ articolo.fornitore.ragione_sociale }}
+                        </a>
+                    </dd>
+
+                    <dt class="col-sm-4">Città:</dt>
+                    <dd class="col-sm-8">{{ articolo.fornitore.citta|default:"N/A" }}</dd>
+
+                    <dt class="col-sm-4">Telefono:</dt>
+                    <dd class="col-sm-8">{{ articolo.fornitore.telefono|default:"N/A" }}</dd>
+                </dl>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- GIACENZA -->
+    <div class="col-lg-4">
+        <!-- IMMAGINE ARTICOLO -->
+        {% if articolo.immagine %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fas fa-image"></i> Immagine Articolo
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ articolo.immagine.url }}" alt="{{ articolo.descrizione }}" class="img-fluid rounded" style="max-width: 100%;">
+                {% if articolo.immagine_thumbnail %}
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> Immagine ottimizzata automaticamente
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-pie"></i> Giacenza
+            </div>
+            <div class="card-body">
+                {% if giacenza %}
+                <div class="mb-3">
+                    <h6 class="text-muted">Quantità Disponibile</h6>
+                    <h3 class="text-primary">{{ giacenza.quantita_disponibile }}</h3>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Quantità Impegnata</h6>
+                    <h3 class="text-warning">{{ giacenza.quantita_impegnata }}</h3>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Quantità Prenotata</h6>
+                    <h3 class="text-info">{{ giacenza.quantita_prenotata }}</h3>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <h6 class="text-muted">Quantità Libera</h6>
+                    <h3 class="text-success">{{ giacenza.quantita_libera }}</h3>
+                </div>
+                <small class="text-muted">
+                    Ultimo aggiornamento: {{ giacenza.ultimo_aggiornamento|date:"d/m/Y H:i" }}
+                </small>
+                {% else %}
+                <p class="text-muted"><i class="fas fa-exclamation-circle"></i> Nessuna giacenza registrata</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ULTIMI MOVIMENTI -->
+<div class="card mt-3">
+    <div class="card-header">
+        <i class="fas fa-exchange-alt"></i> Ultimi Movimenti
+    </div>
+    <div class="card-body p-0">
+        {% if ultimi_movimenti %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo</th>
+                        <th>Quantità</th>
+                        <th>Operatore</th>
+                        <th>Documento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movimento in ultimi_movimenti %}
+                    <tr>
+                        <td>{{ movimento.data_movimento|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if movimento.tipo_movimento == 'CARICO' %}
+                            <span class="badge bg-success">{{ movimento.get_tipo_movimento_display }}</span>
+                            {% elif movimento.tipo_movimento == 'SCARICO' %}
+                            <span class="badge bg-danger">{{ movimento.get_tipo_movimento_display }}</span>
+                            {% else %}
+                            <span class="badge bg-info">{{ movimento.get_tipo_movimento_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ movimento.quantita }}</strong></td>
+                        <td>{{ movimento.operatore }}</td>
+                        <td>{{ movimento.numero_documento|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="p-3 text-center text-muted">Nessun movimento registrato</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

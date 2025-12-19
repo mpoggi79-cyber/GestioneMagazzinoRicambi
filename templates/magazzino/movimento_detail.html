@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ movimento.id_movimento }} - Gestione Magazzino{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">
+    <i class="fas fa-exchange-alt"></i> Movimento #{{ movimento.id_movimento }}
+</h1>
+
+<!-- BOTTONI AZIONI -->
+<div class="mb-3">
+    <a href="{% url 'magazzino:movimento_list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Indietro
+    </a>
+</div>
+
+<div class="row">
+    <!-- INFORMAZIONI PRINCIPALE -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Dettagli Movimento
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">ID Movimento:</dt>
+                    <dd class="col-sm-8"><strong>#{{ movimento.id_movimento }}</strong></dd>
+
+                    <dt class="col-sm-4">Data Movimento:</dt>
+                    <dd class="col-sm-8">{{ movimento.data_movimento|date:"d/m/Y H:i:s" }}</dd>
+
+                    <dt class="col-sm-4">Articolo:</dt>
+                    <dd class="col-sm-8">
+                        <a href="{% url 'magazzino:articolo_detail' movimento.articolo.id_articolo %}">
+                            {{ movimento.articolo.codice_interno }} - {{ movimento.articolo.descrizione }}
+                        </a>
+                    </dd>
+
+                    <dt class="col-sm-4">Tipo Movimento:</dt>
+                    <dd class="col-sm-8">
+                        {% if movimento.tipo_movimento == 'CARICO' %}
+                        <span class="badge bg-success">{{ movimento.get_tipo_movimento_display }}</span>
+                        {% elif movimento.tipo_movimento == 'SCARICO' %}
+                        <span class="badge bg-danger">{{ movimento.get_tipo_movimento_display }}</span>
+                        {% elif movimento.tipo_movimento == 'RETTIFICA' %}
+                        <span class="badge bg-warning">{{ movimento.get_tipo_movimento_display }}</span>
+                        {% else %}
+                        <span class="badge bg-info">{{ movimento.get_tipo_movimento_display }}</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Quantità:</dt>
+                    <dd class="col-sm-8"><strong>{{ movimento.quantita }} {{ movimento.articolo.unita_misura.codice }}</strong></dd>
+
+                    <dt class="col-sm-4">Fornitore:</dt>
+                    <dd class="col-sm-8">
+                        {% if movimento.fornitore %}
+                        <a href="{% url 'magazzino:fornitore_detail' movimento.fornitore.id_fornitore %}">
+                            {{ movimento.fornitore.ragione_sociale }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Operatore:</dt>
+                    <dd class="col-sm-8">{{ movimento.operatore }}</dd>
+
+                    <dt class="col-sm-4">Numero Documento:</dt>
+                    <dd class="col-sm-8">{{ movimento.numero_documento|default:"-" }}</dd>
+
+                    <dt class="col-sm-4">Causale:</dt>
+                    <dd class="col-sm-8">{{ movimento.causale|default:"-" }}</dd>
+
+                    <dt class="col-sm-4">Creato il:</dt>
+                    <dd class="col-sm-8">{{ movimento.creato_il|date:"d/m/Y H:i:s" }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- NOTE -->
+        {% if movimento.note %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="fas fa-sticky-note"></i> Note
+            </div>
+            <div class="card-body">
+                {{ movimento.note }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- RIEPILOGO -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-cube"></i> Articolo
+            </div>
+            <div class="card-body">
+                <h6 class="mb-2">{{ movimento.articolo.descrizione }}</h6>
+                <small class="text-muted">
+                    Codice: <strong>{{ movimento.articolo.codice_interno }}</strong><br>
+                    Categoria: <strong>{{ movimento.articolo.categoria.nome_categoria }}</strong><br>
+                    Unità: <strong>{{ movimento.articolo.unita_misura.descrizione }}</strong>
+                </small>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="fas fa-exchange-alt"></i> Tipo Movimento
+            </div>
+            <div class="card-body">
+                {% if movimento.tipo_movimento == 'CARICO' %}
+                <div class="alert alert-success mb-0">
+                    <i class="fas fa-arrow-up"></i> CARICO
+                </div>
+                {% elif movimento.tipo_movimento == 'SCARICO' %}
+                <div class="alert alert-danger mb-0">
+                    <i class="fas fa-arrow-down"></i> SCARICO
+                </div>
+                {% elif movimento.tipo_movimento == 'RETTIFICA' %}
+                <div class="alert alert-warning mb-0">
+                    <i class="fas fa-exchange-alt"></i> RETTIFICA
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-undo"></i> RESO A FORNITORE
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

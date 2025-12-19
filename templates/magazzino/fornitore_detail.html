@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ fornitore.ragione_sociale }} - Gestione Magazzino{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">
+    <i class="fas fa-truck"></i> {{ fornitore.ragione_sociale }}
+</h1>
+
+<!-- BOTTONI AZIONI -->
+<div class="mb-3">
+    <a href="{% url 'magazzino:fornitore_update' fornitore.id_fornitore %}" class="btn btn-warning">
+        <i class="fas fa-edit"></i> Modifica
+    </a>
+    <a href="{% url 'magazzino:fornitore_delete' fornitore.id_fornitore %}" class="btn btn-danger">
+        <i class="fas fa-trash"></i> Elimina
+    </a>
+    <a href="{% url 'magazzino:fornitore_list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Indietro
+    </a>
+</div>
+
+<div class="row">
+    <!-- INFORMAZIONI PRINCIPALE -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Informazioni Fornitore
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Ragione Sociale:</dt>
+                    <dd class="col-sm-8"><strong>{{ fornitore.ragione_sociale }}</strong></dd>
+
+                    <dt class="col-sm-4">Indirizzo:</dt>
+                    <dd class="col-sm-8">{{ fornitore.indirizzo|default:"-" }}</dd>
+
+                    <dt class="col-sm-4">Città:</dt>
+                    <dd class="col-sm-8">{{ fornitore.citta|default:"-" }}</dd>
+
+                    <dt class="col-sm-4">CAP:</dt>
+                    <dd class="col-sm-8">{{ fornitore.cap|default:"-" }}</dd>
+
+                    <dt class="col-sm-4">Provincia:</dt>
+                    <dd class="col-sm-8">{{ fornitore.provincia|default:"-" }}</dd>
+
+                    <dt class="col-sm-4">Telefono:</dt>
+                    <dd class="col-sm-8">
+                        {% if fornitore.telefono %}
+                        <a href="tel:{{ fornitore.telefono }}">{{ fornitore.telefono }}</a>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">
+                        {% if fornitore.email %}
+                        <a href="mailto:{{ fornitore.email }}">{{ fornitore.email }}</a>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Partita IVA:</dt>
+                    <dd class="col-sm-8">{{ fornitore.partita_iva|default:"-" }}</dd>
+
+                    <dt class="col-sm-4">Tempo Consegna:</dt>
+                    <dd class="col-sm-8">{{ fornitore.tempo_medio_consegna_giorni }} giorni</dd>
+
+                    <dt class="col-sm-4">Stato:</dt>
+                    <dd class="col-sm-8">
+                        {% if fornitore.stato_attivo %}
+                        <span class="badge bg-success">Attivo</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inattivo</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Creato il:</dt>
+                    <dd class="col-sm-8">{{ fornitore.creato_il|date:"d/m/Y H:i" }}</dd>
+
+                    <dt class="col-sm-4">Modificato il:</dt>
+                    <dd class="col-sm-8">{{ fornitore.modificato_il|date:"d/m/Y H:i" }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- NOTE -->
+        {% if fornitore.note %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <i class="fas fa-sticky-note"></i> Note
+            </div>
+            <div class="card-body">
+                {{ fornitore.note }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- STATISTICHE -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-bar"></i> Statistiche
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="text-muted">Articoli Forniti</h6>
+                    <h3 class="text-primary">{{ articoli|length }}</h3>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Ultimi Movimenti</h6>
+                    <h3 class="text-info">{{ ultimi_movimenti|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ULTIMI MOVIMENTI -->
+<div class="card mt-3">
+    <div class="card-header">
+        <i class="fas fa-exchange-alt"></i> Ultimi Movimenti
+    </div>
+    <div class="card-body p-0">
+        {% if ultimi_movimenti %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Articolo</th>
+                        <th>Tipo</th>
+                        <th>Quantità</th>
+                        <th>Documento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movimento in ultimi_movimenti %}
+                    <tr>
+                        <td>{{ movimento.data_movimento|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'magazzino:articolo_detail' movimento.articolo.id_articolo %}">
+                                {{ movimento.articolo.codice_interno }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if movimento.tipo_movimento == 'CARICO' %}
+                            <span class="badge bg-success">{{ movimento.get_tipo_movimento_display }}</span>
+                            {% elif movimento.tipo_movimento == 'SCARICO' %}
+                            <span class="badge bg-danger">{{ movimento.get_tipo_movimento_display }}</span>
+                            {% else %}
+                            <span class="badge bg-info">{{ movimento.get_tipo_movimento_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ movimento.quantita }}</strong></td>
+                        <td>{{ movimento.numero_documento|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="p-3 text-center text-muted">Nessun movimento registrato</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.id_categoria %}Modifica{% else %}Aggiungi{% endif %} Categoria - Gestione Magazzino{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">
+    <i class="fas fa-folder"></i> 
+    {% if form.instance.id_categoria %}
+        Modifica Categoria: {{ form.instance.nome_categoria }}
+    {% else %}
+        Aggiungi Nuova Categoria
+    {% endif %}
+</h1>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" novalidate id="categoria-form">
+                    {% csrf_token %}
+                    
+                    <!-- Errori globali -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Errore!</strong>
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- NOME CATEGORIA -->
+                    <div class="mb-3">
+                        <label for="{{ form.nome_categoria.id_for_label }}" class="form-label">
+                            <i class="fas fa-tag"></i> {{ form.nome_categoria.label }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        {{ form.nome_categoria }}
+                        {% if form.nome_categoria.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.nome_categoria.errors.0 }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted d-block mt-1">
+                            {{ form.nome_categoria.help_text }}
+                        </small>
+                    </div>
+
+                    <!-- GERARCHIA -->
+                    <h6 class="mb-2 mt-3 fw-bold text-primary">Gerarchia</h6>
+                    
+                    <!-- Campo nascosto per categoria_padre (valorizzato da JS) -->
+                    {{ form.categoria_padre }}
+                    
+                    <!-- Breadcrumb categoria selezionata -->
+                    <div class="alert alert-info py-2 mb-2" id="categoria-breadcrumb" style="display:none; font-size: 0.9rem;">
+                        <strong><i class="fas fa-sitemap"></i> Gerarchia:</strong> 
+                        <span id="breadcrumb-text"></span>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label for="{{ form.macrocategoria.id_for_label }}" class="form-label">
+                                {{ form.macrocategoria.label }}
+                            </label>
+                            {{ form.macrocategoria }}
+                            {% if form.macrocategoria.errors %}
+                            <div class="invalid-feedback d-block">{{ form.macrocategoria.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-2">
+                            <label for="{{ form.categoria_livello2.id_for_label }}" class="form-label">
+                                {{ form.categoria_livello2.label }}
+                            </label>
+                            {{ form.categoria_livello2 }}
+                            {% if form.categoria_livello2.errors %}
+                            <div class="invalid-feedback d-block">{{ form.categoria_livello2.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <small class="text-muted d-block mb-3">
+                        <i class="fas fa-info-circle"></i> 
+                        Lascia vuoto per creare una Macrocategoria (livello 1). 
+                        Seleziona solo Macrocategoria per livello 2, entrambe per livello 3.
+                    </small>
+
+                    <!-- DESCRIZIONE -->
+                    <div class="mb-3">
+                        <label for="{{ form.descrizione.id_for_label }}" class="form-label">{{ form.descrizione.label }}</label>
+                        {{ form.descrizione }}
+                        {% if form.descrizione.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.descrizione.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- ORDINE -->
+                    <div class="mb-3">
+                        <label for="{{ form.ordine.id_for_label }}" class="form-label">{{ form.ordine.label }}</label>
+                        {{ form.ordine }}
+                        {% if form.ordine.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.ordine.errors.0 }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted d-block mt-1">
+                            {{ form.ordine.help_text }}
+                        </small>
+                    </div>
+
+                    <!-- STATO -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.stato_attivo }}
+                            <label class="form-check-label" for="{{ form.stato_attivo.id_for_label }}">
+                                {{ form.stato_attivo.label }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- BOTTONI -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 
+                            {% if form.instance.id_categoria %}Salva Modifiche{% else %}Crea Categoria{% endif %}
+                        </button>
+                        <a href="{% url 'magazzino:categoria_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Annulla
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// GERARCHIA A CASCATA
+document.addEventListener('DOMContentLoaded', function() {
+    const macroSelect = document.getElementById('{{ form.macrocategoria.id_for_label }}');
+    const cat2Select = document.getElementById('{{ form.categoria_livello2.id_for_label }}');
+    const categoriaPadreHidden = document.getElementById('{{ form.categoria_padre.id_for_label }}');
+    const breadcrumbDiv = document.getElementById('categoria-breadcrumb');
+    const breadcrumbText = document.getElementById('breadcrumb-text');
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function loadCategorieLevel2(macroId) {
+        if (!macroId) {
+            cat2Select.innerHTML = '<option value="">--- Nessuna ---</option>';
+            cat2Select.disabled = true;
+            updateCategoriaPadre();
+            return;
+        }
+        
+        fetch(`/api/categorie/${macroId}/figlie/`)
+            .then(response => response.json())
+            .then(data => {
+                cat2Select.innerHTML = '<option value="">--- Nessuna ---</option>';
+                // L'endpoint restituisce {success: true, categorie: [...]}
+                const categorie = data.categorie || data;
+                categorie.forEach(cat => {
+                    cat2Select.innerHTML += `<option value="${cat.id_categoria}">${cat.nome_categoria}</option>`;
+                });
+                cat2Select.disabled = false;
+                updateCategoriaPadre();
+            })
+            .catch(error => {
+                console.error('Errore nel caricamento categorie livello 2:', error);
+                cat2Select.innerHTML = '<option value="">Errore caricamento</option>';
+                cat2Select.disabled = true;
+            });
+    }
+    
+    function updateCategoriaPadre() {
+        const cat2Value = cat2Select.value;
+        const macroValue = macroSelect.value;
+        const currentValue = categoriaPadreHidden.value;
+        
+        // Determina il nuovo valore
+        let newValue = '';
+        if (cat2Value) {
+            newValue = cat2Value;
+        } else if (macroValue) {
+            newValue = macroValue;
+        }
+        
+        // Aggiorna solo se c'è un nuovo valore o se il campo è vuoto
+        // (preserva valore iniziale dal server se i dropdown non sono ancora popolati)
+        if (newValue || !currentValue) {
+            categoriaPadreHidden.value = newValue;
+        }
+        
+        updateBreadcrumb();
+    }
+    
+    function updateBreadcrumb() {
+        const macroText = macroSelect.options[macroSelect.selectedIndex]?.text || '';
+        const cat2Text = cat2Select.options[cat2Select.selectedIndex]?.text || '';
+        
+        let breadcrumb = [];
+        
+        if (macroSelect.value && macroText !== '--- Nessuna (sarà Macrocategoria) ---') {
+            breadcrumb.push(macroText);
+        }
+        
+        if (cat2Select.value && cat2Text !== '--- Nessuna ---') {
+            breadcrumb.push(cat2Text);
+        }
+        
+        if (breadcrumb.length > 0) {
+            breadcrumbText.textContent = breadcrumb.join(' > ');
+            breadcrumbDiv.style.display = 'block';
+        } else {
+            breadcrumbDiv.style.display = 'none';
+        }
+    }
+    
+    // Event listeners
+    
+    // Abilita dropdown prima del submit (i campi disabled non vengono inviati)
+    const form = document.getElementById('categoria-form');
+    form.addEventListener('submit', function(e) {
+        // Abilita temporaneamente il dropdown categoria livello 2
+        cat2Select.disabled = false;
+        // Forza aggiornamento del campo nascosto
+        updateCategoriaPadre();
+    });
+    
+    macroSelect.addEventListener('change', function() {
+        loadCategorieLevel2(this.value);
+    });
+    
+    cat2Select.addEventListener('change', function() {
+        updateCategoriaPadre();
+    });
+    
+    // Inizializzazione: se in modifica/creazione con valori pre-selezionati
+    if (macroSelect.value) {
+        loadCategorieLevel2(macroSelect.value);
+        // Aspetta che le opzioni siano caricate prima di impostare il valore
+        setTimeout(function() {
+            {% if form.initial.categoria_livello2 %}
+                {% if form.initial.categoria_livello2.id_categoria %}
+                    cat2Select.value = '{{ form.initial.categoria_livello2.id_categoria }}';
+                {% else %}
+                    cat2Select.value = '{{ form.initial.categoria_livello2 }}';
+                {% endif %}
+                updateCategoriaPadre();
+            {% endif %}
+        }, 300);
+    } else {
+        updateBreadcrumb();
+    }
+});
+</script>
+
+{% endblock %}

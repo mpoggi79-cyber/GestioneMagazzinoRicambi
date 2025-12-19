@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Elimina Categoria - Gestione Magazzino{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">
+    <i class="fas fa-trash"></i> Conferma Eliminazione
+</h1>
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <i class="fas fa-warning"></i> Attenzione!
+            </div>
+            <div class="card-body">
+                <p class="mb-4">
+                    Sei sicuro di voler eliminare la categoria <strong>{{ categoria.nome_categoria }}</strong>?
+                </p>
+                
+                <div class="alert alert-warning mb-4">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Avviso:</strong> Questa azione non può essere annullata.
+                </div>
+                
+                <h6 class="mb-3">Dettagli della categoria:</h6>
+                <dl class="row">
+                    <dt class="col-sm-4">Nome:</dt>
+                    <dd class="col-sm-8">{{ categoria.nome_categoria }}</dd>
+                    
+                    <dt class="col-sm-4">Descrizione:</dt>
+                    <dd class="col-sm-8">{{ categoria.descrizione|default:"-" }}</dd>
+                    
+                    <dt class="col-sm-4">Stato:</dt>
+                    <dd class="col-sm-8">
+                        {% if categoria.stato_attivo %}
+                        <span class="badge bg-success">Attivo</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inattivo</span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <form method="post" class="d-flex gap-2 justify-content-center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Elimina
+                </button>
+                <a href="{% url 'magazzino:categoria_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Annulla
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

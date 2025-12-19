@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestione Utenti - Magazzino Ricambi{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- HEADER CON STATISTICHE -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-users"></i> Gestione Utenti
+                </h1>
+                <div class="page-actions">
+                    {% if user.profilo.è_admin %}
+                    <a href="{% url 'magazzino:utente_create' %}" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Nuovo Utente
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- STATISTICHE RAPIDE -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                    <h3 class="mb-0">{{ total_utenti }}</h3>
+                    <p class="text-muted mb-0">Totale Utenti</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="mb-0">{{ utenti_attivi }}</h3>
+                    <p class="text-muted mb-0">Utenti Attivi</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-shield fa-2x text-warning mb-2"></i>
+                    <h3 class="mb-0">{{ utenti_admin }}</h3>
+                    <p class="text-muted mb-0">Amministratori</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                    <h3 class="mb-0">{{ total_utenti|add:"-"|add:utenti_attivi }}</h3>
+                    <p class="text-muted mb-0">Utenti Inattivi</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FILTRI E RICERCA -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                <i class="fas fa-search"></i> Ricerca
+                            </label>
+                            <input type="text" 
+                                   name="search" 
+                                   class="form-control" 
+                                   placeholder="Cerca per username, nome, email..." 
+                                   value="{{ search_query }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="fas fa-user-tag"></i> Ruolo
+                            </label>
+                            <select name="ruolo" class="form-select">
+                                <option value="">Tutti i ruoli</option>
+                                {% for value, label in ruoli %}
+                                <option value="{{ value }}" {% if ruolo_filtro == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="fas fa-toggle-on"></i> Stato
+                            </label>
+                            <select name="stato" class="form-select">
+                                <option value="">Tutti</option>
+                                <option value="attivo" {% if stato_filtro == 'attivo' %}selected{% endif %}>Attivi</option>
+                                <option value="inattivo" {% if stato_filtro == 'inattivo' %}selected{% endif %}>Inattivi</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter"></i> Filtra
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TABELLA UTENTI -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-list"></i> Elenco Utenti
+                </div>
+                <div class="card-body">
+                    {% if utenti %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="fas fa-user"></i> Username</th>
+                                    <th><i class="fas fa-id-card"></i> Nome Completo</th>
+                                    <th><i class="fas fa-envelope"></i> Email</th>
+                                    <th><i class="fas fa-user-tag"></i> Ruolo</th>
+                                    <th><i class="fas fa-building"></i> Dipartimento</th>
+                                    <th><i class="fas fa-toggle-on"></i> Stato</th>
+                                    <th><i class="fas fa-clock"></i> Ultimo Accesso</th>
+                                    <th class="text-center"><i class="fas fa-cog"></i> Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for utente in utenti %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ utente.username }}</strong>
+                                        {% if utente.is_staff %}
+                                        <span class="badge bg-warning ms-1">
+                                            <i class="fas fa-star"></i> Staff
+                                        </span>
+                                        {% endif %}
+                                        {% if utente.is_superuser %}
+                                        <span class="badge bg-danger ms-1">
+                                            <i class="fas fa-crown"></i> Superuser
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ utente.get_full_name|default:"-" }}
+                                    </td>
+                                    <td>
+                                        <a href="mailto:{{ utente.email }}">{{ utente.email }}</a>
+                                    </td>
+                                    <td>
+                                        {% if utente.profilo.ruolo == 'ADMIN' %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-user-shield"></i> {{ utente.profilo.get_ruolo_display }}
+                                        </span>
+                                        {% elif utente.profilo.ruolo == 'GESTORE_MAGAZZINO' %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-user-cog"></i> {{ utente.profilo.get_ruolo_display }}
+                                        </span>
+                                        {% elif utente.profilo.ruolo == 'OPERATORE' %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-user"></i> {{ utente.profilo.get_ruolo_display }}
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-eye"></i> {{ utente.profilo.get_ruolo_display }}
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ utente.profilo.dipartimento|default:"-" }}
+                                    </td>
+                                    <td>
+                                        {% if utente.is_active %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check"></i> Attivo
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times"></i> Inattivo
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if utente.last_login %}
+                                        <small>{{ utente.last_login|date:"d/m/Y H:i" }}</small>
+                                        {% else %}
+                                        <small class="text-muted">Mai</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'magazzino:utente_detail' utente.pk %}" 
+                                               class="btn btn-info btn-sm"
+                                               title="Dettagli">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if user.profilo.è_admin %}
+                                            <a href="{% url 'magazzino:utente_update' utente.pk %}" 
+                                               class="btn btn-warning btn-sm"
+                                               title="Modifica">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-primary btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#resetPasswordModal{{ utente.pk }}"
+                                                    title="Reset Password">
+                                                <i class="fas fa-key"></i>
+                                            </button>
+                                            {% if utente != user %}
+                                            <a href="{% url 'magazzino:utente_delete' utente.pk %}" 
+                                               class="btn btn-danger btn-sm"
+                                               title="Disattiva"
+                                               onclick="return confirm('Sei sicuro di voler disattivare questo utente?')">
+                                                <i class="fas fa-user-slash"></i>
+                                            </a>
+                                            {% endif %}
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Modal Reset Password -->
+                                        <div class="modal fade" id="resetPasswordModal{{ utente.pk }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-warning">
+                                                        <h5 class="modal-title">
+                                                            <i class="fas fa-key"></i> Reset Password
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Vuoi generare una nuova password temporanea per l'utente <strong>{{ utente.username }}</strong>?</p>
+                                                        <div class="alert alert-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                            La password attuale verrà sostituita con una nuova password casuale.
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                                                        <form method="post" action="{% url 'magazzino:utente_reset_password' utente.pk %}" class="d-inline">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-warning">
+                                                                <i class="fas fa-key"></i> Reset Password
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- PAGINAZIONE -->
+                    {% if is_paginated %}
+                    <nav aria-label="Paginazione utenti">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">Prima</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Precedente</a>
+                            </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Pagina {{ page_obj.number }} di {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Successiva</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Ultima</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        Nessun utente trovato con i filtri selezionati.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

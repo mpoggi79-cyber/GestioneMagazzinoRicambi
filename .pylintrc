@@ -1,0 +1,15 @@
+[MASTER]
+ignore-patterns=^\.#
+ignore-paths=^venv/,^media/,^static/,^logs/,^backups/,^templates/,^.*\.md$
+ignore=.git,__pycache__,venv,media,static,logs,backups,templates
+
+[DESIGN]
+max-args=5
+max-attributes=7
+max-branches=12
+max-locals=15
+max-statements=50
+
+[FORMAT]
+max-line-length=120
+indent-string='    '

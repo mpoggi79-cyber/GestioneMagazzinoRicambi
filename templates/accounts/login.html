@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accesso - Gestione Magazzino Ricambi</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a5f7a 0%, #2a8db8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 450px;
+            width: 100%;
+            padding: 2rem;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #1a5f7a;
+        }
+        
+        .login-header h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-header i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            color: #2a8db8;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #2a8db8;
+            box-shadow: 0 0 0 0.2rem rgba(42, 141, 184, 0.25);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #1a5f7a 0%, #2a8db8 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: 1rem;
+            transition: transform 0.2s;
+        }
+        
+        .btn-login:hover {
+            background: linear-gradient(135deg, #144d63 0%, #1f6d94 100%);
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .login-footer a {
+            color: #2a8db8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1rem 0;
+        }
+        
+        .errorlist li {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #f5c6cb;
+        }
+        
+        .form-error {
+            border-color: #f5c6cb !important;
+        }
+        
+        .info-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #2a8db8;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #004085;
+        }
+        
+        .info-box i {
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Header -->
+        <div class="login-header">
+            <i class="fas fa-warehouse"></i>
+            <h1>Magazzino Ricambi</h1>
+            <p>Sistema di Gestione Ricambi</p>
+        </div>
+        
+        <!-- Info Box -->
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <strong>Credenziali di test:</strong><br>
+            Username: <code>admin</code><br>
+            Password: <code>Admin@12345</code>
+        </div>
+        
+        <!-- Form Login -->
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <!-- Errori Globali -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-circle"></i>
+                <strong>Errore di accesso!</strong>
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endif %}
+            
+            <!-- Username -->
+            <div class="mb-3">
+                <label for="{{ form.username.id_for_label }}" class="form-label">
+                    <i class="fas fa-user"></i> Nome utente
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.username.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Password -->
+            <div class="mb-3">
+                <label for="{{ form.password.id_for_label }}" class="form-label">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.password.errors.0 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Bottone Login -->
+            <button type="submit" class="btn btn-login">
+                <i class="fas fa-sign-in-alt"></i> Accedi
+            </button>
+        </form>
+        
+        <!-- Footer -->
+        <div class="login-footer">
+            <p>
+                Non hai un account? <a href="{% url 'accounts:register' %}">Registrati qui</a>
+            </p>
+            <p style="font-size: 0.85rem; color: #999; margin-top: 1rem;">
+                <i class="fas fa-lock"></i> Accesso sicuro con protezione CSRF
+            </p>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

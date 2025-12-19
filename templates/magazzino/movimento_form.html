@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Registra Movimento - Gestione Magazzino{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">
+    <i class="fas fa-exchange-alt"></i> Registra Nuovo Movimento
+</h1>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Errori globali -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Errore!</strong>
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- ARTICOLO -->
+                    <div class="mb-3">
+                        <label for="{{ form.articolo.id_for_label }}" class="form-label">
+                            <i class="fas fa-cube"></i> {{ form.articolo.label }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        {{ form.articolo }}
+                        {% if form.articolo.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.articolo.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- INFO GIACENZA -->
+                    <div id="giacenza-info" class="alert alert-info d-none mb-3 border-left border-info border-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <small><i class="fas fa-warehouse text-info"></i> <strong>Stock Disponibile:</strong></small>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Disponibile</small>
+                                <span id="giacenza-disponibile" class="badge bg-success fs-6 px-3 py-2">-</span>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Impegnata</small>
+                                <span id="giacenza-impegnata" class="badge bg-warning text-dark fs-6 px-3 py-2">-</span>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">Prenotata</small>
+                                <span id="giacenza-prenotata" class="badge bg-secondary fs-6 px-3 py-2">-</span>
+                            </div>
+                        </div>
+                        <!-- Avviso di stock insufficiente -->
+                        <div id="stock-warning" class="alert alert-warning d-none mt-2 mb-0">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Attenzione:</strong> Stock insufficiente per uno SCARICO!
+                        </div>
+                    </div>
+
+                    <!-- TIPO MOVIMENTO -->
+                    <div class="mb-3">
+                        <label for="{{ form.tipo_movimento.id_for_label }}" class="form-label">
+                            <i class="fas fa-exchange-alt"></i> {{ form.tipo_movimento.label }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        {{ form.tipo_movimento }}
+                        {% if form.tipo_movimento.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.tipo_movimento.errors.0 }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted d-block mt-1">
+                            • <strong>CARICO:</strong> Inserimento merce in magazzino<br>
+                            • <strong>SCARICO:</strong> Prelievo merce dal magazzino<br>
+                            • <strong>RETTIFICA:</strong> Correzione inventario<br>
+                            • <strong>RESO A FORNITORE:</strong> Merce resa al fornitore
+                        </small>
+                    </div>
+
+                    <!-- QUANTITÀ -->
+                    <div class="mb-3">
+                        <label for="{{ form.quantita.id_for_label }}" class="form-label">
+                            {{ form.quantita.label }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        {{ form.quantita }}
+                        {% if form.quantita.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.quantita.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- FORNITORE (opzionale) -->
+                    <div class="mb-3">
+                        <label for="{{ form.fornitore.id_for_label }}" class="form-label">{{ form.fornitore.label }}</label>
+                        {{ form.fornitore }}
+                    </div>
+
+                    <!-- CAUSALE -->
+                    <div class="mb-3">
+                        <label for="{{ form.causale.id_for_label }}" class="form-label">{{ form.causale.label }}</label>
+                        {{ form.causale }}
+                    </div>
+
+                    <!-- NUMERO DOCUMENTO -->
+                    <div class="mb-3">
+                        <label for="{{ form.numero_documento.id_for_label }}" class="form-label">{{ form.numero_documento.label }}</label>
+                        {{ form.numero_documento }}
+                        <small class="form-text text-muted d-block mt-1">
+                            Es: DDT123, FATTURA-2025-001, ORDINE-50
+                        </small>
+                    </div>
+
+                    <!-- NOTE -->
+                    <div class="mb-3">
+                        <label for="{{ form.note.id_for_label }}" class="form-label">{{ form.note.label }}</label>
+                        {{ form.note }}
+                    </div>
+
+                    <!-- BOTTONI -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Registra Movimento
+                        </button>
+                        <a href="{% url 'magazzino:movimento_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Annulla
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- INFO LATERALE -->
+    <div class="col-lg-4">
+        <div class="card bg-light">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-info-circle"></i> Informazioni
+            </div>
+            <div class="card-body">
+                <h6 class="mb-3">Campi Obbligatori</h6>
+                <ul class="small">
+                    <li>Articolo</li>
+                    <li>Tipo Movimento</li>
+                    <li>Quantità</li>
+                </ul>
+                
+                <hr>
+                
+                <h6 class="mb-3">Nota Importante</h6>
+                <p class="small">
+                    Ogni movimento modifica automaticamente la giacenza dell'articolo. 
+                    Inserisci dati accurati per mantenere l'inventario coerente.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Aggiorna le informazioni di giacenza e autocompila il fornitore quando l'articolo cambia
+document.addEventListener('DOMContentLoaded', function() {
+    const articoloField = document.getElementById('id_articolo');
+    const fornitoreField = document.getElementById('id_fornitore');
+    const tipoMovimentoField = document.getElementById('id_tipo_movimento');
+    const quantitaField = document.getElementById('id_quantita');
+    const giacenzaInfo = document.getElementById('giacenza-info');
+    const stockWarning = document.getElementById('stock-warning');
+    
+    let currentGiacenza = null; // Memorizza la giacenza corrente
+    
+    if (!articoloField) {
+        return;
+    }
+    
+    // Funzione per aggiornare le giacenze
+    function updateGiacenza() {
+        const articoloId = articoloField.value;
+        
+        if (!articoloId) {
+            if (giacenzaInfo) giacenzaInfo.classList.add('d-none');
+            return;
+        }
+        
+        const url = `/api/articolo/${articoloId}/giacenza/`;
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && giacenzaInfo) {
+                    // Memorizza la giacenza per controlli successivi
+                    currentGiacenza = data.disponibile;
+                    
+                    const dispElem = document.getElementById('giacenza-disponibile');
+                    const impElem = document.getElementById('giacenza-impegnata');
+                    const preElem = document.getElementById('giacenza-prenotata');
+                    
+                    if (dispElem) dispElem.textContent = data.disponibile + ' ' + data.unita_misura;
+                    if (impElem) impElem.textContent = data.impegnata + ' ' + data.unita_misura;
+                    if (preElem) preElem.textContent = data.prenotata + ' ' + data.unita_misura;
+                    
+                    giacenzaInfo.classList.remove('d-none');
+                    
+                    // Controlla se mostrare l'avviso
+                    checkStockWarning();
+                }
+            })
+            .catch(error => {
+                if (giacenzaInfo) giacenzaInfo.classList.add('d-none');
+            });
+    }
+    
+    // Funzione per autocompilare il fornitore
+    function updateFornitore() {
+        const articoloId = articoloField.value;
+        
+        if (!articoloId || !fornitoreField) {
+            return;
+        }
+        
+        const url = `/api/articolo/${articoloId}/fornitore/`;
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    if (data.fornitore_id) {
+                        fornitoreField.value = data.fornitore_id;
+                        fornitoreField.dispatchEvent(new Event('change', { bubbles: true }));
+                    } else {
+                        fornitoreField.value = '';
+                    }
+                }
+            })
+            .catch(error => {
+                // Silenziosamente fallisce
+            });
+    }
+    
+    // Funzione per controllare se mostrare avviso stock
+    function checkStockWarning() {
+        if (!stockWarning || currentGiacenza === null) return;
+        
+        const tipoMovimento = tipoMovimentoField ? tipoMovimentoField.value : '';
+        const quantita = quantitaField ? parseInt(quantitaField.value) || 0 : 0;
+        
+        // Mostra avviso se: è uno SCARICO E quantità > disponibile
+        if ((tipoMovimento === 'SCARICO' || tipoMovimento === 'RESO_FORNITORE') && quantita > currentGiacenza) {
+            stockWarning.classList.remove('d-none');
+        } else {
+            stockWarning.classList.add('d-none');
+        }
+    }
+    
+    // Listener al cambio di articolo
+    articoloField.addEventListener('change', function() {
+        updateGiacenza();
+        updateFornitore();
+    });
+    
+    // Listener al cambio di tipo movimento o quantità per aggiornare l'avviso
+    if (tipoMovimentoField) {
+        tipoMovimentoField.addEventListener('change', checkStockWarning);
+    }
+    if (quantitaField) {
+        quantitaField.addEventListener('input', checkStockWarning);
+    }
+    
+    // Se c'è un articolo precompilato al caricamento della pagina
+    if (articoloField.value) {
+        setTimeout(() => {
+            updateGiacenza();
+            updateFornitore();
+        }, 300);
+    }
+});
+</script>
+
+{% endblock %}

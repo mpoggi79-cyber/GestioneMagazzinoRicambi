@@ -1,0 +1,65 @@
+<li class="tree-item level-{{ categoria.livello }}" 
+    draggable="true" 
+    data-categoria-id="{{ categoria.id_categoria }}">
+    
+    <div class="categoria-header">
+        <!-- Toggle per sottocategorie -->
+        {% if categoria.has_children %}
+        <span class="collapse-toggle" onclick="toggleChildren(this)">
+            <i class="fas fa-chevron-down"></i>
+        </span>
+        {% else %}
+        <span style="width: 16px; display: inline-block;"></span>
+        {% endif %}
+        
+        <!-- Icona -->
+        <i class="{{ categoria.get_icon }} categoria-icon"></i>
+        
+        <!-- Nome -->
+        <div class="categoria-nome">
+            <strong>{{ categoria.nome_categoria }}</strong>
+            {% if categoria.descrizione %}
+                <br><small class="text-muted">{{ categoria.descrizione|truncatechars:60 }}</small>
+            {% endif %}
+        </div>
+        
+        <!-- Badge -->
+        <span class="badge bg-secondary categoria-badge">
+            {{ categoria.count_articoli }} art.
+        </span>
+        
+        {% if not categoria.stato_attivo %}
+        <span class="badge bg-danger categoria-badge">Inattiva</span>
+        {% endif %}
+        
+        <!-- Azioni -->
+        <div class="categoria-actions">
+            <a href="{% url 'magazzino:categoria_create' %}?padre={{ categoria.id_categoria }}" 
+               class="btn btn-sm btn-outline-primary"
+               title="Aggiungi sottocategoria">
+                <i class="fas fa-plus"></i>
+            </a>
+            <a href="{% url 'magazzino:categoria_update' categoria.id_categoria %}" 
+               class="btn btn-sm btn-warning"
+               title="Modifica">
+                <i class="fas fa-edit"></i>
+            </a>
+            <a href="{% url 'magazzino:categoria_delete' categoria.id_categoria %}" 
+               class="btn btn-sm btn-danger"
+               title="Elimina">
+                <i class="fas fa-trash"></i>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Sottocategorie (ricorsivo) -->
+    {% if categoria.has_children %}
+    <ul class="tree-children" style="display: none;">
+        {% for sottocategoria in categoria.sottocategorie.all %}
+            {% if sottocategoria.stato_attivo or request.GET.stato == 'inattivo' or not request.GET.stato %}
+                {% include 'magazzino/categoria_tree_item.html' with categoria=sottocategoria %}
+            {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+</li>

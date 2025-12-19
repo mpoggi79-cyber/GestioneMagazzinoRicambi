@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestione Backup Database - Magazzino Ricambi{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- HEADER -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-database"></i> Gestione Backup Database
+                </h1>
+                <div class="page-actions">
+                    <a href="{% url 'magazzino:backup_settings' %}" class="btn btn-secondary">
+                        <i class="fas fa-cog"></i> Impostazioni
+                    </a>
+                    
+                    <form method="post" action="{% url 'magazzino:backup_create' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus-circle"></i> Crea Nuovo Backup
+                        </button>
+                    </form>
+                    
+                    {% if backups %}
+                    <form method="post" action="{% url 'magazzino:backup_cleanup' %}" 
+                          class="d-inline"
+                          onsubmit="return confirm('Eliminare tutti i backup più vecchi di {{ retention_days }} giorni?')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-broom"></i> Pulizia Automatica
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- STATISTICHE -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-copy fa-2x text-primary mb-2"></i>
+                    <h3 class="mb-0">{{ backup_count }}</h3>
+                    <p class="text-muted mb-0">Backup Totali</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-hdd fa-2x text-info mb-2"></i>
+                    <h3 class="mb-0">{{ total_size_mb|floatformat:2 }} MB</h3>
+                    <p class="text-muted mb-0">Spazio Totale</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x text-success mb-2"></i>
+                    <h3 class="mb-0">{{ retention_days }}</h3>
+                    <p class="text-muted mb-0">Giorni Retention</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-folder fa-2x text-warning mb-2"></i>
+                    <h3 class="mb-0" style="font-size: 0.9rem;">{{ backup_dir }}</h3>
+                    <p class="text-muted mb-0">Cartella Backup</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- INFO BACKUP -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Informazioni:</strong>
+                <ul class="mb-0 mt-2">
+                    <li>I backup vengono creati in formato compresso (.sql.gz)</li>
+                    <li>Conservazione automatica per {{ retention_days }} giorni</li>
+                    <li>Ogni backup contiene lo schema completo e tutti i dati</li>
+                    <li><strong>IMPORTANTE:</strong> Scarica regolarmente i backup su un'unità esterna!</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LISTA BACKUP -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-list"></i> Backup Disponibili
+                </div>
+                <div class="card-body">
+                    {% if backups %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="fas fa-file"></i> Nome File</th>
+                                    <th><i class="fas fa-calendar"></i> Data Creazione</th>
+                                    <th><i class="fas fa-clock"></i> Età</th>
+                                    <th><i class="fas fa-hdd"></i> Dimensione</th>
+                                    <th><i class="fas fa-info-circle"></i> Stato</th>
+                                    <th class="text-center"><i class="fas fa-cog"></i> Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for backup in backups %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-file-archive text-primary"></i>
+                                        <code>{{ backup.filename }}</code>
+                                    </td>
+                                    <td>
+                                        {{ backup.timestamp|date:"d/m/Y H:i:s" }}
+                                    </td>
+                                    <td>
+                                        {% if backup.age_days == 0 %}
+                                        <span class="badge bg-success">Oggi</span>
+                                        {% elif backup.age_days == 1 %}
+                                        <span class="badge bg-info">Ieri</span>
+                                        {% elif backup.age_days < 7 %}
+                                        <span class="badge bg-info">{{ backup.age_days }} giorni fa</span>
+                                        {% elif backup.age_days < 30 %}
+                                        <span class="badge bg-warning">{{ backup.age_days }} giorni fa</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">{{ backup.age_days }} giorni fa</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ backup.size_mb|floatformat:2 }} MB</strong>
+                                    </td>
+                                    <td>
+                                        {% if backup.age_days >= retention_days %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-exclamation-triangle"></i> Da eliminare
+                                        </span>
+                                        {% elif backup.age_days >= retention_days|add:"-5" %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock"></i> In scadenza
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check"></i> Valido
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <!-- Download -->
+                                            <a href="{% url 'magazzino:backup_download' backup.filename %}" 
+                                               class="btn btn-success"
+                                               title="Scarica backup">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            
+                                            <!-- Ripristina -->
+                                            <button type="button"
+                                                    class="btn btn-warning"
+                                                    title="Ripristina backup (ATTENZIONE!)"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#restoreModal{{ forloop.counter }}">
+                                                <i class="fas fa-upload"></i>
+                                            </button>
+                                            
+                                            <!-- Elimina -->
+                                            <form method="post" 
+                                                  action="{% url 'magazzino:backup_delete' backup.filename %}"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Sei sicuro di voler eliminare questo backup?')">
+                                                {% csrf_token %}
+                                                <button type="submit" 
+                                                        class="btn btn-danger"
+                                                        title="Elimina backup">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        
+                                        <!-- Modal conferma ripristino -->
+                                        <div class="modal fade" id="restoreModal{{ forloop.counter }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                            ATTENZIONE - Ripristino Backup
+                                                        </h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="alert alert-danger">
+                                                            <strong>⚠️ OPERAZIONE CRITICA!</strong>
+                                                            <ul class="mt-2 mb-0">
+                                                                <li>Tutti i dati attuali verranno SOVRASCRITTI</li>
+                                                                <li>L'operazione è IRREVERSIBILE</li>
+                                                                <li>Tutte le modifiche dopo {{ backup.timestamp|date:"d/m/Y H:i" }} andranno PERSE</li>
+                                                            </ul>
+                                                        </div>
+                                                        
+                                                        <p><strong>File da ripristinare:</strong></p>
+                                                        <code>{{ backup.filename }}</code>
+                                                        
+                                                        <p class="mt-3">
+                                                            Per confermare, digita <strong class="text-danger">RESTORE</strong> nel campo seguente:
+                                                        </p>
+                                                        
+                                                        <form method="post" action="{% url 'magazzino:backup_restore' backup.filename %}" id="restoreForm{{ forloop.counter }}">
+                                                            {% csrf_token %}
+                                                            <input type="text" 
+                                                                   name="confirm" 
+                                                                   class="form-control" 
+                                                                   placeholder="Digita RESTORE per confermare"
+                                                                   required
+                                                                   autocomplete="off">
+                                                            
+                                                            <div class="mt-3 d-flex justify-content-between">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                    <i class="fas fa-times"></i> Annulla
+                                                                </button>
+                                                                <button type="submit" class="btn btn-danger">
+                                                                    <i class="fas fa-upload"></i> Ripristina Backup
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- RIEPILOGO -->
+                    {% if newest_backup and oldest_backup %}
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="alert alert-success">
+                                <strong><i class="fas fa-clock"></i> Backup più recente:</strong><br>
+                                {{ newest_backup.filename }}<br>
+                                <small>{{ newest_backup.timestamp|date:"d/m/Y H:i" }} ({{ newest_backup.size_mb|floatformat:2 }} MB)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-warning">
+                                <strong><i class="fas fa-history"></i> Backup più vecchio:</strong><br>
+                                {{ oldest_backup.filename }}<br>
+                                <small>{{ oldest_backup.timestamp|date:"d/m/Y H:i" }} ({{ oldest_backup.age_days }} giorni fa)</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Nessun backup disponibile!</strong>
+                        <p class="mb-0 mt-2">
+                            Clicca su "Crea Nuovo Backup" per creare il primo backup del database.
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ISTRUZIONI -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <i class="fas fa-book"></i> Guida Rapida
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-plus-circle text-success"></i> Creare un Backup</h5>
+                            <ol>
+                                <li>Clicca su "Crea Nuovo Backup"</li>
+                                <li>Attendi il completamento (pochi secondi)</li>
+                                <li>Il backup apparirà nella lista</li>
+                            </ol>
+                            
+                            <h5 class="mt-3"><i class="fas fa-download text-primary"></i> Scaricare un Backup</h5>
+                            <ol>
+                                <li>Clicca sull'icona <i class="fas fa-download"></i> accanto al backup</li>
+                                <li>Salva il file in un luogo sicuro</li>
+                                <li>Conserva su disco esterno o cloud</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-trash text-danger"></i> Eliminare un Backup</h5>
+                            <ol>
+                                <li>Clicca sull'icona <i class="fas fa-trash"></i></li>
+                                <li>Conferma l'eliminazione</li>
+                                <li>Il backup verrà rimosso definitivamente</li>
+                            </ol>
+                            
+                            <h5 class="mt-3"><i class="fas fa-broom text-warning"></i> Pulizia Automatica</h5>
+                            <ol>
+                                <li>Clicca su "Pulizia Automatica"</li>
+                                <li>Elimina backup più vecchi di {{ retention_days }} giorni</li>
+                                <li>Libera spazio su disco</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-danger mt-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>⚠️ IMPORTANTE - Best Practices:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>Backup Regolari:</strong> Crea un backup prima di ogni modifica importante</li>
+                            <li><strong>Backup Esterni:</strong> Scarica i backup e conservali su un disco esterno o cloud</li>
+                            <li><strong>Test Ripristino:</strong> Verifica periodicamente che i backup siano funzionanti</li>
+                            <li><strong>Retention:</strong> Mantieni almeno 7 giorni di backup per sicurezza</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

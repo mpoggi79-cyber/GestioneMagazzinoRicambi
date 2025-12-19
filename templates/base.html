@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestione Magazzino Ricambi{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #1a5f7a;
+            --secondary-color: #2a8db8;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --dark-text: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* NAVBAR */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white !important;
+        }
+        
+        .navbar-brand i {
+            margin-right: 0.5rem;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+            transition: color 0.3s;
+            margin: 0 0.5rem;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+        }
+        
+        .nav-link.active {
+            color: white !important;
+            font-weight: bold;
+            border-bottom: 2px solid white;
+        }
+        
+        /* OROLOGIO */
+        .clock-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+            padding-right: 1rem;
+        }
+        
+        .digital-clock {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-width: 150px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .digital-clock #clock {
+            font-size: 1.1rem;
+        }
+        
+        .digital-clock #date {
+            font-size: 0.95rem;
+            font-weight: normal;
+            opacity: 1.0;
+        }
+        
+        /* SIDEBAR */
+        .sidebar {
+            background-color: white;
+            border-right: 1px solid #dee2e6;
+            min-height: 100%;
+            padding: 0.5rem 0;
+            min-width: 160px;
+            max-width: 190px;
+            width: auto;
+        }
+        
+        .sidebar .nav-link {
+            color: var(--dark-text) !important;
+            border-left: 3px solid transparent;
+            padding: 0.25rem 0.75rem;
+            margin: 0;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+        }
+        
+        .sidebar .nav-link i {
+            min-width: 16px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: var(--light-bg);
+            border-left-color: var(--secondary-color);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: var(--light-bg);
+            border-left-color: var(--secondary-color);
+            color: var(--primary-color) !important;
+            font-weight: bold;
+        }
+        
+        .sidebar-header {
+            padding: 0.5rem 0.75rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+        }
+        
+        .page-title {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+        
+        .page-title i {
+            margin-right: 0.5rem;
+        }
+        
+        /* CARDS */
+        .card {
+            border: none;
+            border-top: 3px solid var(--secondary-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .card-header {
+            background-color: var(--light-bg);
+            border-bottom: 1px solid #dee2e6;
+            font-weight: bold;
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .card-body {
+            padding: 0.75rem 1rem;
+        }
+        
+        .card-title {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card h3, .card h4 {
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+        }
+        
+        .card .btn {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.85rem;
+        }
+        
+        /* BUTTONS */
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-sm {
+            font-size: 0.85rem;
+        }
+        
+        /* ALERTS */
+        .alert {
+            border: none;
+            border-left: 4px solid;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            border-left-color: #27ae60;
+            background-color: #d5f4e6;
+            color: #145a32;
+        }
+        
+        .alert-danger {
+            border-left-color: #e74c3c;
+            background-color: #fadbd8;
+            color: #78281f;
+        }
+        
+        .alert-warning {
+            border-left-color: #f39c12;
+            background-color: #fef5e7;
+            color: #7d6608;
+            font-size: 1.1rem;
+        }
+        
+        /* Alert speciale per password */
+        .alert-warning:has(i.fa-key),
+        .alert-warning:contains("PASSWORD") {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe5a0 100%);
+            border: 3px solid #ff9800;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+        
+        .alert-info {
+            border-left-color: #3498db;
+            background-color: #d6eaf8;
+            color: #154360;
+        }
+        
+        /* TABLES */
+        .table {
+            background-color: white;
+        }
+        
+        .table thead th {
+            background-color: var(--light-bg);
+            border-bottom: 2px solid var(--secondary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+            padding: 1rem;
+        }
+        
+        .table tbody td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .table tbody tr:hover {
+            background-color: var(--light-bg);
+        }
+        
+        /* FORMS */
+        .form-control, .form-select {
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(42, 141, 184, 0.25);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* FOOTER */
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: auto;
+            font-size: 0.9rem;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .clock-container {
+                display: none;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* UTILITY CLASSES */
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        
+        .text-secondary {
+            color: var(--secondary-color) !important;
+        }
+        
+        .badge-status-attivo {
+            background-color: #27ae60;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .badge-status-inattivo {
+            background-color: #95a5a6;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .icon-small {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.5rem;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <!-- Logo e Nome App -->
+            <a class="navbar-brand" href="{% url 'magazzino:dashboard' %}">
+                <i class="fas fa-warehouse"></i> Magazzino Ricambi
+            </a>
+            
+            <!-- Hamburger Menu per Mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Menu Navigation -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'magazzino:dashboard' %}">
+                                <i class="fas fa-chart-line"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-boxes"></i> Gestione
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'magazzino:articolo_list' %}">Articoli</a></li>
+                                <li><a class="dropdown-item" href="{% url 'magazzino:categoria_list' %}">Categorie</a></li>
+                                <li><a class="dropdown-item" href="{% url 'magazzino:fornitore_list' %}">Fornitori</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'magazzino:modello_scm_list' %}"><i class="fas fa-industry"></i> Modelli SCM</a></li>
+                                <li><a class="dropdown-item" href="{% url 'magazzino:matricola_scm_list' %}"><i class="fas fa-barcode"></i> Matricole SCM</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'magazzino:movimento_list' %}">Movimenti</a></li>
+                                <li><a class="dropdown-item" href="{% url 'magazzino:giacenza_list' %}">Giacenze</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="reportDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-file-alt"></i> Report
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="reportDropdown">
+                                <li><a class="dropdown-item" href="{% url 'magazzino:report_giacenze' %}">Report Giacenze</a></li>
+                                <li><a class="dropdown-item" href="{% url 'magazzino:report_movimenti' %}">Report Movimenti</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <!-- OROLOGIO DIGITALE -->
+            <div class="clock-container">
+                <div class="digital-clock">
+                    <span id="clock">00:00:00</span>
+                    <span id="date">--/--/----</span>
+                </div>
+                
+                <!-- User Menu -->
+                {% if user.is_authenticated %}
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i> {{ user.get_full_name|default:user.username }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                            <i class="fas fa-id-card"></i> Profilo
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:change_password' %}">
+                            <i class="fas fa-key"></i> Cambia Password
+                        </a></li>
+                        {% if user.is_staff %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'admin:index' %}">
+                            <i class="fas fa-cog"></i> Admin
+                        </a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="post" action="{% url 'accounts:logout' %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger" style="border: none; background: none; width: 100%; text-align: left; cursor: pointer;">
+                                    <i class="fas fa-sign-out-alt"></i> Esci
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                {% else %}
+                <a class="btn btn-sm btn-outline-light" href="{% url 'accounts:login' %}">
+                    <i class="fas fa-sign-in-alt"></i> Accedi
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <!-- CONTAINER PRINCIPALE -->
+    <div class="container-fluid flex-grow-1">
+        <div class="row h-100">
+            <!-- SIDEBAR -->
+            {% if user.is_authenticated %}
+            <nav class="col-auto d-md-block sidebar px-0">
+                <div class="sidebar-header">
+                    <i class="fas fa-list"></i> Navigazione
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'magazzino:dashboard' %}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    <div class="sidebar-header" style="margin-top: 1.5rem;">
+                        Magazzino
+                    </div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'magazzino:articolo_list' %}">
+                            <i class="fas fa-cube"></i> Articoli
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'magazzino:categoria_list' %}">
+                            <i class="fas fa-folder"></i> Categorie
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'magazzino:giacenza_list' %}">
+                            <i class="fas fa-chart-pie"></i> Giacenze
+                        </a>
+                    </li>
+                    
+                    <div class="sidebar-header" style="margin-top: 1.5rem;">
+                        Operazioni
+                    </div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'magazzino:movimento_list' %}">
+                            <i class="fas fa-exchange-alt"></i> Movimenti
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'magazzino:fornitore_list' %}">
+                            <i class="fas fa-truck"></i> Fornitori
+                        </a>
+                    </li>
+                    
+                    <div class="sidebar-header" style="margin-top: 1.5rem;">
+                        Report
+                    </div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'magazzino:report_giacenze' %}">
+                            <i class="fas fa-chart-bar"></i> Report Giacenze
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'magazzino:report_movimenti' %}">
+                            <i class="fas fa-list-ul"></i> Report Movimenti
+                        </a>
+                    </li>
+                    
+                    {% if user.profilo.è_admin or user.profilo.è_gestore_magazzino %}
+                    <div class="sidebar-header" style="margin-top: 1.5rem;">
+                        Amministrazione
+                    </div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'magazzino:utente_list' %}">
+                            <i class="fas fa-users-cog"></i> Gestione Utenti
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if user.profilo.è_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'magazzino:backup_list' %}">
+                            <i class="fas fa-database"></i> Backup Database
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+            <!-- MAIN CONTENT -->
+            <main class="col-md-10 ms-sm-auto main-content">
+                <!-- MESSAGES -->
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <!-- BLOCCO CONTENUTO -->
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    
+    <!-- FOOTER -->
+    <footer class="footer mt-auto">
+        <p>&copy; 2025 Gestione Magazzino Ricambi. Sviluppato con Django e Bootstrap.</p>
+    </footer>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Clock Script -->
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+            const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+            const dayName = days[now.getDay()];
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            document.getElementById('date').textContent = `${dayName}, ${day} ${month} ${year}`;
+        }
+        
+        // Aggiorna l'orologio ogni secondo
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

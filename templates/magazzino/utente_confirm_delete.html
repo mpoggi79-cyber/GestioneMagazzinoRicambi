@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Disattiva Utente - Magazzino Ricambi{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Disattiva Utente
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Attenzione!</strong> Stai per disattivare un utente.
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5><i class="fas fa-user"></i> Dettagli Utente</h5>
+                            <hr>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Username:</th>
+                                    <td><strong>{{ object.username }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Nome Completo:</th>
+                                    <td>{{ object.get_full_name|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ object.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Ruolo:</th>
+                                    <td>
+                                        <span class="badge 
+                                            {% if object.profilo.ruolo == 'ADMIN' %}bg-danger
+                                            {% elif object.profilo.ruolo == 'GESTORE_MAGAZZINO' %}bg-warning
+                                            {% else %}bg-info{% endif %}">
+                                            {{ object.profilo.get_ruolo_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Nota:</strong> L'utente verrà disattivato ma non eliminato dal database. 
+                        Potrà essere riattivato in seguito modificando il suo profilo.
+                    </div>
+                    
+                    <p class="mb-3">Sei sicuro di voler disattivare l'utente <strong>{{ object.username }}</strong>?</p>
+                    
+                    <p class="text-muted">
+                        <small>L'utente non potrà più accedere al sistema finché non verrà riattivato.</small>
+                    </p>
+                    
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'magazzino:utente_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Annulla
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-user-slash"></i> Sì, Disattiva Utente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

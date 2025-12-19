@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Report Movimenti - Gestione Magazzino Ricambi{% endblock %}
+
+{% block content %}
+
+<style>
+    .table-compact th,
+    .table-compact td {
+        padding: 0.3rem 0.25rem !important;
+        white-space: nowrap;
+    }
+</style>
+
+<h1 class="page-title">
+    <i class="fas fa-file-alt"></i> Report Movimenti Ultimi 30 Giorni
+</h1>
+
+<!-- STATISTICHE GENERALI -->
+<div class="row mb-4">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-2">Totale Movimenti</h6>
+                <h2 class="text-primary">{{ movimenti_ultimi_30_giorni|length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-2">Operatori Coinvolti</h6>
+                <h2 class="text-info">{{ statistiche_operatore|length }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="text-muted mb-2">Tipi di Movimento</h6>
+                <h2 class="text-success">{{ statistiche_tipo|length }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STATISTICHE PER TIPO MOVIMENTO -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-chart-bar"></i> Statistiche per Tipo di Movimento
+    </div>
+    <div class="card-body p-0">
+        {% if statistiche_tipo %}
+        <div class="table-responsive">
+            <table class="table table-hover table-sm table-compact mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Tipo Movimento</th>
+                        <th>Numero Movimenti</th>
+                        <th>Quantità Totale</th>
+                        <th>Media per Movimento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in statistiche_tipo %}
+                    <tr>
+                        <td>
+                            {% if stat.tipo_movimento == 'CARICO' %}
+                            <span class="badge bg-success">{{ stat.get_tipo_movimento_display }}</span>
+                            {% elif stat.tipo_movimento == 'SCARICO' %}
+                            <span class="badge bg-danger">{{ stat.get_tipo_movimento_display }}</span>
+                            {% elif stat.tipo_movimento == 'RETTIFICA' %}
+                            <span class="badge bg-warning">{{ stat.get_tipo_movimento_display }}</span>
+                            {% else %}
+                            <span class="badge bg-info">{{ stat.get_tipo_movimento_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ stat.count }}</strong></td>
+                        <td>{{ stat.quantita_totale }}</td>
+                        <td>{{ stat.media_quantita|default:'-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted">
+            <p>Nessun movimento registrato</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- STATISTICHE PER OPERATORE -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-user-tie"></i> Top Operatori (Ultimi 30 Giorni)
+    </div>
+    <div class="card-body p-0">
+        {% if statistiche_operatore %}
+        <div class="table-responsive">
+            <table class="table table-hover table-sm table-compact mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Operatore</th>
+                        <th>Numero Movimenti</th>
+                        <th>Percentuale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in statistiche_operatore %}
+                    <tr>
+                        <td><strong>{{ stat.operatore }}</strong></td>
+                        <td>{{ stat.count }} movimenti</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                {% widthratio stat.count movimenti_ultimi_30_giorni|length 100 as percentage %}
+                                <div class="progress-bar bg-info" role="progressbar" 
+                                     style="width: {{ percentage }}%;" 
+                                     aria-valuenow="{{ stat.count }}" aria-valuemin="0" aria-valuemax="{{ movimenti_ultimi_30_giorni|length }}">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted">
+            <p>Nessun movimento registrato</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ULTIMI MOVIMENTI REGISTRATI -->
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-exchange-alt"></i> Ultimi Movimenti Registrati
+    </div>
+    <div class="card-body p-0">
+        {% if movimenti_ultimi_30_giorni %}
+        <div class="table-responsive">
+            <table class="table table-hover table-sm table-compact mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Articolo</th>
+                        <th>Codice</th>
+                        <th>Tipo</th>
+                        <th>Quantità</th>
+                        <th>Fornitore</th>
+                        <th>Operatore</th>
+                        <th>Documento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movimento in movimenti_ultimi_30_giorni %}
+                    <tr>
+                        <td>{{ movimento.data_movimento|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            <a href="{% url 'magazzino:articolo_detail' movimento.articolo.id_articolo %}">
+                                {{ movimento.articolo.descrizione|truncatewords:3 }}
+                            </a>
+                        </td>
+                        <td><strong>{{ movimento.articolo.codice_interno }}</strong></td>
+                        <td>
+                            {% if movimento.tipo_movimento == 'CARICO' %}
+                            <span class="badge bg-success">Carico</span>
+                            {% elif movimento.tipo_movimento == 'SCARICO' %}
+                            <span class="badge bg-danger">Scarico</span>
+                            {% elif movimento.tipo_movimento == 'RETTIFICA' %}
+                            <span class="badge bg-warning">Rettifica</span>
+                            {% else %}
+                            <span class="badge bg-info">Reso</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ movimento.quantita }}</td>
+                        <td>
+                            {% if movimento.fornitore %}
+                            <a href="{% url 'magazzino:fornitore_detail' movimento.fornitore.id_fornitore %}">
+                                {{ movimento.fornitore.ragione_sociale|truncatewords:2 }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ movimento.operatore }}</td>
+                        <td>{{ movimento.numero_documento|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-4 text-center text-muted">
+            <i class="fas fa-inbox" style="font-size: 2rem;"></i>
+            <p class="mt-2 mb-0">Nessun movimento negli ultimi 30 giorni</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

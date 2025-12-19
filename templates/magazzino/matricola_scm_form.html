@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Modifica{% else %}Nuova{% endif %} Matricola SCM - GMR{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-barcode"></i>
+                        {% if object %}Modifica Matricola{% else %}Nuova Matricola Macchina SCM{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_modello" class="form-label">
+                                Modello Macchina <span class="text-danger">*</span>
+                            </label>
+                            <select name="modello" class="form-select" id="id_modello" required>
+                                <option value="">-- Seleziona modello --</option>
+                                {% load static %}
+                                {% for modello in form.modello.field.queryset %}
+                                    <option value="{{ modello.id_modello }}" 
+                                            {% if form.modello.value == modello.id_modello %}selected{% endif %}>
+                                        {{ modello.nome_modello }}{% if modello.gamma %} - {{ modello.gamma }}{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.modello.errors %}
+                                <div class="text-danger">{{ form.modello.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_matricola_macchina" class="form-label">
+                                Numero Matricola <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="matricola_macchina" class="form-control font-monospace" 
+                                   id="id_matricola_macchina" required maxlength="100"
+                                   value="{{ form.matricola_macchina.value|default:'' }}"
+                                   placeholder="Es. AA1/000681 o ACL/001/21">
+                            <small class="form-text text-muted">
+                                Numero univoco di matricola della macchina
+                            </small>
+                            {% if form.matricola_macchina.errors %}
+                                <div class="text-danger">{{ form.matricola_macchina.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_anno" class="form-label">Anno</label>
+                            <input type="number" name="anno" class="form-control" 
+                                   id="id_anno" min="1900" max="2100"
+                                   value="{{ form.anno.value|default:'' }}"
+                                   placeholder="Es. 2024">
+                            <small class="form-text text-muted">
+                                Anno di produzione o installazione (opzionale)
+                            </small>
+                            {% if form.anno.errors %}
+                                <div class="text-danger">{{ form.anno.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if object %}
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" name="stato_attivo" class="form-check-input" 
+                                   id="id_stato_attivo" {% if form.stato_attivo.value %}checked{% endif %}>
+                            <label class="form-check-label" for="id_stato_attivo">
+                                Matricola attiva
+                            </label>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salva
+                            </button>
+                            <a href="{% url 'magazzino:matricola_scm_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Annulla
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

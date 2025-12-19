@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Elimina Fornitore - Gestione Magazzino{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">
+    <i class="fas fa-trash"></i> Conferma Eliminazione
+</h1>
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <i class="fas fa-warning"></i> Attenzione!
+            </div>
+            <div class="card-body">
+                <p class="mb-4">
+                    Sei sicuro di voler eliminare il fornitore <strong>{{ fornitore.ragione_sociale }}</strong>?
+                </p>
+                
+                {% with movimenti_count=fornitore.movimentomagazzino_set.count %}
+                    {% if movimenti_count > 0 %}
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Nota:</strong> {{ movimenti_count }} movimento/i associato/i a questo fornitore 
+                        verranno <strong>riassegnati automaticamente</strong> al fornitore "Non Specificato".
+                    </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="alert alert-warning mb-4">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Avviso:</strong> Questa azione non può essere annullata.
+                </div>
+                
+                <h6 class="mb-3">Dettagli del fornitore:</h6>
+                <dl class="row">
+                    <dt class="col-sm-4">Ragione Sociale:</dt>
+                    <dd class="col-sm-8">{{ fornitore.ragione_sociale }}</dd>
+                    
+                    <dt class="col-sm-4">Città:</dt>
+                    <dd class="col-sm-8">{{ fornitore.citta|default:"-" }}</dd>
+                    
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">
+                        {% if fornitore.email %}
+                        <a href="mailto:{{ fornitore.email }}">{{ fornitore.email }}</a>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-4">Stato:</dt>
+                    <dd class="col-sm-8">
+                        {% if fornitore.stato_attivo %}
+                        <span class="badge bg-success">Attivo</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inattivo</span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <form method="post" class="d-flex gap-2 justify-content-center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Elimina
+                </button>
+                <a href="{% url 'magazzino:fornitore_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Annulla
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
