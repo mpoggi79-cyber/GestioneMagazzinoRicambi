@@ -1,4 +1,4 @@
-# 🏭 Gestione Magazzino Ricambi Goose
+# 🏭 Gestione Magazzino Ricambi Goose By Matteo
 
 **Status**: ✅ v1.0 PRODUCTION READY | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
 **Completamento**: 22 view | 11 modelli | 22 template | 4 ruoli utente | 77 movimenti test
