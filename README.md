@@ -1,7 +1,7 @@
 # 🏭 Gestione Magazzino Ricambi Goose By Matteo
 
-**Status**: ✅ v1.0 PRODUCTION READY | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
-**Completamento**: 22 view | 11 modelli | 22 template | 4 ruoli utente | 77 movimenti test
+**Status**: ✅ v1.1 CLIENTI MODULE - FASE 1 | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
+**Completamento**: 22 view magazzino | 16 modelli | 22 template | 4 ruoli | **+5 tabelle clienti Fase 1**
 
 ---
 
@@ -45,9 +45,10 @@ python manage.py runserver
 
 | Componente | Stato | Dettagli |
 |-----------|-------|---------|
-| **Backend Django 5.2.8** | ✅ Completo | 22 CBV, 11 modelli ORM, 5 form |
-| **Database MySQL 10.4** | ✅ Operativo | 77 movimenti test, 19 articoli, 8 categorie, 5 fornitori |
+| **Backend Django 5.2.8** | ✅ Completo | 22 CBV magazzino, 16 modelli ORM, 5 form |
+| **Database MySQL 10.4** | ✅ Operativo | 77 movimenti, 19 articoli, **+66 record clienti (5 tabelle)** |
 | **Frontend Bootstrap 5.3** | ✅ Completo | 22 template HTML responsive, Font Awesome 6.4 |
+| **Modulo Clienti - Fase 1** | ✅ **COMPLETATA** | **5 tabelle base: tbAppellativo (7), tbCategoriaIVA (7), tbCategorieTariffe (21), tbTipoPagamento (23), tbModalitaPagamento (8)** |
 | **Autenticazione** | ✅ Funzionante | Login/logout, 4 ruoli, ProfiloUtente, LogAccesso |
 | **Permessi** | ✅ Implementati | CanEditMixin, CanViewMixin, controlli basati su ruolo |
 | **CRUD Operazioni** | ✅ Testate | Categoria, PezzoRicambio, Fornitore, MovimentoMagazzino, Giacenza, Inventario |
@@ -108,15 +109,16 @@ Output atteso:
 python manage.py migrate
 ```
 
-### 4️⃣ Caricare Dati di Test (OPZIONALE ma CONSIGLIATO)
+### 4️⃣ Caricare Dati di Test (CONSIGLIATO)
 
+**Dati Magazzino**:
 ```bash
 python manage.py populate_db
 ```
 
 Crea:
-- **8 categorie** (Motori, Trasmissioni, Componenti Meccanici, Idraulica, Pneumatica, Controllo, Connettori, Varia)
-- **7 unità di misura** (pz, kg, l, h, m, mm, W)
+- **8 categorie** gerarchiche (Motori, Trasmissioni, Componenti Meccanici, Idraulica, Pneumatica, Controllo, Connettori, Varia)
+- **14 unità di misura** via tbUnitaMisura (Pz, Lt, Mt, Set, Coppia, Conf, Ore, gg, km, etc.)
 - **5 fornitori** (MotorTech, HydraulicSys, ElectroComponents, FastSupply, QualityParts)
 - **19 articoli** con giacenze associate
 - **77 movimenti** ultimi 30 giorni (CARICO/SCARICO/RETTIFICA/RESO)
@@ -125,6 +127,24 @@ Crea:
   - `gestore` / `gestore` (GESTORE_MAGAZZINO - CRUD + Report)
   - `operatore` / `operatore` (OPERATORE - Solo creazione movimenti)
   - `visualizzatore` / `visualizzatore` (VISUALIZZATORE - Solo lettura)
+
+**Dati Clienti - Fase 1** ✅:
+```bash
+python manage.py import_tbappellativo
+python manage.py import_tbcategoriaiva
+python manage.py import_tbcategorietariffe
+python manage.py import_tbtipopagamento
+python manage.py import_tbmodalitapagamento
+```
+
+Importa:
+- **7 appellativi** (Sig., Dott., Prof., etc.)
+- **7 categorie IVA** con aliquote (22%, 0%, etc.)
+- **21 categorie tariffe** (Assistenza, Produzione, etc.)
+- **23 tipi pagamento** (Bonifico 30gg, 60gg, RI.BA., etc.)
+- **8 modalità pagamento** (Contanti, Assegno, Carta, etc.)
+
+**TOTALE**: 66 record clienti + dati magazzino completi
 
 ### 5️⃣ Avviare Server di Sviluppo
 
@@ -136,7 +156,7 @@ Accedere: **http://localhost:8000** con credenziali `admin` / `admin`
 
 ---
 
-## 📊 MODELLI DATI (11 TOTALI)
+## 📊 MODELLI DATI (16 TOTALI)
 
 ### Dominio Magazzino (9 modelli)
 
@@ -144,11 +164,18 @@ Accedere: **http://localhost:8000** con credenziali `admin` / `admin`
 Categoria
 ├── nome_categoria: CharField(max_length=100, unique=True)
 ├── descrizione: TextField(blank=True)
+├── categoria_padre: ForeignKey(self, null=True) - Gerarchia
+├── livello: IntegerField(default=0)
 └── ordine: PositiveIntegerField(default=0)
 
-UnitaMisura
-├── codice: CharField(max_length=10, unique=True)
-└── descrizione: CharField(max_length=100)
+TbUnitaMisura ✅ (sostituisce UnitaMisura)
+├── idUnitaMisura: AutoField(PK, db_column='idUnitaMisura')
+├── Denominazione: CharField(max_length=50) - es: Pz, Ore, km
+├── DenominazioneStampa: CharField(max_length=100, null=True)
+├── stato_attivo: BooleanField(default=True)
+├── creato_il: DateTimeField(auto_now_add=True)
+└── modificato_il: DateTimeField(auto_now=True)
+📊 14 righe: Pz(9), Lt(10), Mt(11), Set(12), Coppia(13), Conf(14), Ore(4), gg(3), km(2), etc.
 
 Fornitore
 ├── ragione_sociale: CharField(max_length=200)
@@ -162,10 +189,9 @@ PezzoRicambio (Articles)
 ├── codice_interno: CharField(max_length=50, unique=True)
 ├── codice_scm: CharField(max_length=50, blank=True)
 ├── codice_fornitore: CharField(max_length=50, blank=True)
-├── codice_alternativo: CharField(max_length=50, blank=True)
 ├── descrizione: TextField()
 ├── categoria: ForeignKey(Categoria)
-├── unita_misura: ForeignKey(UnitaMisura)
+├── unita_misura: ForeignKey(TbUnitaMisura) - db_column='idUnitaMisura'
 ├── fornitore: ForeignKey(Fornitore)
 ├── giacenza_minima: PositiveIntegerField()
 ├── giacenza_massima: PositiveIntegerField()
@@ -224,6 +250,42 @@ LogAccesso (Audit Trail)
 ├── data_ora: DateTimeField(auto_now_add=True)
 ├── indirizzo_ip: GenericIPAddressField()
 └── successo: BooleanField()
+```
+
+### Dominio Clienti e Fatturazione - FASE 1 ✅ (5 modelli base)
+
+```
+TbAppellativo
+├── idAppellativo: AutoField(PK, db_column='idAppellativo')
+└── Descrizione: CharField(max_length=50) - es: Sig., Dott., Prof.
+📊 7 righe importate
+
+TbCategoriaIVA
+├── idCategoriaIVA: AutoField(PK, db_column='idCategoriaIVA')
+├── NomeCategoria: CharField(max_length=100) - es: Manodopera, Ricambi
+└── ValoreIVA: DecimalField(5,3) - es: 0.22 = 22%
+📊 7 righe importate
+
+TbCategorieTariffe
+├── idCategorieTariffe: AutoField(PK, db_column='idCategorieTariffe')
+├── CategoriaTariffe: CharField(max_length=200)
+└── IsVisible: BooleanField(default=True)
+📊 21 righe importate
+
+TbTipoPagamento
+├── idTipoPagamento: AutoField(PK, db_column='idTipoPagamento')
+├── descrizione: CharField(max_length=200) - es: Bonifico 30 gg D.F.
+├── DataRifScad: CharField(max_length=50) - DF/FM
+├── GiorniDataRif: IntegerField
+└── GiornoAddebito: IntegerField
+📊 23 righe importate
+
+TbModalitaPagamento
+├── idModalitaPagamento: AutoField(PK, db_column='idModalitaPagamento')
+└── Nome: CharField(max_length=100) - es: Bonifico bancario
+📊 8 righe importate
+
+✅ TOTALE FASE 1: 66 record in 5 tabelle
 ```
 
 ---
