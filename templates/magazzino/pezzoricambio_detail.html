@@ -41,7 +41,16 @@
                     <dd class="col-sm-8">{{ articolo.categoria.nome_categoria }}</dd>
 
                     <dt class="col-sm-4">Unità Misura:</dt>
-                    <dd class="col-sm-8">{{ articolo.unita_misura.descrizione }} ({{ articolo.unita_misura.codice }})</dd>
+                    <dd class="col-sm-8">
+                        {% if articolo.unita_misura %}
+                            {{ articolo.unita_misura.denominazione }}
+                            {% if articolo.unita_misura.denominazione_stampa %}
+                                - {{ articolo.unita_misura.denominazione_stampa }}
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">Non specificata</span>
+                        {% endif %}
+                    </dd>
 
                     <dt class="col-sm-4">Giacenza Minima:</dt>
                     <dd class="col-sm-8">{{ articolo.giacenza_minima }}</dd>

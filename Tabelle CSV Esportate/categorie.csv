@@ -1,0 +1,32 @@
+id_categoria;nome_categoria;descrizione;id_categoria_padre 'FK';livello;ordine;stato_attivo;creato_il;modificato_il
+16;ACCESSORI PIANI MACCHINE;Ventose, Morsetti, Battute, Innalzatori;;0;0;VERO;2025-12-07 22:53:14;2025-12-07 22:53:14
+15;AUTO;TUTTO SULLE AUTOMOBILI;;0;0;VERO;2025-12-07 22:37:37;2025-12-07 23:43:48
+5;Elettrica;Componenti elettrici;;0;0;VERO;2025-11-30 19:49:37;2025-11-30 19:49:37
+29;Macchine al Capanno;Macchine da vendere al capanno;;0;0;VERO;2025-12-08 09:35:16;2025-12-08 09:35:16
+9;Nessuna;Categoria di fallback per articoli orfani - da caratterizzare manualmente;;0;0;VERO;2025-11-30 22:08:26;2025-12-14 21:27:34
+17;Pompe Del Vuoto;Tutto Sulle pompe del vuoto;;0;0;VERO;2025-12-07 22:54:02;2025-12-08 17:16:29
+12;RICAMBI MECCANICI;Componenti meccanici, cinghie, ingranaggi, cuscinetti, guarnizioni;;0;0;VERO;2025-12-07 22:04:54;2025-12-07 22:04:54
+2;Trasmissione;Sistemi di trasmissione;;0;0;VERO;2025-11-30 19:49:37;2025-11-30 19:49:37
+10;Ventose piano TVN;Ventose per piano TVN dalle ultime record 130 in su;;0;0;VERO;2025-12-06 21:08:12;2025-12-06 21:08:12
+13;RICAMBI ELETTRICI;Componenti elettrici, schede, motori, sensori, cavi;;0;1;VERO;2025-12-07 22:04:54;2025-12-07 22:04:54
+14;RICAMBI PNEUMATICI;Componenti Pneumatici, tubi, valvole, pompe, cilindri, raccordi;;0;2;VERO;2025-12-07 22:04:54;2025-12-07 22:51:07
+42;Aspirazione;tubi aspirazione, Bocchette in plastica, farfalle, ecc.;12;1;0;VERO;2025-12-08 16:36:48;2025-12-08 16:36:48
+18;Backer;Tutto sulle pompe della Backer;17;1;0;VERO;2025-12-07 22:54:46;2025-12-07 23:43:48
+19;Busch;Tutto sulle pompe della Busch;17;1;0;VERO;2025-12-07 22:56:27;2025-12-07 23:43:48
+6;Climatizzazione;Sistema di raffreddamento;15;1;0;VERO;2025-11-30 19:49:37;2025-12-07 23:43:48
+38;Cuffie;Soffietti, Anelli, Spazzole, Corpo attuativo,;12;1;0;VERO;2025-12-08 11:19:32;2025-12-08 11:19:32
+7;Filtri;Filtri e manutenzione;15;1;0;VERO;2025-11-30 19:49:37;2025-12-08 17:37:49
+4;Freni;Sistemi frenanti;15;1;0;VERO;2025-11-30 19:49:37;2025-12-07 23:43:48
+8;Lubrificanti;Oli e lubrificanti;15;1;0;VERO;2025-11-30 19:49:37;2025-12-07 23:43:48
+1;Motore;Parti motore e componenti;15;1;0;VERO;2025-11-30 19:49:37;2025-12-07 23:43:48
+11;Pattini - Viti - Cremagliere - Guide;Parti meccaniche;12;1;0;VERO;2025-12-07 00:03:57;2025-12-07 22:42:39
+30;Pressa Usata;;29;1;0;VERO;2025-12-08 09:36:20;2025-12-08 09:36:20
+20;ritchle;Tutto sulle pompe che esplodono;17;1;0;VERO;2025-12-07 22:59:52;2025-12-07 23:43:48
+25;ciao;;30;2;0;VERO;2025-12-08 00:20:14;2025-12-08 17:46:59
+35;Cremagliere;tutti i tipi;11;2;0;VERO;2025-12-08 09:45:51;2025-12-08 09:45:51
+40;Cufffie motorizzate Vecchie;vecchie cuffie  con il trilobato;38;2;0;VERO;2025-12-08 16:34:16;2025-12-08 17:27:31
+41;Cuffia pneumatica 4 posizioni;;38;2;0;VERO;2025-12-08 16:35:18;2025-12-08 16:35:18
+39;Cuffie Motorizzate;tutto su cuffie motorizzate;38;2;0;VERO;2025-12-08 16:32:28;2025-12-08 16:32:28
+31;Guide;Guide prismatiche di varie marche;11;2;0;VERO;2025-12-08 09:37:30;2025-12-08 09:43:25
+32;Pattini;Pattini di tutte le marche;11;2;0;VERO;2025-12-08 09:43:59;2025-12-08 09:43:59
+37;Viti a ricircoloooo;Viti a ricircolo di sfere (viti, chiocciole, viti + chiocciole);11;2;0;VERO;2025-12-08 11:17:13;2025-12-08 18:15:00

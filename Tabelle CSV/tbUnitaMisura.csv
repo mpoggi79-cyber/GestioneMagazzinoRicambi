@@ -1,8 +1,14 @@
-﻿idUnitaMisura;Denominazione;DenominazioneStampa
-1;Num.;
-2;km;per Chilometro - per kilometer
-3;gg;per Giornata - per Day
-4;Ore;per Ora o frazione
-5;Kg;
-7;Day;Daily
-8;Hour;Hour or fraction
+﻿idUnitaMisura;Denominazione;DenominazioneStampa;stato_attivo;creato_il;modificato_il
+1;Num.;Num.;VERO;;
+2;km;per Chilometro - per kilometer;VERO;;
+3;gg;per Giornata - per Day;VERO;;
+4;Ore;per Ora o frazione;VERO;;
+5;Kg;Kg;VERO;;
+7;Day;Daily;VERO;;
+8;Hour;Hour or fraction;VERO;;
+9;Pz;Pezzi;VERO;;
+10;Lt;Litri;VERO;;
+11;Mt;Metri;VERO;;
+12;Set;Set oppure Kit;VERO;;
+13;Coppia;Coppia;VERO;;
+14;Conf;Confezione;VERO;;

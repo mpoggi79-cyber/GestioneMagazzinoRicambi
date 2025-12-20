@@ -38,7 +38,7 @@
                     <dd class="col-sm-7">{{ giacenza.articolo.categoria.nome_categoria }}</dd>
 
                     <dt class="col-sm-5">Unità Misura:</dt>
-                    <dd class="col-sm-7">{{ giacenza.articolo.unita_misura.codice }}</dd>
+                    <dd class="col-sm-7">{{ giacenza.articolo.unita_misura.denominazione }}</dd>
 
                     <dt class="col-sm-5">Giacenza Min:</dt>
                     <dd class="col-sm-7">{{ giacenza.articolo.giacenza_minima }}</dd>
@@ -60,21 +60,21 @@
                 <div class="mb-4">
                     <label class="form-label text-muted">Quantità Disponibile</label>
                     <div style="font-size: 2.5rem; color: #2a8db8; font-weight: bold;">
-                        {{ giacenza.quantita_disponibile }} {{ giacenza.articolo.unita_misura.codice }}
+                        {{ giacenza.quantita_disponibile }} {{ giacenza.articolo.unita_misura.denominazione }}
                     </div>
                 </div>
 
                 <div class="mb-4">
                     <label class="form-label text-muted">Quantità Impegnata</label>
                     <div style="font-size: 1.5rem; color: #f39c12; font-weight: bold;">
-                        {{ giacenza.quantita_impegnata }} {{ giacenza.articolo.unita_misura.codice }}
+                        {{ giacenza.quantita_impegnata }} {{ giacenza.articolo.unita_misura.denominazione }}
                     </div>
                 </div>
 
                 <div class="mb-4">
                     <label class="form-label text-muted">Quantità Prenotata</label>
                     <div style="font-size: 1.5rem; color: #3498db; font-weight: bold;">
-                        {{ giacenza.quantita_prenotata }} {{ giacenza.articolo.unita_misura.codice }}
+                        {{ giacenza.quantita_prenotata }} {{ giacenza.articolo.unita_misura.denominazione }}
                     </div>
                 </div>
 
@@ -83,7 +83,7 @@
                 <div>
                     <label class="form-label text-muted">Quantità Libera (disponibile - impegnata - prenotata)</label>
                     <div style="font-size: 2rem; color: #27ae60; font-weight: bold;">
-                        {{ giacenza.quantita_libera }} {{ giacenza.articolo.unita_misura.codice }}
+                        {{ giacenza.quantita_libera }} {{ giacenza.articolo.unita_misura.denominazione }}
                     </div>
                 </div>
             </div>

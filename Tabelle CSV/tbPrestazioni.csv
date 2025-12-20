@@ -1,4 +1,4 @@
-﻿idPrestazione;Denominazione;idUnitaMisura 'FK';PrezzoUnitario;idCategorieTariffe 'FK';idCategoriaDettaglio 'FK';VisualizzaPreventivo;OrdineStampa
+﻿idPrestazione;Denominazione;idUnitaMisura 'FK';PrezzoUnitario;idCategorieTariffe 'FK';idCategoriaIVA 'FK';VisualizzaPreventivo;OrdineStampa
 5;Manodopera ordinaria;4;47;1;1;VERO;1
 12;Manodopera ordinaria Italia;4;38,5;2;8;VERO;1
 13;Manodopera straordinaria Italia;4;45;2;8;VERO;3

@@ -1,0 +1,26 @@
+id_giacenza;articolo;quantita_disponibile;quantita_impegnata;quantita_prenotata;ultimo_aggiornamento
+1;RIC-0001 - Filtro olio motore;15;12;0;2025-11-30 19:51:08
+2;RIC-0002 - Set 4 candele NGK;3;1;0;2025-11-30 19:51:08
+3;RIC-0003 - Cinghia distribuzione 122 denti;6;0;0;2025-11-30 19:51:08
+4;RIC-0004 - Olio cambio automatico;9;3;0;2025-11-30 19:51:08
+5;RIC-0005 - Cuscinetto ruota anteriore;8;3;0;2025-11-30 19:51:08
+6;RIC-0006 - Ammortizzatore anteriore sx/dx;8;5;0;2025-11-30 19:51:08
+8;RIC-0008 - Pastiglie freno anteriori;12;2;0;2025-11-30 19:51:08
+9;RIC-0009 - Disco freno ventilato;4;1;0;2025-11-30 19:51:08
+10;RIC-0010 - Liquido freni DOT 4;15;5;0;2025-11-30 19:51:08
+11;RIC-0011 - Batteria 12V 70Ah;8;5;0;2025-11-30 19:51:08
+12;RIC-0012 - Alternatore 120A;0;1;0;2025-12-14 22:55:18
+13;RIC-0013 - Motorino avviamento;3;0;0;2025-11-30 19:51:08
+14;RIC-0014 - Compressore aria condizionata;3;1;0;2025-11-30 19:51:08
+15;RIC-0015 - Filtro abitacolo auto;13;9;0;2025-11-30 19:51:08
+16;RIC-0016 - Filtro aria motore;28;1;0;2025-11-30 23:04:32
+17;RIC-0017 - Filtro gasolio motore;14;11;0;2025-11-30 19:51:08
+19;RIC-0019 - Grasso lubrificante universale;28;4;0;2025-11-30 23:19:19
+20;int8904 - Raccordo dritto da 8mm;0;0;0;2025-12-06 21:19:20
+21;Ric679011 - Tubo rilsan da 4mm;0;0;0;2025-12-06 22:58:22
+22;Ric-776355 - Inverter KEB F5;0;0;0;2025-12-06 23:24:55
+23;Ric-000182 - Soffietto cuffia 350;0;0;0;2025-12-08 11:23:49
+24;Ric-665478 - Anello Cuffia da 350;0;0;0;2025-12-08 16:19:40
+25;Ric-667382 - Art Ciao;0;0;0;2025-12-08 17:23:40
+26;RiC-888999 - Valvola pneumax quella li dai;0;0;0;2025-12-08 23:30:34
+27;Ric-888555 - Valvola pneumax monostabile 24vdc;0;0;0;2025-12-09 00:14:06

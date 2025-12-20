@@ -1,0 +1,26 @@
+giacenza;id_articolo;codice_interno;codice_scm;descrizione_scm;modello_scm_old;matricola_scm_old;id_modello_scm 'FK';id_matricola_scm 'FK';codice_fornitore;descrizione;id_categoria 'FK';id_fornitore 'FK';id_unita_misura 'FK';giacenza_minima;giacenza_massima;prezzo_acquisto;prezzo_acquisto_scm;stato_disponibilita;immagine;immagine_thumbnail;stato_attivo;creato_il;modificato_il
+RIC-0012 - Disp: 0;12;RIC-0012;;;;;1;;;Alternatore 120A;5;1;1;2;5;500.00;;ESAU;;;VERO;2025-11-30 19:51:08;2025-12-14 21:48:46
+RIC-0006 - Disp: 8;6;RIC-0006;;;;;;;;Ammortizzatore anteriore sx/dx;9;;6;3;8;120.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 23:26:11
+Ric-665478 - Disp: 0;24;Ric-665478;;;;;;;;Anello Cuffia da 350;38;;1;5;100;;;DISP;;;VERO;2025-12-08 16:19:40;2025-12-14 21:34:09
+Ric-667382 - Disp: 0;25;Ric-667382;;;;;;;;Art Ciao;25;;4;5;100;;;DISP;;;VERO;2025-12-08 17:23:40;2025-12-08 17:23:40
+RIC-0011 - Disp: 8;11;RIC-0011;;;;;;;;Batteria 12V 70Ah;5;;1;3;8;150.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0003 - Disp: 6;3;RIC-0003;;;;;;;;Cinghia distribuzione 122 denti;1;;1;2;8;85.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0014 - Disp: 3;14;RIC-0014;;;;;;;;Compressore aria condizionata;6;;1;1;3;380.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0005 - Disp: 8;5;RIC-0005;;;;;;;;Cuscinetto ruota anteriore;2;;1;4;12;65.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0009 - Disp: 4;9;RIC-0009;;;;;;;;Disco freno ventilato;4;;1;2;6;95.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0015 - Disp: 13;15;RIC-0015;;;;;;;;Filtro abitacolo auto;6;;1;5;15;28.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0016 - Disp: 28;16;RIC-0016;;;;;;;;Filtro aria motore;7;;1;8;20;20.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0017 - Disp: 14;17;RIC-0017;;;;;;;;Filtro gasolio motore;7;;1;6;15;32.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0001 - Disp: 15;1;RIC-0001;;;;;;;;Filtro olio motore;1;;1;5;15;25.50;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0019 - Disp: 28;19;RIC-0019;;;;;;;;Grasso lubrificante universale;8;;3;8;25;12.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+Ric-776355 - Disp: 0;22;Ric-776355;0001310282E;AZIONAM KEB 5KV GDB1111;Record 242 TVN;AA1/014696;1;;;Inverter KEB F5;1;6;1;5;100;1500.00;4000.00;ESAU;articoli/2025/12/inverter_keb_img_dr-f5-d_1496_1920x1920_large.jpg;articoli/thumbnails/2025/12/inverter_keb_img_dr-f5-d_1496_1920x1920_thumb.jpg;VERO;2025-12-06 23:24:55;2025-12-14 21:34:27
+RIC-0010 - Disp: 15;10;RIC-0010;;;;;;;;Liquido freni DOT 4;4;;2;5;15;18.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0013 - Disp: 3;13;RIC-0013;;;;;;;;Motorino avviamento;5;;1;2;6;180.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0004 - Disp: 9;4;RIC-0004;;;;;;;;Olio cambio automatico;2;;2;5;20;22.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+RIC-0008 - Disp: 12;8;RIC-0008;;;;;;;;Pastiglie freno anteriori;4;;6;4;12;55.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+int8904 - Disp: 0;20;int8904;;;;;;;racc1456;Raccordo dritto da 8mm;9;;1;5;100;1.00;;DISP;;;VERO;2025-12-06 21:19:20;2025-12-06 21:19:20
+RIC-0002 - Disp: 3;2;RIC-0002;;;;;;;;Set 4 candele NGK;1;;5;3;10;45.00;;DISP;;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+Ric-000182 - Disp: 0;23;Ric-000182;0002756784F;;;;27;;;Soffietto cuffia 350;38;999;1;2;100;100.00;150.00;ESAU;;;VERO;2025-12-08 11:23:49;2025-12-14 21:34:41
+Ric679011 - Disp: 0;21;Ric679011;;;;;;;;Tubo rilsan da 4mm;9;;4;50;100;5.00;10.00;ESAU;;;VERO;2025-12-06 22:58:22;2025-12-06 22:58:22
+Ric-888555 - Disp: 0;27;Ric-888555;0002736370H;Valvola pneumax monostabile 24vdc;;;;;;Valvola pneumax monostabile 24vdc;14;1000;1;0;5;;;ESAU;articoli/2025/12/Valvola_pneumax_monostabile_24vdc_large.jpg;articoli/thumbnails/2025/12/Valvola_pneumax_monostabile_24vdc_thumb.jpg;VERO;2025-12-09 00:14:06;2025-12-14 21:34:49
+RiC-888999 - Disp: 0;26;RiC-888999;0123123120F;Valvola Pneumax 4l + 5o;;;;;;Valvola pneumax quella li dai;14;1000;1;0;100;250.00;450.00;ESAU;articoli/2025/12/Valvola_Canbus_Pneumax_large.jpg;articoli/thumbnails/2025/12/Valvola_Canbus_Pneumax_thumb.jpg;VERO;2025-12-08 23:30:34;2025-12-10 20:15:51

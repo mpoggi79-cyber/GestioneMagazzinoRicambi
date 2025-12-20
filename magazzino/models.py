@@ -180,35 +180,53 @@ class Categoria(models.Model):
 # 2. UNITÀ DI MISURA - Standardizzazione delle unità
 # ============================================================================
 
-class UnitaMisura(models.Model):
-    """Unità di misura standard per i ricambi"""
+class TbUnitaMisura(models.Model):
+    """Unità di misura per articoli e prestazioni"""
     
-    id_unita = models.AutoField(primary_key=True, db_column='id_unita')
-    codice = models.CharField(
-        max_length=10,
-        unique=True,
-        verbose_name=_('Codice'),
-        help_text=_('Codice univoco (es. pz, kg, mt, lt)')
-    )
-    descrizione = models.CharField(
+    id_unita_misura = models.AutoField(primary_key=True, db_column='idUnitaMisura')
+    denominazione = models.CharField(
         max_length=50,
-        verbose_name=_('Descrizione'),
-        help_text=_('Descrizione estesa dell\'unità')
+        verbose_name=_('Denominazione'),
+        help_text=_('Nome breve unità (es. Ore, gg, km, Pz)')
     )
-    stato_attivo = models.BooleanField(default=True, verbose_name=_('Stato Attivo'))
+    denominazione_stampa = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name=_('Denominazione Stampa'),
+        help_text=_('Descrizione completa per stampe (es. "per Ora o frazione")')
+    )
+    stato_attivo = models.BooleanField(
+        default=True,
+        verbose_name=_('Stato Attivo')
+    )
+    creato_il = models.DateTimeField(
+        auto_now_add=True,
+        db_column='creato_il',
+        blank=True,
+        null=True
+    )
+    modificato_il = models.DateTimeField(
+        auto_now=True,
+        db_column='modificato_il',
+        blank=True,
+        null=True
+    )
     
     class Meta:
-        db_table = 'unita_misura'
-        ordering = ['descrizione']
+        db_table = 'tbUnitaMisura'
+        ordering = ['denominazione']
         indexes = [
-            models.Index(fields=['codice']),
+            models.Index(fields=['denominazione']),
             models.Index(fields=['stato_attivo']),
         ]
         verbose_name = _('Unità di Misura')
         verbose_name_plural = _('Unità di Misura')
     
     def __str__(self):
-        return f"{self.codice} - {self.descrizione}"
+        if self.denominazione_stampa:
+            return f"{self.denominazione} - {self.denominazione_stampa}"
+        return self.denominazione
 
 
 # ============================================================================
@@ -495,10 +513,11 @@ class PezzoRicambio(models.Model):
         help_text=_('Fornitore associato al prezzo di acquisto')
     )
     unita_misura = models.ForeignKey(
-        UnitaMisura,
+        TbUnitaMisura,
         on_delete=models.PROTECT,
         verbose_name=_('Unità di Misura'),
-        db_column='id_unita_misura'
+        db_column='idUnitaMisura',
+        related_name='pezzi_ricambio'
     )
     giacenza_minima = models.IntegerField(
         default=5,
@@ -1088,3 +1107,167 @@ class AzioneUtente(models.Model):
     
     def __str__(self):
         return f"{self.username} - {self.get_tipo_azione_display()} ({self.data_azione.strftime('%d/%m/%Y')})"
+
+
+# ============================================================================
+# SEZIONE CLIENTI E FATTURAZIONE - Nuove tabelle da CSV
+# ============================================================================
+
+class TbAppellativo(models.Model):
+    """Tipi di appellativo per contatti (Sig., Dott., Prof., etc.)"""
+    
+    id_appellativo = models.AutoField(
+        primary_key=True,
+        db_column='idAppellativo'
+    )
+    descrizione = models.CharField(
+        max_length=50,
+        db_column='Descrizione',
+        verbose_name=_('Descrizione'),
+        help_text=_('Appellativo (es: Sig., Dott., Prof.)')
+    )
+    
+    class Meta:
+        db_table = 'tbAppellativo'
+        ordering = ['id_appellativo']
+        verbose_name = _('Appellativo')
+        verbose_name_plural = _('Appellativi')
+    
+    def __str__(self):
+        return self.descrizione
+
+
+class TbCategoriaIVA(models.Model):
+    """Categorie IVA per applicazione aliquote fiscali"""
+    
+    id_categoria_iva = models.AutoField(
+        primary_key=True,
+        db_column='idCategoriaIVA'
+    )
+    nome_categoria = models.CharField(
+        max_length=100,
+        db_column='NomeCategoria',
+        verbose_name=_('Nome Categoria'),
+        help_text=_('Nome categoria IVA (es: Manodopera, Ricambi)')
+    )
+    valore_iva = models.DecimalField(
+        max_digits=5,
+        decimal_places=3,
+        db_column='ValoreIVA',
+        verbose_name=_('Valore IVA'),
+        help_text=_('Aliquota IVA (es: 0.22 = 22%, 0 = esente)')
+    )
+    
+    class Meta:
+        db_table = 'tbCategoriaIVA'
+        ordering = ['nome_categoria']
+        verbose_name = _('Categoria IVA')
+        verbose_name_plural = _('Categorie IVA')
+    
+    def __str__(self):
+        return f"{self.nome_categoria} ({self.valore_iva * 100}%)"
+    
+    def get_percentuale_iva(self):
+        """Restituisce percentuale IVA formattata"""
+        return f"{self.valore_iva * 100:.1f}%"
+
+
+class TbCategorieTariffe(models.Model):
+    """Categorie di tariffe per clienti (assistenza, produzione, etc.)"""
+    
+    id_categorie_tariffe = models.AutoField(
+        primary_key=True,
+        db_column='idCategorieTariffe'
+    )
+    categoria_tariffe = models.CharField(
+        max_length=200,
+        db_column='CategoriaTariffe',
+        verbose_name=_('Categoria Tariffe'),
+        help_text=_('Nome categoria (es: Assistenza lunga per cliente generico)')
+    )
+    is_visible = models.BooleanField(
+        default=True,
+        db_column='IsVisible',
+        verbose_name=_('Visibile'),
+        help_text=_('Visibilità tariffa (attiva/nascosta)')
+    )
+    
+    class Meta:
+        db_table = 'tbCategorieTariffe'
+        ordering = ['categoria_tariffe']
+        verbose_name = _('Categoria Tariffa')
+        verbose_name_plural = _('Categorie Tariffe')
+    
+    def __str__(self):
+        status = "✓" if self.is_visible else "✗"
+        return f"{status} {self.categoria_tariffe}"
+
+
+class TbTipoPagamento(models.Model):
+    """Tipi di pagamento con scadenze (Bonifico 30gg, 60gg, RI.BA., etc.)"""
+    
+    id_tipo_pagamento = models.AutoField(
+        primary_key=True,
+        db_column='idTipoPagamento'
+    )
+    descrizione = models.CharField(
+        max_length=200,
+        verbose_name=_('Descrizione'),
+        help_text=_('Descrizione (es: Bonifico 30 gg D.F.)')
+    )
+    data_rif_scad = models.CharField(
+        max_length=50,
+        db_column='DataRifScad',
+        verbose_name=_('Riferimento Scadenza'),
+        help_text=_('DF=data fattura, FM=fine mese')
+    )
+    giorni_data_rif = models.IntegerField(
+        db_column='GiorniDataRif',
+        verbose_name=_('Giorni da Data Riferimento'),
+        help_text=_('Giorni da aggiungere per scadenza')
+    )
+    giorno_addebito = models.IntegerField(
+        db_column='GiornoAddebito',
+        verbose_name=_('Giorno Addebito'),
+        help_text=_('Giorno specifico addebito (0=nessuno)')
+    )
+    
+    class Meta:
+        db_table = 'tbTipoPagamento'
+        ordering = ['descrizione']
+        verbose_name = _('Tipo Pagamento')
+        verbose_name_plural = _('Tipi Pagamento')
+    
+    def __str__(self):
+        return self.descrizione
+    
+    def get_descrizione_scadenza(self):
+        """Restituisce descrizione dettagliata scadenza"""
+        rif = "data fattura" if self.data_rif_scad == "DF - data fattura" else "fine mese"
+        if self.giorni_data_rif > 0:
+            return f"{self.giorni_data_rif} giorni da {rif}"
+        return rif
+
+
+class TbModalitaPagamento(models.Model):
+    """Modalità di pagamento (Assegno, Bonifico, Contanti, etc.)"""
+    
+    id_modalita_pagamento = models.AutoField(
+        primary_key=True,
+        db_column='idModalitaPagamento'
+    )
+    nome = models.CharField(
+        max_length=100,
+        db_column='Nome',
+        verbose_name=_('Nome'),
+        help_text=_('Descrizione modalità (es: Bonifico bancario)')
+    )
+    
+    class Meta:
+        db_table = 'tbModalitaPagamento'
+        ordering = ['nome']
+        verbose_name = _('Modalità Pagamento')
+        verbose_name_plural = _('Modalità Pagamento')
+    
+    def __str__(self):
+        return self.nome

@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import (
     Categoria,
-    UnitaMisura,
+    TbUnitaMisura,
     Fornitore,
     ModelloMacchinaSCM,
     MatricolaMacchinaSCM,
@@ -45,15 +45,20 @@ class CategoriaAdmin(admin.ModelAdmin):
 # UNITÀ DI MISURA
 # ============================================================================
 
-@admin.register(UnitaMisura)
-class UnitaMisuraAdmin(admin.ModelAdmin):
-    list_display = ('codice', 'descrizione', 'stato_attivo')
-    list_filter = ('stato_attivo',)
-    search_fields = ('codice', 'descrizione')
+@admin.register(TbUnitaMisura)
+class TbUnitaMisuraAdmin(admin.ModelAdmin):
+    list_display = ('id_unita_misura', 'denominazione', 'denominazione_stampa', 'stato_attivo', 'creato_il')
+    list_filter = ('stato_attivo', 'creato_il')
+    search_fields = ('denominazione', 'denominazione_stampa')
+    readonly_fields = ('creato_il', 'modificato_il')
     
     fieldsets = (
         (_('Informazioni Generali'), {
-            'fields': ('codice', 'descrizione', 'stato_attivo')
+            'fields': ('denominazione', 'denominazione_stampa', 'stato_attivo')
+        }),
+        (_('Timestamp'), {
+            'fields': ('creato_il', 'modificato_il'),
+            'classes': ('collapse',)
         }),
     )
 

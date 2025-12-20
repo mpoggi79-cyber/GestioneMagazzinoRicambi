@@ -27,7 +27,7 @@ from .forms import (
     MovimentoMagazzinoForm, InventarioForm
 )
 from .models import (
-    Categoria, UnitaMisura, Fornitore, PezzoRicambio, 
+    Categoria, TbUnitaMisura, Fornitore, PezzoRicambio, 
     Giacenza, MovimentoMagazzino, Inventario, DettaglioInventario
 )
 from accounts.models import RuoloUtente
@@ -1919,7 +1919,7 @@ def get_articolo_giacenza(request, articolo_id):
                 'impegnata': giacenza.quantita_impegnata or 0,
                 'prenotata': giacenza.quantita_prenotata or 0,
                 'descrizione': articolo.descrizione,
-                'unita_misura': articolo.unita_misura.codice if articolo.unita_misura else 'pz'
+                'unita_misura': articolo.unita_misura.denominazione if articolo.unita_misura else 'N/D'
             }
         else:
             data = {
@@ -1928,7 +1928,7 @@ def get_articolo_giacenza(request, articolo_id):
                 'impegnata': 0,
                 'prenotata': 0,
                 'descrizione': articolo.descrizione,
-                'unita_misura': articolo.unita_misura.codice if articolo.unita_misura else 'pz'
+                'unita_misura': articolo.unita_misura.denominazione if articolo.unita_misura else 'N/D'
             }
         
         return JsonResponse(data)

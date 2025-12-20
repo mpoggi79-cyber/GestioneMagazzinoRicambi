@@ -52,7 +52,7 @@
                     </dd>
 
                     <dt class="col-sm-4">Quantità:</dt>
-                    <dd class="col-sm-8"><strong>{{ movimento.quantita }} {{ movimento.articolo.unita_misura.codice }}</strong></dd>
+                    <dd class="col-sm-8"><strong>{{ movimento.quantita }} {{ movimento.articolo.unita_misura.denominazione }}</strong></dd>
 
                     <dt class="col-sm-4">Fornitore:</dt>
                     <dd class="col-sm-8">
@@ -104,7 +104,7 @@
                 <small class="text-muted">
                     Codice: <strong>{{ movimento.articolo.codice_interno }}</strong><br>
                     Categoria: <strong>{{ movimento.articolo.categoria.nome_categoria }}</strong><br>
-                    Unità: <strong>{{ movimento.articolo.unita_misura.descrizione }}</strong>
+                    Unità: <strong>{{ movimento.articolo.unita_misura.denominazione }}</strong>
                 </small>
             </div>
         </div>

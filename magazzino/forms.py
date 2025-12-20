@@ -428,6 +428,8 @@ class PezzoRicambioForm(forms.ModelForm):
         self.fields['unita_misura'].widget.attrs.update({
             'class': 'form-select',
         })
+        self.fields['unita_misura'].label = _('Unità di Misura')
+        self.fields['unita_misura'].required = True
         
         # Giacenze
         for field in ['giacenza_minima', 'giacenza_massima']:

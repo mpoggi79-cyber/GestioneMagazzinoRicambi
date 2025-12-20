@@ -1,0 +1,8 @@
+id_fornitore;ragione_sociale;indirizzo;citta;cap;provincia;telefono;email;partita_iva;tempo_medio_consegna_giorni;note;stato_attivo;creato_il;modificato_il
+1;BOSCH Italia S.p.A.;Via Roma 100, Milano;Milano;;;+39 02 1234 5678;ordini@bosch.it;00000000123;7;Bravi ma cari;VERO;2025-11-30 19:51:08;2025-11-30 21:26:38
+4;BREMBO S.p.A.;Via Brembo 25, Bergamo;;;;+39 035 215 6111;vendite@brembo.it;00000000400;7;;FALSO;2025-11-30 19:51:08;2025-11-30 23:21:18
+5;CONTINENTAL AG;Via Europa 1, Bologna;;;;+39 051 542 5000;info@continental.com;00000000500;7;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+6;Hiteco;Via Marchiese;Villa Verucchio;;RN;0541746111;info@hiteco.com;non ricordo;7;;VERO;2025-11-30 21:24:56;2025-11-30 23:20:54
+2;MAGNETI MARELLI S.p.A.;Via Verdi 50, Torino;;;;+39 011 234 5678;info@magnetimarelli.it;00000000200;7;;VERO;2025-11-30 19:51:08;2025-11-30 19:51:08
+999;Non Specificato;;;;;;;;0;Fornitore generico usato quando si elimina un fornitore con articoli associati. NON ELIMINARE.;VERO;2025-11-30 22:53:05;2025-11-30 22:53:05
+1000;Pneumaticenter;Via non mi ricordo;Santarcangelo;47777;RN;+3977888888;info@pneumaticenter.it;1234567890;7;ciao;VERO;2025-12-06 21:24:11;2025-12-09 00:09:42

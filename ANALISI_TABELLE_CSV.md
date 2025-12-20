@@ -2,7 +2,20 @@
 **Data analisi**: 20 Dicembre 2025  
 **Totale tabelle**: 13  
 **Separatore CSV**: `;` (punto e virgola)  
-**Ultima modifica**: Aggiunta tbUnitaMisura, eliminata tbDettaglioCategorieTariffe
+**Encoding**: UTF-8-sig (con BOM)
+**Ultima modifica**: Aggiornamento tbUnitaMisura (14 righe), unita_misura ELIMINATA dal database
+
+---
+
+## ⚠️ IMPORTANTE: Tabella tbUnitaMisura
+
+**Status**: ✅ **IMPLEMENTATA NEL DATABASE** (tabella `tbunitamisura`)  
+**Modello Django**: `TbUnitaMisura` (magazzino/models.py)  
+**Migration**: 0011, 0012, 0013, 0014 applicate  
+**Data attivazione**: 20/12/2025  
+**Righe attuali**: **14** (include unità per prestazioni E articoli)
+
+La tabella `tbunitamisura` è ora l'UNICA tabella per unità di misura del sistema, sostituendo definitivamente la vecchia `unita_misura` (eliminata dal database).
 
 ---
 
@@ -19,17 +32,17 @@
 
 ---
 
-## 2️⃣ tbCategoriaDettaglio
+## 2️⃣ tbCategoriaIVA
 
-**Descrizione**: Categorie di dettaglio per tariffe (Manodopera, Rimborso spese, Ricambi)  
-**Nome Tabella**: `tbCategoriaDettaglio`  
+**Descrizione**: Categorie IVA per applicazione aliquote fiscali su prestazioni/servizi  
+**Nome Tabella**: `tbCategoriaIVA`  
 **Righe dati**: 7
 
 | Colonna | Tipo | Formato | Chiave | Descrizione |
 |---------|------|---------|--------|-------------|
-| idCategoriaDettaglio | INT | Numerico | **PK** | ID univoco categoria dettaglio |
+| idCategoriaIVA | INT | Numerico | **PK** | ID univoco categoria IVA |
 | NomeCategoria | VARCHAR(100) | Testo | - | Nome categoria (es: "Manodopera", "Ricambi") |
-| IVA | DECIMAL(5,3) | Percentuale | - | Aliquota IVA (es: 0.22 = 22%, 0 = esente) |
+| ValoreIVA | DECIMAL(5,3) | Percentuale | - | Aliquota IVA (es: 0.22 = 22%, 0 = esente) |
 
 ---
 
@@ -169,7 +182,7 @@
 | idUnitaMisura | INT | Numerico | **FK** | → tbUnitaMisura |
 | PrezzoUnitario | DECIMAL(10,2) | Decimale | - | Prezzo unitario |
 | idCategorieTariffe | INT | Numerico | **FK** | → tbCategorieTariffe |
-| idCategoriaDettaglio | INT | Numerico | **FK** | → tbCategoriaDettaglio |
+| idCategoriaIVA | INT | Numerico | **FK** | → tbCategoriaIVA |
 | VisualizzaPreventivo | BOOLEAN | VERO/FALSO | - | Mostra in preventivo |
 | OrdineStampa | INT | Numerico | NULL | Ordine visualizzazione stampa |
 
@@ -218,26 +231,62 @@
 
 ---
 
-## 1️⃣3️⃣ tbUnitaMisura ✅ NUOVA
+## 1️⃣3️⃣ tbUnitaMisura ✅ ATTIVA NEL DATABASE
 
-**Descrizione**: Unità di misura per prestazioni/servizi  
-**Nome Tabella**: `tbUnitaMisura`  
-**Righe dati**: 8
+**Descrizione**: Unità di misura per prestazioni/servizi E articoli magazzino  
+**Nome Tabella**: `tbUnitaMisura` (database: `tbunitamisura`)  
+**Modello Django**: `TbUnitaMisura`  
+**File CSV**: `tbUnitaMisura.csv`  
+**Righe dati CSV**: 14 (include 6 unità per articoli + 8 unità per prestazioni)
+
+### 📋 Struttura Colonne
 
 | Colonna | Tipo | Formato | Chiave | Descrizione |
 |---------|------|---------|--------|-------------|
-| idUnitaMisura | INT | Numerico | **PK** | ID univoco unità misura |
-| Denominazione | VARCHAR(50) | Testo | - | Nome unità (es: "Ore", "gg", "km") |
-| DenominazioneStampa | VARCHAR(100) | Testo | NULL | Testo descrittivo per stampa (es: "per Ora o frazione") |
+| idUnitaMisura | INT | Numerico | **PK** | ID univoco unità misura (case-sensitive: idUnitaMisura) |
+| Denominazione | VARCHAR(50) | Testo | - | Nome unità breve (es: "Ore", "Pz", "km") |
+| DenominazioneStampa | VARCHAR(100) | Testo | NULL | Testo descrittivo esteso per stampa |
+| stato_attivo | BOOLEAN | VERO/FALSO | - | Unità attiva (default: VERO) |
+| creato_il | DATETIME | Data/Ora | auto_now_add | Timestamp creazione record |
+| modificato_il | DATETIME | Data/Ora | auto_now | Timestamp ultima modifica |
 
-**Valori presenti**:
-- 1: Num. (Numero/Forfait)
-- 2: km (per Chilometro)
-- 3: gg (per Giornata)
-- 4: Ore (per Ora o frazione)
-- 5: Kg (Kilogrammi)
-- 7: Day (Daily - inglese)
-- 8: Hour (Hour or fraction - inglese)
+### 📊 Dati Completi (14 unità)
+
+| ID | Denominazione | DenominazioneStampa | Categoria | Note |
+|----|---------------|---------------------|-----------|------|
+| 1  | Num.    | Num.                                 | Prestazione     | Forfait/Numero |
+| 2  | km      | per Chilometro - per kilometer       | Prestazione     | Viaggi/distanze |
+| 3  | gg      | per Giornata - per Day | Prestazione | Giornate lavoro |
+| 4  | **Ore** | per Ora o frazione                   | **Prestazione** | **Manodopera oraria** |
+| 5  | Kg      | Kg                                   | Articolo | Peso |
+| 7  | Day     | Daily                                | Prestazione | Giorni (EN) |
+| 8  | Hour    | Hour or fraction | Prestazione       | Ore (EN) |
+| 9  | **Pz**  | Pezzi                                | **Articolo** | **Articoli contati** (da vecchio ID 1) |
+| 10 | Lt      | Litri                                | Articolo | Liquidi (da vecchio ID 2 "L") |
+| 11 | Mt      | Metri                                | Articolo | Lunghezze (da vecchio ID 4) |
+| 12 | Set     | Set oppure Kit                       | Articolo | Kit (da vecchio ID 5) |
+| 13 | Coppia  | Coppia                               | Articolo | Coppie (da vecchio ID 6) |
+| 14 | Conf    | Confezione                           | Articolo | Confezioni (da vecchio ID 7) |
+
+### 🔗 Foreign Key - Referenziata da:
+
+1. **pezzi_ricambio.idUnitaMisura** (magazzino esistente)  
+   - Campo modello: `unita_misura`  
+   - db_column: `idUnitaMisura`  
+   - Usa ID: 5, 9, 10, 11, 12, 13, 14
+
+2. **tbPrestazioni.idUnitaMisura** (da implementare)  
+   - Usa principalmente ID: 1, 2, 3, 4, 7, 8
+
+### ✅ Implementazione Completata
+
+**Migrations applicate**:
+- `0011_alter_unitamisura_options_tbunitamisura.py` - Creazione tabella tbunitamisura
+- `0012_pezzoricambio_tb_unita_misura_and_more.py` - Aggiunta campo transitorio
+- `0013_mappa_unita_misura_vecchie_a_nuove.py` - Mappatura dati vecchi→nuovi ID
+- `0014_usa_solo_tbunitamisura.py` - Rimozione campo transitorio, eliminazione UnitaMisura
+
+**Status**: ✅ ATTIVA - Unica tabella unità misura del sistema dal 20/12/2025
 
 ---
 
@@ -254,17 +303,23 @@
 | **tbContatti** | Appellativo | → tbAppellativo | idAppellativo |
 | **tbPrestazioni** | idUnitaMisura | → tbUnitaMisura | idUnitaMisura |
 | **tbPrestazioni** | idCategorieTariffe | → tbCategorieTariffe | idCategorieTariffe |
-| **tbPrestazioni** | idCategoriaDettaglio | → tbCategoriaDettaglio | idCategoriaDettaglio |
+| **tbPrestazioni** | idCategoriaIVA | → tbCategoriaIVA | idCategoriaIVA |
+| **pezzi_ricambio** | idUnitaMisura | → tbUnitaMisura | idUnitaMisura |
 
 ---
 
 ## ✅ TUTTI I PROBLEMI RISOLTI
 
-### 1. **Naming Inconsistente PK in tbCategorieTariffe**
+### 1. **tbUnitaMisura - IMPLEMENTATA ✅**
+**Problema**: Mancava nel database magazzino, usava vecchia tabella `unita_misura` con solo 7 unità  
+**Azione**: ✅ **COMPLETATO** - Creata `tbunitamisura` con 14 unità (prestazioni + articoli)  
+**Status**: Migrations 0011-0014 applicate, vecchia tabella `unita_misura` ELIMINATA
+
+### 2. **Naming Inconsistente PK in tbCategorieTariffe**
 **Problema**: La PK si chiama `idCategorieTariffe` ma in alcune referenze storiche era chiamata `idTariffe`  
 **Azione**: ✅ RISOLTO - tbPrestazioni ora usa correttamente `idCategorieTariffe`
 
-### 2. **tbContatti.Appellativo**
+### 3. **tbContatti.Appellativo**
 **Problema**: Contiene valori INT (0-7) ma non era FK formale  
 **Azione**: ✅ RISOLTO - Ora è FK formale a tbAppellativo
 
@@ -274,20 +329,61 @@
 
 ## ✅ Problemi Risolti
 
-1. **tbUnitaMisura CREATA** - Aggiunta con 8 unità di misura
+1. **tbUnitaMisura IMPLEMENTATA ✅** - Creata con **14 unità** (prestazioni + articoli), vecchia `unita_misura` ELIMINATA dal database
 2. **tbDettaglioCategorieTariffe ELIMINATA** - Era duplicato di tbPrestazioni
 3. **tbPrestazioni.idCategoriaProdotto RISOLTO** - Ora usa correttamente `idCategorieTariffe`
 4. **tbContatti.Appellativo** - Impostato come FK formale a tbAppellativo
+5. **tbCategoriaDettaglio RINOMINATA** - Ora `tbCategoriaIVA` con campo `ValoreIVA` per aliquote
 
 ---
 
-# 🎯 PROSSIMI STEP
+# 📂 STATUS FILE CSV
 
-1. ✅ **tbUnitaMisura** - Creata e popolata
-2. ✅ **tbPrestazioni** - FK corrette (idCategorieTariffe + idCategoriaDettaglio + idUnitaMisura)
-3. ✅ **tbDettaglioCategorieTariffe** - Eliminata (duplicato)
-4. ✅ **tbContatti.Appellativo** - Impostato come FK formale a tbAppellativo
-5. 🏗️ **Generare modelli Django** - Struttura confermata e completa, pronta per codice
+## Tabelle da Implementare (11 rimanenti)
+
+| # | File CSV                 | Righe   | Priorità | Dipendenze |
+|---|--------------------------|---------|----------|------------|
+| 1 | tbAppellativo.csv        | 7       | Alta     | Nessuna |
+| 2 | tbCategoriaIVA.csv       | 7       | Alta     | Nessuna |
+| 3 | tbCategoriaSpesa.csv     | 32      | Media    | Nessuna |
+| 4 | tbCategorieTariffe.csv   | 22      | Alta     | Nessuna |
+| 5 | **tbClienti.csv**        | **262** | **🔥 MASSIMA** | tbCategorieTariffe, tbTipoPagamento |
+| 6 | tbContatti.csv           | 299     | Alta     | tbClienti, fornitori, tbAppellativo |
+| 7 | tbModalitaPagamento.csv  | 8       | Bassa    | Nessuna |
+| 8 | **tbPrestazioni.csv**    | **142** | **🔥 MASSIMA** | tbUnitaMisura ✅, tbCategorieTariffe, tbCategoriaIVA |
+| 9 | tbRiferimentoSpesa.csv   | 21      | Bassa    | Nessuna |
+| 10 | tbStatoDocumenti.csv    | 7       | Media    | Nessuna |
+| 11 | tbTipoPagamento.csv     | 24     | Alta      | Nessuna |
+
+## ✅ Tabelle Implementate (1)
+
+| # | Tabella | Righe DB | Data Implementazione | Migration |
+|---|---------|----------|----------------------|-----------|
+| 1 | **tbUnitaMisura** | **14** | **20/12/2025** | **0011-0014** |
+
+---
+
+# 🎯 PROSSIMI STEP CONSIGLIATI
+
+### Ordine Implementazione Suggerito:
+
+1. **Fase 1 - Tabelle Base** (nessuna dipendenza):
+   - ✅ tbUnitaMisura (COMPLETATA)
+   - tbAppellativo
+   - tbCategoriaIVA
+   - tbCategorieTariffe
+   - tbTipoPagamento
+   - tbModalitaPagamento
+
+2. **Fase 2 - Tabelle Principali** (dipendono da Fase 1):
+   - **tbClienti** (dipende: tbCategorieTariffe, tbTipoPagamento)
+   - **tbPrestazioni** (dipende: tbUnitaMisura ✅, tbCategorieTariffe, tbCategoriaIVA)
+
+3. **Fase 3 - Tabelle Secondarie**:
+   - tbContatti (dipende: tbClienti, fornitori, tbAppellativo)
+   - tbCategoriaSpesa
+   - tbRiferimentoSpesa
+   - tbStatoDocumenti
 
 ---
 
