@@ -1,0 +1,262 @@
+﻿idClienti;Nominativo;RagioneSociale;PIVA;CodiceFiscale;ViaIndirizzo;NumeroIndirizzo;ComuneIndirizzo;ProvinciaIndirizzo;NazioneIndirizzo;CAP;WWW;idCategoriaTariffe 'FK';TariffaViaggioForfait;idTipoPagamento 'FK';Banca;IbanCode;CIN;ABI;CAB;ContoCorr;SDI;PEC;Note;NoteTariffe;TxtStampaConsuntivo;TxtStampaFatture
+4;SCM - Assistenza Pantografi;Scm Group s.p.a.;126480409;126480409;Via Emilia 71/77;71/77;Rimini;RN;Italia;47900;www.scmgroup.com;2;;11;;;;;;;;;;;Alla cortese attenzione di Alberto Fratti / Elisa Davoli;"---- IVA non applicata ai sensi dell'art. 8, c.1, l.c del D.P.R. 633/72 come da dichiarazione d'intento N°133 del 2018 con data 07/12/2017.
+---- Imposta di bollo assolta sull'esemplare in nostro possesso.
+---- Tariffe come da contratto numero CSAP-2018-010-AA1 stipulato con SCM Group spa"
+6;Kosmosoft;Kosmosoft s.r.l.;656675767;;Via Diaz, 25;4445;Suzzara;MN;Italia;46029;;6;;7;CREDEM;IT18H0303211500010000004086;H;3032;11500;10000004086;;;;;Alla cortese attenzione di Stefano Sganzerla;Tariffe come da CONTRATTO D’OPERA concordato tra le parti.
+7;SCM - Reparto produzione Rimini;Scm Group s.p.a.;126480409;126480409;Via Emilia 71/77;;Rimini;RN;Italia;47900;;4;;11;;;;;;;;;;;Alla cortese attenzione di Giovanni Riccatti e Morgan Coccia;"---- IVA non applicata ai sensi dell'art. 8, c.1, l.c del D.P.R. 633/72 come da dichiarazione d'intento N°133 del 2018 con data 07/12/2017.
+---- Imposta di bollo assolta sull'esemplare in nostro possesso.
+---- Tariffe come da contratto numero  CSAP-2016-004A  stipulato con SCM Group spa"
+8;SCM - Reparto commerciali;SCM Group s.p.a.;126480409;126480409;Via Emilia 71/77;;Rimini;RN;Italia;47900;;2;;11;;;;;;;;;;;;Tariffe come da preventivo numero .....
+9;Legnami Radis;Radis s.r.l;2141460390;2141460390;Via Faentina, 280;;San Michele;RA;Italia;48124;;1;;22;;;;;;;;;;;;
+10;Falegnameria Legno Quattro;Falegnameria Legno Quattro di Olla Mauro & C. s.n.c.;2308730924;;Strada Statale 126 Z.I. PIP;;Guspini;VS;Italia;9036;;1;;22;;;;;;;;;;;;Tariffe come da preventivo numero .....
+11;Falegnameria Vivere il Legno;Falegnameria Vivere il Legno di Mascia S. e Piras A. s.n.c.;2437620921;2437620921;Via G. Galilei, 26 (produzione Z.I. strada B3);;Villacidro;VS;Italia;;;1;1.970,00;31;;;;;;;;;;;;
+12;Manucci;Manucci s.n.c.;2093430409;;Via Due Ponti, 27;;Forli;FC;Italia;47122;;1;;6;;;;;;;;;CONTATTO FORNITO DA TECNOMAC          1° intervento il 03/03/2013;;;Tariffe come da preventivo numero .....
+13;Panas Spol s.r.o.;Panas Spol s.r.o.;CZ 45280401;;Jordánská 978;;Praha 14 - Kyje;;Repubblica Ceca;;;11;;22;;;;;;;;;;;Att. of Mr. Jan Mimra;
+14;Stanghellini Orazio;Stanghellini Bruno, Orazio, Nicola s.r.l.;2091660205;;Via G. Galilei, 12;;Guidizzolo;MN;Italia;46040;;8;;7;;;;;;;;;;;All'attenzione di Stanghellini Orazio e Nicola;
+15;Falegnameria Rigon;Falegnameria Rigon s.n.c.;217410240;217410240;Via S. Lucia, 64;;Marano Vicentino;VI;Italia;36035;;1;475;22;;;;;;;;;;;;Tariffe come da preventivo N° 28 del 04 marzo 2013
+18;Secam;Secam s.r.l.;3222040408;3222040408;Via Borgese, 7;;Rimini;RN;Italia;47923;;8;;7;;;;;;;;;;;Alla cortese attenzione del Sig. Ferri Nicolò;
+20;CS Legnami SA;CS Legnami SA;CHE-101.247.8;;Via Tamporiva, 14;;"Lugano (TI)
+
+Cod. IDI:  CHE-101,247,845";;Svizzera;6900;;1;;27;;;;;;;;;"SEDE OPERATIVA:   Zona industriale via Brusighel -  6807 Taverne (TI)    numero d’identificazione delle imprese CHE-101.247.845 Il codice IDI è stato inserito tra i dati generali cliente nel campo della ""Citta""";;;
+21;SCM - Ufficio tecnico Rimini;Scm Group s.p.a.;126480409;126480409;Via Emilia 71/77;;Rimini;RN;Italia;47900;;2;;22;;;;;;;;;;;All'attenzione di Matteo Villa;
+22;Baldin;Baldin s.r.l.;1266490240;;Via Piave, 7;;Sandrigo;VI;Italia;36066;;21;;7;;;;;;;;;;;Alla cortese attenzione di Chiara;
+23;Tecnomac;Tecnomac Group s.r.l.;4534160405;4534160405;Via F.lli Lumierè 41;;Forlì;FC;Italia;47121;;12;;11;;;;;;;SUBM70N;;;;Alla Cortese attenzione dei sigg. Amaducci e Mei;
+25;Falegnameria Masè;Falegnameria Masè Mirco;1299630226;MSAMCV68B17I975J;Via Molino, 10;;Strembo;TN;Italia;38080;;9;;18;;;;;;;;;;;All'attenzione del Sig. Mirco Masè;
+26;Fontemaggi;Fontemaggi s.r.l.;1817930405;1817930405;Via Consolare, 13;;Rimini;RN;Italia;47923;;9;;22;Unicredit spa - Agenzia di Rimini Viale Praga;IT30X0200824211000011044553;;;;;;;;;Alla cortese attenzione di Ivan Scanavino / Sauro Bertuccioli;
+27;Operas;Operas s.r.l.s.;1562010916;1562010916;Zona Industriale Lotto 13/14;;Siniscola;NU;Italia;8025;;9;850;7;;;;;;;;operas@pec.it;;Aggiungere il costo del traghetto;;
+28;Viva Engineering (PTY);Viva Steelfab Engineering (PTY) Ltd;4340237561;;68 Loper Avenue;;Spartan Kempton Park;;South Africa;;;9;;13;;;;;;;;;Cliente Autech ci ha contattati per chiave Hicam;;;
+29;Imballaggi Industriali;Imballaggi Industriali di Bombardini Renato & C. s.n.c.;707501201;535190391;Via Morandi, 10;;Toscanella di Dozza;BO;Italia;40060;;9;;7;;;;;;;;;;;;
+30;Falegnameria Ruzzon;Falegnameria Ruzzon;4585250287;;Via Palu' 57;;Conselve;PD;Italia;35026;;1;;31;;;;;;;;;;;;
+31;Tecnostrutture;Tecnostrutture s.r.l.;1743750224;1743750224;Via Fiamme Gialle, 36/C;;Predazzo;TN;Italia;38037;;9;;22;;;;;;;;;;;;
+33;Falegnameria Cicuti;FALEGNAMERIA CICUTI di Cicuti Massimo;1698760186;CCTMSM71P19I968Y;Strada Pavese, 64;;Broni;PV;Italia;27043;;1;450;7;;;;;;;;;;;;
+34;Amici Atos;AMICI ATOS DI AMICI DANIELE e C. s.n.c.;1449030392;1449030392;Via Cella, 575/b;;Carraie;RA;Italia;48125;;1;;7;;;;;;;;;;;;
+35;Frekhaug Vinduet;Frekhaug Vinduet AS;;;Mjåtveitflaten 11;;Frekhaug;;Norway;5918;;1;;22;;;;;;;;;;;;"Fuori Campo Iva Art. 7 ter Dpr 63372
+
+Contact person: Ståle Sveen
+Phone Number: +47 56 17 44 40"
+36;Effedi Salotti;Effedi Salotti di Farneti Danilo;1799520406;;Via Sacco e Vanzetti, 47/B;;Castrocaro Terme e Terra del Sole;FC;Italia;47011;;9;;7;;;;;;;;;Codice univoco: W7YVJK9;;;
+37;Chiorlin;Chiorlin Arturo s.n.c.;IT02348770963;IT02348770963;Viale Lombardia, 68;;Limbiate;MB;Italia;20812;;1;;31;;;;;;;;;;;;
+38;Falcon;Falcon s.r.l.;1176810396;;Via degli Artigiani;;Savio di Ravenna;RA;Italia;;;9;;22;;;;;;;;;;;;
+39;Falegnameria De Monte;DE MONTE Gabriele;2948520305;DMNGRL69T27Z133A;Via Casali Savonitti, 4;;Artegna;UD;Italia;33011;;1;;13;BCC Primacassa FVG - Buia (UD);IT30U0863763680000023048788;U;8637;63680;23048788;;;;;;
+40;Scarabelli Giacomo;Scarabelli Giacomo Falegnameria;404081200;;Via Ghiaradino, 8;;Granarolo dell'Emilia;BO;Italia;40057;;9;;22;;;;;;;;;;;;
+41;Rogiers;Rogiers - Vanpoucke NV;;;Henri Lebbestraat, 150;;Waregem;BE;Belgium;8790;;11;;29;;;;;;;;;"
+Rogiers - Vanpoucke NV
+
+Henri Lebbestraat 150
+BE-8790 Waregem
+T +32 56 60 13 45
+F +32 (0)56 60 74 76
+E info@rogiers.be";;;
+42;M&P di Marchi Gianluca;M & P di Marchi Gianluca;4147170403;MRCGLC67T06G755O;Via Falcone Borsellino, 21;;Poggio Torriana;RN;Italia;47824;;13;;22;;;;;;;;;;;;
+43;Ori e Bonetti;Ori & Bonetti s.r.l.;102440195;;Via Oglio, 4;;Cicognolo;CR;Italia;26030;;1;;31;;;;;;;;;;;;
+44;SCM - Component (Hiteco);Scm Group s.p.a.;126480409;126480409;Via Emilia 71/77;;Rimini;RN;Italia;47900;;2;;22;;;;;;;;;Inviare a Fornitori@scmgroup.com;;;"---- IVA non applicata ai sensi dell'art. 8, c.1, l.c del D.P.R. 633/72 come da dichiarazione d'intento N°133 del 2018 con data 07/12/2017.
+---- Imposta di bollo assolta sull'esemplare in nostro possesso."
+46;Paletti Infissi;Paletti Infissi s.r.l.;1906780661;;Via Circonfucense, 167;;Trasacco;AQ;Italia;67059;;1;;31;;;;;;;;;;;;
+47;Sdruccioli Veneer;Sdruccioli Veneer s.r.l.;331450429;331450429;Via dell'Artigianato;;Ostra;AN;Italia;60010;;9;170;33;Cred.Coop.di Ostra e Morro - Ag. Ostra;IT73G0870437500000010119292;G;8704;37500;10119292;;;;;;
+48;De Giorgi;De Giorgi s.r.l.;4472070756;4472070756;Via Trento, 12;;Surbo;LE;Italia;73100;;9;1.500,00;13;;;;;;;KRRH6B9;;;;;
+49;Falegnameria Ortenzi;Falegnameria Ortenzi di Francesco Ortenzi & C. s.n.c.;;;Via Mariano Guzzini;;Recanati;MC;Italia;62019;;9;;31;;;;;;;;;;;;
+50;SCM USA Atlanta;SCM Group North America Inc.;58-2664474;;2475A Satellite Blvd.;;Duluth;GA;USA;30096;;14;;22;;;;;;;;;;;;Fuori Campo Iva Art. 7 ter Dpr 63372
+51;Falegnameria Di Biase;Falegnameria Di Biase s.r.l.;1714440698;;Via San Antonio, 109;;Ari;CH;Italia;66010;;9;;7;BCC Sangro Teatina Filiale di Giuliano Teatino;IT06P0896877720000050302195;P;8968;77720;50302195;;;;;;
+52;ES - Elettronica Sammarinese;Scm Industria s.p.a.;COE  SM00261;;Strada degli Angariari;;Falciano;;Repubblica di San marino;47891;;2;;11;;;;;;;;;;;"All'attenzione del sig.
+Medoro Bicchierini";
+53;MIT;MIT s.r.l.;1512450436;;Via Soprani - Z.I. Squartabue;;Recanati;MC;Italia;62019;;21;;22;;;;;;;;;;Tariffa forfettaria per intervento a Mondolfo 500,00€/die tutto incluso;Alla cortese attenzione del Sig. Bono Marino;
+54;Tecnodam;TecnoDam s.r.l.;;;;;;;;;;1;;31;;;;;;;;;;;;
+55;D&M rivenditore Pesaro;D&M s.r.l.;1452560418;;Piazzale Mario Coralloni, 13;;Pesaro;PU;Italia;61122;;8;;7;;;;;;;;;;;"Alla cortese attenzione
+Sig. Paola";
+56;Borgo Antico;Borgo Antico s.r.l.;1544800434;;Via dell'Industria, 4;;Treia;MC;Italia;62010;;9;;22;;;;;;;;;;;;
+57;Attilio Gori;Attilio Gori s.r.l.;369580519;369580519;C.S. 66/B;;Terontola di Cortona;AR;Italia;52044;;8;;22;;;;;;;;;"Invio tariffe 26/09/2016. (mai fatti interventi diretti per lui).
+Invio tariffe 24/04/2019: concessionari e privati.";;;
+58;Gemma Group;Gemma Group s.r.l.;245400403;245400403;Via D. Alighieri, 6;;Coriano;RN;Italia;47825;;15;;22;;;;;;;;;;;Alla cortese attenzione del Sig. Rosati;
+59;Pavarini Macchine;Pavarini Macchine s.r.l.;665150363;;Via Lama Quartirolo, 48/b;;Carpi;MO;Italia;41012;;8;;7;;;;;;;;;;;"Alla cortese attenzione
+Sig. Massimo
+Sig.na Annalita";
+60;Archilegno di Antioco Piras;Archilegno di Antioco Piras;3676440922;PRSNTC64L17L924P;Z.I. Strada C7;;Villacidro;VS;Italia;9039;;1;;13;;;;;;;;;;;;
+61;Claudio Conforto;Claudio Conforto;0;;;;;;;;;8;;31;;;;;;;;;;;;
+62;DVC di Valerio Consolati;Falegnameria DVC di Valerio Consolati;4384880235;CNSVLR79D03G489A;Via Gardesana, 166;;Malcesine;VR;Italia;37018;;8;650;22;Banco Popolare socetà cooperativa;IT53B0503459550000000000422;B;5034;59550;422;;;SDI= 596NUAX;;;
+63;Poliarredo;Poliarredo s.n.c.;1218630760;;Zona Paip, lotto 6/A;;Oppido Lucano;PZ;Italia;85015;;18;900;35;BCC di Oppido Lucano e Ripacandida;IT42M0870842140000100301830;M;8708;42140;100301830;;;;;"Alla cortese attenzione
+Sig. Grimaldi Saverio";
+64;Emmedue Automazioni;Industrie Montanari s.r.l.;COE SM04951;;Via Fondo Ausa, 23;;San Marino;SM;Repubblica di San Marino;47890;;16;;11;;;;;;;;;;;Alla cortese attenzione di. Christian Montanari e Roberta Verzicco;Fuori Campo Iva Art. 7 ter Dpr 63372
+65;Emmelle;Emmelle di Montali Romeo;1948860406;MNTRMO56B22I304O;Via Molino Vigne, 3;;Poggio Torriana;RN;Italia;47825;;1;;13;;;;;;;;;;;;
+66;CTC - Routech;CTC s.r.l. - ROUTECH;00749270526​;00749270526​;Via delle Prata, 169;;Sinalunga;SI;Italia;53048;;17;;11;;;;;;;;;"Per invio fatture a fine mese usare i seguenti indirizzi:
+a: fatture_ctc@scmgroup.com
+cc: gcavallini@scmgroup.com
+cc: alucaroni@scmgroup.com";"- Interventi estero Europa: rimborso standard per vitto e alloggio.
+- Tariffa straordinario applicata dopo le 10h.
+- Ore massime giornaliere fatturabili 12h.";Alla cortese attenzione di Gianluca Cavallini e Alice Lucaroni;
+67;​Viru Trade Estonia;​VIRU TRADE EXPERT OÜ;EE101647980;;26 Juuli 11-12;;Narva;;Estonia;20207;;9;;13;;;;;;;;;;;;Iva non imponibile Art. 41 DL 331 del 1993
+68;Zanni;Zanni s.r.l. produzione infissi in legno;1982710350;1982710350;Via G. Di Vittorio, 40/A;;Castelnovo Ne' Monti;RE;Italia;42035;;1;;31;;;;;;;;;;;;
+69;Falegnameria Gasparon;Falegnameria Gasparon s.n.c.;214280240;;Via Botticelli, 4;;Bolzano Vicentino;VI;Italia;36050;;1;475;13;;;;;;;;;;;;
+70;Zandoli Italo rottami ferrosi;Zandoli Italo;2288480409;;Via Loreto, 4;;Gambettola;FC;Italia;47035;;1;;32;;;;;;;;;;;;esenzione IVA ai sensi dell'Art.74 comma 7
+71;Magagnini Laura (Bottegoni Matteo Recanati);Magagnini Laura;880330436;880330436;Zona Ind.le Squartabue;;Recanati;MC;Italia;62019;;1;270;13;;;;;;;;;Non ha pagato nei tempi richiesti. Cliente da evitare;"4 ore di viaggio a €25
+280 km a €0,6";;
+72;Black Pecora;Black Pecora;4319660405;;Corso Giovanni XXIII, 38;;Rimini;RN;Italia;47921;;1;;13;;;;;;;;;;;;
+73;I.P.M. Industria Porte Meridionale;I.P.M. s.r.l. Industria Porte Meridionale;1095500763;;Via Nazionale, 13;;Castelluccio Inferiore;PZ;Italia;85040;;9;;13;;;;;;;;;;;;
+74;Santerini Macchine;Santerini Macchine s.r.l.;847840501;847840501;Via Marco Polo, 131/A;;Bientina;PI;Italia;56031;;8;350;34;"B.di Pisa e Fornacette
+Banca di Pisa e Fornacette";IT92T0856270911000010013910;T;8562;70911;10013910;;;;;;
+75;Inventa Contract;Inventa Contract s.r.l.;2486260413;2486260413;Via Bracci, 6;;Pesaro;PU;Italia;61122;;20;;13;Banca Malatestiana;;;7090;67750;;;;;;;
+76;F.M. di Montagner;F.M. s.r.l.;3858050267;3858050267;Viale Rizzera, 267;;Vittorio Veneto;TV;Italia;31029;;21;;22;;;;;;;;;;;Alla cortese attenzione del Sig. Mauro Montagner;
+77;Bimal;Bimal s.r.l.;2620760401;2620760401;Via Dalla Chiesa Generale Carlo Alberto, 6;;Savignano sul Rubicone;FC;Italia;47039;;8;;22;;;;;;;;;;;;
+78;Bandiera Macchine Sicilia;Bandiera s.a.s.;1471880896;;Via Bainsizza, 128;;Siracusa;SR;Italia;96100;;21;560;22;;;;;;;;;SDI: W7YVJK9;;;
+79;Synerghia Service;Synerghia Service s.r.l.;SM05578;;Via Guardia di Rocca, 37;;Serravalle;SM;Repubblica di San Marino;47899;;20;;13;Banca di San Marino - ag. Dogana;SM55K0854009802000020107389;K;8540;9802;20107389;;;;;;Fuori Campo IVA art. 7ter DPR 633/72
+80;Falegnameria Montebelli;Falegnameria Montebelli s.r.l.;3319100404;3319100404;Via Maracco, 32;;Coriano;RN;Italia;47853;;1;;7;Malatestiana - Coriano;;;7090;67770;;;;SDI: M5UXCR1;;;
+82;Bio Thai;Bio Thai Natural Products s.r.l.;3456320401;3456320401;Via Achille Grandi, 9;;Rimini;RN;Italia;47922;;20;;23;Rimini Banca - Via Garibaldi;IT97D0899524213026031239798;D;8995;24213;26031239798;;;;;;
+83;Angelini Betti;Angelini Arreda;3775390408;NGLLBT68A50H294Q;Via Giulio Pastore, 45;;Rimini;RN;Italia;47922;;20;;13;Unicredit;IT55D0200824207000100638174;D;2008;24207;100638174;;;;;;
+84;A.C.M. Paolo Rossi;A.C.M. Engineering s.r.l.;SM07704;;Strada del Bargello, 80;;Dogana (RSM);;Repubblica di San Marino;47891;;21;;22;;;;;;;;;;;Alla cortese attenzione di Paolo Rossi;Fuori Campo Iva Art. 7 ter Dpr 63372
+85;RS-Group;RS-GROUP Romana Strajhar s.p.;SI71259201;;Zadobrova 72;;Skofja vas;;Slovenia;3211;;11;;29;;;;;;;;;;;;
+86;Bounty;M.G. GESTIONI s.r.l.;3319210401;3319210401;Piazza Ferrari, 22/B;;Rimini;RN;Italia;47922;;20;;18;;;;;;;;;"Destinazione:
+Via La Strada (1954), 6
+47921 Rimini (RN)";;;
+87;Bussi;BUSSI s.r.l.;2274860408;2274860408;Via Porzia Nefetti, 76;;Santa Sofia;FC;Italia;47018;;8;;13;;;;;;;;;;;;
+88;Valeriani e Rossini;VALERIANI & ROSSINI s.r.l.;303690416;303690416;Via della Produzione, 95/97;;Montelabbate;PU;Italia;61025;;22;;22;;;;;;;;;;;;
+89;Ghines;GHINES GROUP s.r.l.;4072670401;4072670401;Via Marecchiese, 364;;Rimini;RN;Italia;47923;;8;;25;;;;;;;;;;;Alla cortese attenzione di Gabellini Andrea;
+90;Fabrizio Romei;Fabrizio Romei;1277360515;RMOFRZ62A20B243D;Via R. Fabbrini, 70;;Cavriglia;AR;Italia;52022;;8;;25;UNICREDIT BANCA DI ROMA;IT07F0200871603000401397001;;;;;;;;;All cortese attenzione di Romei Fabrizio;
+91;Falerlegno - ex Orselli;FALERLEGNO s.r.l.;1157230440;1157230440;Via Molino Vecchio, 1/A;;Piane di Falerone;FM;Italia;63387;;9;;25;Carifermo - Piane di Falerone;;;6150;69441;;;;;;Alla cortese attenzione del Sig. Attilio Tortelli;
+92;Macelleria Mussoni;MACELLERIA MUSSONI di Mussoni Andrea & C. s.n.c.;4096310406;4096310406;Via Castelfidardo, 19;;Rimini;RN;Italia;47921;;20;;18;;;;;;;;;;;;
+93;H2O;H2O Di Lorenzi Leonardo e Samuele & C. s.n.c.;2044350417;2044350417;Via Pantanelli, 3/5;;Montellabbate;PU;Italia;61025;;22;;25;BANCA DI PESARO - filiale di Borgo Santa Maria;IT53W0882613301000050107009;W;8826;13301;50107009;;;;;;
+94;Techwood;TECHWOOD s.r.l.;2380540415;2380540415;Via Benucci, 45;;Pesaro;PU;Italia;61122;;8;;25;BCC Pesaro;;;8826;13301;;;;;;;
+95;Pieri Macchine;PIERI MACCHINE s.p.a.;302050513;302050513;Via Giacomo Konz, 80;;Arezzo;AR;Italia;52100;;23;;22;;;;;;;;;;;;
+96;Legnobagno;LEGNOBAGNO s.r.l.;1631650593;1631650593;Via Alfredo Fieramonti;;Cisterna di Latina;LT;Italia;4012;;9;;13;;;;;;;;;;;;
+97;Faietech;Faietech s.r.l.;8215591218;8215591218;Via Matteotti, 60;;Nocera Superiore;SA;Italia;84015;;8;;13;;;;;;;;;;;;
+98;Olivieri;OLIVIERI s.r.l.;921560405;921560405;Via Marecchiese, 275;;Rimini;RN;Italia;47822;;9;0;25;CARIM - Ag. 4 Via Marecchiese;IT84P0623024204000043382672;P;6230;24204;43382672;;;Scadenze del 31/8 e 31/12 da spostare al 30 del mese successivo;;;
+99;Falegmaneria Silvesrti;Falegnameria Silvestri s.r.l.;2123456789;2123456789;Via S. Antonio, 5;;Fara Vicentino;VI;Italia;36030;;9;;13;;;;;;;;;;;;
+100;Parco Pruccoli;Ristorante Parco Pruccoli - Pruccoli F. e C. s.a.s.;2512370400;2512370400;Via Trebbia, 23;;Rimini;RN;Italia;47924;;20;;13;Rimini Banca;IT86Q0899524210006000061694;Q;8995;24210;6000061694;;;;;;
+101;Cipriani Serramenti;Cipriani Serramenti s.p.a.;665090486;;Via di Campigliano, 49;;Bagno a Ripoli;FI;Italia;50012;;9;420;7;;;;;;;;;;;;
+103;Essenza;Essenza di Corrò Loris;;;Via Borgo Furo di Santa Bona, 48;;Treviso;TV;Italia;31100;;9;;31;;;;;;;;;;;;
+104;GT;G.T. s.r.l.;2162240408;2162240408;Via Della Quercia, 9;;Santarcangelo di Romagna;RN;Italia;47922;;11;;25;;;;;;;5RUO82D;;;;;
+105;Morphos di Rogai Matteo;Morphos di Rogai Matteo;4781600483;;Via Case Nuove,43/A;;S. Piero a Sieve (Loc. Taiuti);FI;Italia;50037;;9;300;31;;;;;;;;;;;;
+106;Mancini Luca e Giuseppe;Mancini Luca Maria e Mancini Giuseppe;;MNCLMR71C06H294U;Via Anfitreatro, 1;;Rimini;RN;Italia;47921;;20;;13;;;;;;;;;;;;"Mancini Giuseppe - Via Clementini, 9 - 47921 Rimini
+MNC GPP 41E28 H294A
+
+Intervento di ristrutturazione edilizia per l'unità immobiliare sita a Rimini in via Clementini n. 9 relativa ad intervento SCIA prot.211965 pratica SCIA 2267/17."
+107;Mantovani Arredamenti;MANTOVANI ARREDAMENTI di Mantovani Marco;4322550239;MNTMRC90E25B107A;Via Santa Teresa, 42;;Roverchiara;VR;Italia;37050;;9;;13;;;;;;;;;;;;
+108;AESSE;AESSE ARREDA di Scola Davide;1272570415;SCLDVD69P30G479E;Via Romagna, 245;;Gabicce Mare;PU;Italia;61011;;9;;13;Credito Cooperativo di Gradara - Ag. Tavollo;IT98R0857868321000070178081;R;8578;68321;70178081;;;;;;
+109;EdilTorre;EDILTORRE MESSINA s.r.l.;2706570831;;Strada Provinciale 39, 130;;Messina;ME;Italia;98100;;1;;13;;;;;;;;;;;;
+110;Gyps;Gyps s.r.l.;7491030966;7491030966;Via Elia Errico, 8;;Milano;MI;Italia;20148;;9;0;22;;;;;;;;;"Le tariffe indicate saranno valide per le trasferte di durata minore a n.3 giorni.
+Per ordine di ricambi verrà emesso preventivo e l'ordine verrà effettuato al ricevimento della contabile di avvenuto bonifico. 
+Per gli ordini superiori a €1000 verrà applicato uno sconto sui componenti del 5%.";;;
+111;Utensil Legno;Utensil Legno di Mondino Valerio  & C. s.a.s.;1942420041;1942420041;Via Saluzzo, 29;;Revello;CN;Italia;12036;;8;800;13;;;;;;;;;Codice SDI: BY5KTZZ;;;
+112;Lella 1;PIADA E CASSONI DALLA LELLA AL MARE s.a.s. di Nanni M. e C.;4183380403;4183380403;Piazzale Kennedy, 8;;Rimini;RN;Italia;47921;;20;;13;;;;;;;;;;;;
+113;Acerbis Marino;ACERBIS MARINO s.n.c. di Giovanni Acerbis & C.;426530168;426530168;Via Case Sparse Europa;;Nembro;BG;Italia;24027;;1;;13;;;;;;;;;SDI: SUBM70N;;;
+114;Ricamificio Riminese;RICAMIFICIO RIMINESE di Mancini Luca Maria;2526800400;MNCLMR71C06H294U;Via Galla Placidia, 29;;Rimini;RN;Italia;47922;;20;;13;;;;;;;;;;;;
+115;Embassy;Embassy 1870 s.r.l.;4144040401;4144040401;Viale Amerigo Vespucci, 33;;Rimini;RN;Italia;47921;;20;;13;;;;;;;;;;;;
+116;Falegnameria Neri Alessandro;Falegnameria Neri Alessandro;;;Via Grazia Deledda, 169;;San Rocco;PT;Italia;51036;;1;450;7;;;;;;;;;;;;
+117;Succi Andrea;SUCCI ANDREA;;SCCNDR76M04H294G;Via Villeneuve, 1;;Misano Adriatico;RN;Italia;47843;;20;;13;;;;;;;;;;;;Intervento di ampliamento e parziale ristrutturazione edilizia per l'unità immobiliare sita a Misano in via Palestrina n. 44 relativa ad permesso di costruire DIA n. 16 del 8/9/2017 protocollo n. 8153/2017.
+118;Lella 2;KENNEDY PIZZA s.r.l.;4376070407;4376070407;Corso d'Augusto, 26;;Rimini;RN;Italia;47921;;20;;13;;;;;;;;;;;;
+119;Uniflair;Uniflair s.p.a.;;;Viale della Tecnica, 2;;Conselve;PD;Italia;35026;;22;;13;;;;;;;;;;;;
+120;Red Legno;Red Legno s.r.l.;2619990423;2619990423;Piazza Garibaldi, 5;;Falconara Marittima;AN;Italia;60015;;1;210;13;BCC Falconara Marittima - Castelferretti;IT62O0808637351000010197560;O;8086;37351;10197560;;;;;;
+121;Lella 3;Dalla Lella al Mare di M. Nanni e C. s.n.c.;4366200402;4366200402;Piazzale Kennedy, 2;;Rimini;RN;Italia;47921;;20;;13;;;;;;;;;;;;
+122;Nanni Marina - Lella;Nanni Marina;;NNNMRN74R41H294T;Via Tripoli, 31;;Rimini;RN;Italia;47923;;20;;18;;;;;;;;;;;;
+123;Nulli Sergio;Ebanisteria di Nulli Sergio & C. s.n.c.;2308630546;2308630546;Via Tiberina, 227/A/8;;Pantalla - Todi;PG;Italia;6059;;22;;13;UBI Banca agenzia di Pantalla;IT18W0311138701000000085523;W;3111;38701;85523;;;;;;
+124;Avv. Lunedei Marco;Avvocato Lunedei Marco;4222980403;;Via Flaminia, 101;;Rimini;RN;Italia;47923;;20;;13;;;;;;;;;;;;
+125;Hotel Gabbiano;TOP HOTELS s.r.l.;40350970401;4035970401;Viale Toscanelli, 86;;Rimini;RN;Italia;47921;;20;;13;;;;;;;;;;;;
+126;Fal.Art.Rivotortese;Falegnameria Artigiana Rivotortese di Cosimetti Ulderico;1338150541;CSMLRC49D29A475J;Via Cannara;;Capodacqua d'Assisi;PG;Italia;6081;;9;;13;;;;;;;;;;;;
+127;Nuova Falegnameria Artigiana;Nuova Falegnameria Artigiana s.r.l.;1565180591;1565180591;Via Mediana Vecchia, 30;;Terracina;LT;Italia;4019;;1;;13;;;;;;;;;;;;
+128;Benedetti Davide;Benedetti Davide;3107800405;BNDDVD68H28H294X;Via Ravarino, 58;;Rimini;RN;Italia;47924;;20;;13;;;;;;;;;SDI: J6URRTW;;;
+129;Poli Arredamenti;Poli Arredamenti di Poli Giancarlo e C. s.n.c.;3855440370;3855440370;Via Enrico Mattei, 36/C;;Bologna;BO;Italia;40138;;1;;13;;;;;;;;;;;;
+130;Il Grifondoro;Il Grifondoro;;;;;Firenze;FI;Italia;;;1;380;13;;;;;;;;;;;;
+131;ArtigianLegno;Artigian Legno di Mazzanti Loris;;;Via Aristide Merloni, 16;;Casine di Ostra;AN;Italia;60010;;9;170;13;;;;;;;;;;;;
+132;Scarpetti;Scarpetti Mobili s.n.c.;124010414;124010414;Via Risara, 10;;Montelabbate;PU;Italia;61025;;9;;13;;;;;;;;;;;;
+133;CP Macchine;CP Macchine di Casali Marco s.n.c.;140850405;140850405;Via Peppino Impastato, 3;;Rimini;RN;Italia;47922;;8;;13;;;;;;;;;;;;
+134;CGM;CGM s.n.c. di Genevrini Marino & C.;259330439;259330439;Via Forano, 6;;Appignano;MC;Italia;62010;;22;190;13;;;;;;;;;"SDI: J6URRTW
+PEC: cgmtavoli@pec.sedevirtuale.it";;;
+135;Sabadotto Valter;Falegnameria Sabadotto s.n.c.;1688350261;1688350261;Via Giacomo Matteotti, 2;;Covolo di Pederobba;TV;Italia;31040;;9;520;13;;;;;;;;;;;;
+136;R&D Divani;R & D Divani s.r.l.;;;Via Vigili del Fuoco Caduti in Servizio, 24;;Modugno;BA;Italia;70026;;1;975;13;;;;;;;;;;;;
+137;Arredamenti Bonvicini;ARREDAMENTI BONVICINI s.r.l.;4258660234;4258660234;Via Macia, 3;;Arcole;VR;Italia;37040;;22;445;13;;;;;;;;;"SDI: M5UXCR1
+PEC: arredamentibonvicini@legalmail.it";;;
+138;Falegnameria Marrone;Falegnameria Marrone;;;Via Circonvallazione Nord, 17;;Buddusò;OT;Italia;7020;;9;550;13;;;;;;;;;;;;
+139;Si-mac;Si-mac Albania shpk;;;Rruga Industriale 500;;Kashar;;Albania;1054;;11;;13;;;;;;;;;;;;
+140;Derthona Serramenti;Derthona Serramenti s.r.l.;1494880063;1494880063;Via Vecchia Fornace;;Viguzzolo;AL;Italia;15058;;9;590;13;;;;;;;;;;;;
+141;Fratelli Bagnulo;Bagnulo Giovanni;;;Contrada Santa Caterina;;Ostuni;BR;Italia;72017;;9;1.150,00;13;;;;;;;;;;;;
+143;S.A.R.A.;S.A.R.A. s.r.l.;476790423;476790423;Via Enrico Mattei;;Corinaldo;AN;Italia;60013;;9;200;25;B.C.C. di Pergola e Corinaldo - Corinaldo;IT47Z0873137330000110204666;Z;8731;37330;110204666;;;;;;
+144;Baggiarini;Baggiarini;;;;;;;;;;9;;13;;;;;;;;;;;;
+145;PlastGroup - Erre Effe Plast;Erre Effe Plast s.r.l.;2737430369;2737430369;Viale Virgilio, 50/E;;Modena;MO;Italia;41100;;9;290;13;;;;;;;;;;;;
+146;Rikedo;Rikedo Contract s.r.l.;;;Località Fioretta, 77;;Capena;RM;Italia;600;;9;560;13;;;;;;;;;;;;
+147;Falegnameria Tonini;GT Propellers;1775830407;1775830407;Via del Commercio, 7;;Riccione;RN;Italia;47838;;9;65;13;;;;;;;;;;;;
+148;Falegnameria Piccari;Piccari Adriano;;;Via Brunelleschi, 13;;Auditore;PU;Italia;61020;;9;100;13;;;;;;;;;;;;
+149;SCM España;SCM Group España s.a.u.;A-59063883;;Avda. Ragull 78-80;;Sant Cugat del Vallés;;España;8173;;2;;11;;;;;;;;;;;;
+150;Ventura Elio;Concessionario Busellato;;;;;;;;;;8;;13;;;;;;;;;;;;
+151;Artigiani del Legno;Artigiani del Legno;4312500400;4312500400;Via Marecchiese, 1140;;Sant'Ermete di Santarcangelo;RN;Italia;47822;;9;0;13;;;;;;;;;SDI: 5RUO82D;;;
+152;Noi della Notte;Noi della Notte s.r.l.;975310525;975310525;Loc. Guardavalle snc;;Torrita di Siena;SI;Italia;53049;;9;330;13;;;;;;;;;;;;
+153;SCM France;SCM Group France;;;Chemin des Plattes, 2;;Vourles;;France;69390;;2;;11;;;;;;;;;;;;
+154;Domus Artis;Domus Artis s.r.l.;2058000262;2058000262;Via Rudon, 16;;Poggiana di Riese Pio X;TV;Italia;31039;;9;470;13;;;;;;;;;SDI: T04ZHR3;;;
+155;Camarlinghi;Gruppo Camarlinghi s.p.a.;958760506;958760506;Via Della Repubblica, 344;;Orentano;PI;Italia;56020;;9;465;13;;;;;;;;;;;;
+156;Essepi;Essepi s.r.l.;1572950226;1572950226;Viale De Gasperi, 1/A;;Cavedine;TN;Italia;38073;;9;600;13;;;;;;;;;;;;
+157;Ferwood;Ferwood s.r.l.;2996140048;2996140048;Via Langhe 4/A;;Pollenzo;CN;Italia;12042;;8;;13;;;;;;;;;;;;
+158;Falegnameria Del Fabbro;Falegnameria Del Fabbro Primo di Del Fabbro G. & C. s.n.c.;1831000300;;Via 31 Luglio, 15;;Forni Avoltri;UD;Italia;36302;;9;750;13;;;;;;;;;SDI: SUBM70N;;;
+159;BM Infissi;BM Infissi s.r.l.;272050303;272050303;Via Castellarin, 14;;Ronchis;UD;Italia;33050;;9;575;13;;;;;;;;;;;;
+160;Tecno Wood;Tecno Wood s.r.l.;2434970428;;Via Corinaldese, 92/2;;Senigallia;AN;Italia;60019;;9;190;25;;;;;;;;;SDI: DXEBYTP;;;
+161;Fosso Allestimenti;Fosso Allestimenti s.a.s di Testa Patrizia;;;Via Maestrale 8;;Viareggio;LU;Italia;55049;;9;520;22;;;;;;;;;;;;
+162;Isopad;Isopad s.r.l.;1829100971;1397020486;Via Ettore Strobino, 1;;Prato;PO;Italia;59100;;9;400;13;;;;;;;M5UXCR1;;;;;
+163;Falegnameria Marton;Falegnameria M.G. s.a.s. di Marton Moreno;3428420263;3428420263;Via G. Rossa, 4;;Zero Branco;TV;Italia;31059;;9;465;13;;;;;;;;;;;;
+164;Alfa Tech;Alfa Tech s.r.l.;;;Via Biagio di Santolino, 71;;Acquaviva;SM;Repubblica di San Marino;47892;;8;;13;;;;;;;;;;;;
+165;Art Legno di Fontana Roberto;Art Legno di Fontana Roberto & C. s.n.c.;4538990401;FNTRRT62E31L764A;Loc. Mazzi;;Verghereto;FC;Italia;47028;;1;100;13;;IT93Y0885067700000020122654;;;;;SUBM70N;fontanaroberto@pec.confartigianato.it;;;;
+166;3Ellen;3 Ellen soc.coop.;3422011209;3422011209;Via Palmiro Togliatti, 93;;Imola;BO;Italia;40026;;9;150;13;;;;;;;;;;;;
+167;Officine Del Bello;Officine Del Bello s.r.l.;1159200318;1159200318;Via Nazario Sauro, 15;;Romans d’Isonzo;GO;Italia;34076;;9;650;13;;;;;;;;;;;;
+168;PCM Porte;PCM Design s.r.l.;2474640428;2474640428;Via I Maggio, 156;;Ancona;AN;Italia;60131;;9;300;13;;;;;;;A4707H7;;;;;
+169;PV;PV s.r.l.;1456170412;1456170412;Località Santa Maria del Piano, 61/E;;Urbania;PU;Italia;61049;;9;150;13;;;;;;;;;;"Tariffa oraria 55,00€
+Per pagamenti rapidi sconto del 20% su tutto.";;
+170;Falegnameria Vadi;F.lli Vadi s.n.c.;916020514;;Via Della Resistenza, 26;;Levane di Montevarchi;AR;Italia;52025;;9;320;13;;;;;;;KRRH6B9;ufficio@pec.falegnameriavadi.it;;;;
+171;Agathis;Agathis s.c.a.r.l.;4516500404;4516500404;Via Battuti Rossi, 6/A;;Forlì;FC;Italia;47121;;9;100;13;;;;;;;;;;;;
+172;Trend;Trend Proposte d'Arredo di Casadei P. & C.s.n.c.;3602400404;3602400404;Via Barcarola, 9;;Rimini;RN;Italia;47922;;9;0;13;;;;;;;;;;Tariffa oraria a partire dalla ns. sede;;
+173;PD Porte Blindate;PD Porte Blindate s.r.l.;;;Via Santa Fumia, 90;;Roma;RM;Italia;134;;9;690;13;;;;;;;;;;;;
+174;Ebanè;Ebanè s.r.l.;8415990723;8415990723;Viale Cristoforo Colombo, 23;;Putignano;BA;Italia;70017;;26;1.100,00;13;;;;;;;;;;;;
+175;Scapin;Falegnameria Scapin;;;Via Corte;;Galliera Veneta;PD;Italia;35015;;9;450;13;;;;;;;;;;;;
+176;BS Porte;BS Porte s.r.l.;2516620248;2516620248;Via Cartiera, 81;;Rossano Veneto;VI;Italia;36028;;9;450;13;;;;;;;;;;;;
+177;Rea Marine;Cantieri Rea Marine s.r.l.;2761880414;2761880414;Via Padana, 13/A;;Monte Porzio;PU;Italia;61040;;9;180;13;;;;;;;USAL8PV;;;;;
+178;Catanossi;Falegnameria Catanossi di Catanossi Gabriele;3576030542;CTNGRL87A09I921S;SR418, 99;;Spoleto;PG;Italia;6049;;9;440;13;;;;;;;;;;;;
+179;Neomec;Neomec s.r.l.;1369170418;1369170418;Via Lago Maggiore,  214;;Pesaro;PU;Italia;61122;;8;;13;;;;;;;J6URRTW;;;;;
+180;Tassini;Tassini s.a.s.;6884961001;6884961001;Via San Lorenzo, 10;;Sacrofano;RM;Italia;60;;9;720;13;;;;;;;;;Accord 25 AA1/002739;;;
+181;Fabrika Legno;Fabrika di Tudisco Aldo;3867300752;TDSLDA78T16D862F;Via Vittime del terrorismo, 1;;Seclì;LE;Italia;73050;;21;1.300,00;13;;;;;;;;tudiscoaldo@pec.it;;;;
+182;Falegnameria Arredare;Falegnameria Arredare;2189210442;REXGNN86S24A462O;Contrada Piane Tronto;;Controguerra;TE;Italia;64010;;9;350;13;;;;;;;;arredaregianni@pec.it;;;;
+184;Vida;VIDA s.r.l.;4029300409;4029300409;Via Meucci, 5;;Forlì;FC;Italia;47122;;9;100;13;;IT57U0306913237100000004669;U;3069;13237;1,00E+11;M5ITOJA;vidasrl2012@legalmail.it;;;;
+185;FAIT Adriatica;FA.I.T. Adriatica s.p.a.;136870409;136870409;Via Enrico Fermi, 8;;Gatteo;FC;Italia;47043;;9;60;13;;;;;;;;;;;;
+186;Bettoli;Bettoli s.r.l.;;;;;;;;;;9;;13;;;;;;;;;;;;
+187;Legno Infissi;Legno Infissi s.n.c. di Giomarelli & C.;;;Viale Galileo Galilei, 240 - Ponte d'Arbia;;Monteroni d'Arbia;SI;Italia;53014;;9;430;13;;;;;;;;;;;;
+188;Punto B;Arredamenti Punto B di Barriviera Franco;;;Via Marie Curie, 142;;Pieve di Soligo;TV;Italia;31053;;9;550;13;;;;;;;;;;;;
+189;Idea Legno;Idea Legno s.a.s.;3630900409;3630900409;P.za U. Nobile, 9/A;;San Mauro Pascoli;FC;Italia;47030;;9;50;13;;;;;;;;;;;;
+190;Arredamenti Patriarca;Patriarca S.r.l.;1982590687;1982590687;via Taddei;;Villa Badessa (Rosciano);PE;Italia;65020;;9;580;22;;;;;;;M5UXCR1;certificata@pec.patriarcagroup.it;;;;
+191;CIS;CIS s.r.l.s.;972380943;972380943;Viale Vittorio Emanuele III, 66;;Venafro;IS;Italia;86079;;9;850;13;BPER - Isernia;;;;;;;cetroitaliaserramentisrls@pec.it;;;;
+192;Vuesse;Vuesse Arredi s.r.l.;2118270400;2118270400;Via dei Tigli, 3;;Cesenatico;FC;Italia;47042;;9;90;13;;;;;;;;;;;;
+193;Falegnameria Fusa;Falegnameria Fusa di Fusa Siro & Dario s.n.c.;588860247;588860247;Via Leonardo da Vinci, 19/23;;Motta di Costabissara;VI;Italia;36030;;9;530;13;Banca Unicredit;IT13Z0200860340000105637832;Z;2008;60340;105637832;W7YVJK9;falfusa@legalmail.it;;;;
+194;CS Tranciati;CS Tranciati s.r.l.;SM26331;;Strada Acquasalata, 11;;Serravalle;SM;Repubblica di San Marino;47899;;9;0;13;Cassa di Risparmio di San Marino;SM05F0606709803000030148815;;6067;9803;;XXXXXXX;;;;;
+195;Falegnameria Colangelo;Colangelo Arredamenti s.r.l.s.;;;Strada S. Colombano - Dogheria, 2;;Meldola;FC;Italia;47014;;9;130;13;;;;;;;;;;;;
+196;Cordiani Alberto;Falegnameria 4.0 di Cordiani Alberto;;;Via Maestri del Lavoro, 39;;Terni;TR;Italia;5100;;9;500;13;;;;;;;;;Tech Z30 (2006) AL /004889;;;
+197;Bioclima;Bioclima s.r.l.;SM28254;;Via Fondo Ausa, 28;;Dogana;SM;San Marino;47891;;9;;13;;;;;;;;;;;;
+198;Esterino Ceria;Esterino Ceria;;;;;;;Albania;;;9;;13;;;;;;;;;;Le spese di vitto e alloggio, nonché di viaggio saranno addebitate a pié di lista.;;
+199;Falegnameria Marelli;Falegnameria Marelli;;;;;Cantù;CO;Italia;22063;;9;750;13;;;;;;;;;;;;
+200;Formenti;Formenti Group s.r.l.;666000989;666000989;Loc. Ponte Cantone, 11;;Pozzolengo;BS;Italia;25010;;9;590;13;;;;;;;;;;;;
+201;Centro del Serramento;Centro del Serramento s.r.l.;600690481;600690481;Via provinciale di Mercatale, 134/A;;Vinci;FI;Italia;50059;;9;500;13;;;;;;;;;;;;
+202;Produzione Design;Produzione Design s.r.l.;2074770674;2074770674;Viale Europa, s.n.;;Mosciano Sant'Angelo;TE;Italia;64023;;9;475;13;;;;;;;;produzionedesignsrl@pec.it;;;;
+203;SAL;SAL s.r.l.;3891740718;3891740718;Via Nazionale, 70;;Motta Montecorvino;FG;Italia;71030;;9;900;13;;;;;;;T04ZHR3;sal.serramenti@pec.it;sede operativa: SS 17 Km 306+400 Volturino (FG);;;
+204;Neoon - Italcom;NEOON s.r.l.;1552170704;1552170704;Via Leopoldo Pirelli, 14;;Termoli;CB;Italia;86039;;9;750;13;;;;;;;;;;Secondo tecnico scontato 10%;;
+205;ML;ML s.r.l.;2634301200;2634301200;Via G. di Vittorio, 3;;Castelfiumanese;BO;Italia;40020;;9;200;7;;;;;;;;;;;;
+206;Terotecna;Terotecna s.r.l.;3671790750;3671790750;Via Portogallo Z.I.;;Galatina;LE;Italia;73013;;9;1.500,00;13;;;;;;;;;;;;
+207;Expo Design;Expo Design s.r.l. unipersonale;3571670540;3571670540;Via Adige, 11/B;;San Giustino;PG;Italia;6016;;9;250;13;;;;;;;M5UXCR1;expodesignsrl@pec.it;;;;
+208;Feval;Feval Mobili d'Arte s.r.l.;2772210429;2772210429;Via dell'Industria, 87;;Filottrano;AN;Italia;60024;;9;280;13;;;;;;;;fevalmobili@pec.confartigianato.it;;;;
+209;F.lli D'Alessio;F.lli D'Alessio s.r.l.;2973500644;2973500644;Via Aldo Pini, 10;;Avellino;AV;Italia;83100;;9;1.080,00;22;;;;;;;SUBM70N;;"Riportato sede legale, la sede operativa è diversa.
+
+Pos. Sede operativa: https://maps.app.goo.gl/B5WKhYyku57W6TiM8";;;
+210;TeCo;Te.Co. S.r.l.;4280450372;2530440375;Via San Vitale Ovest, 302;;Medicina;BO;Italia;40059;;9;180;13;;;;;;;;;;;;
+211;Falegnameria Cattaneo;Falegnameria Cattaneo s.a.s. di Cattaneo M.;6006910969;6006910969;Via Marconi S/N;;Sant’Angelo Lodigiano;LO;Italia;26866;;9;600;13;;;;;;;M5UCR7X;;;;;
+212;Spazio Scale;Spazio Scale s.n.c. di Bianchi A. e R.;2328340415;2328340415;Via G. Santi, 34;;Gradara;PU;Italia;61012;;9;50;13;;;;;;;M5UXCR1;;;;;
+213;LSG;LSG s.r.l.;5530300655;5530300655;Via Provinciale Puglietta, 298;;Campagna;SA;Italia;84022;;9;1.200,00;13;;;;;;;;;;;;
+214;Vivere il Legno;Vivere il Legno;;;Zona Industriale Strada B3;;Villacidro;SU;Italia;9039;;9;;13;;;;;;;;;;;;
+215;Legno Arte;Legno Arte s.r.l.;2081580678;2081580678;Via Giulio Cesare, 37/A;;S. Egidio alla Vibrata;TE;Italia;64016;;9;470;13;;;;;;;M5UXCR1;;Record 220 matricola AA1/010126;;;
+216;SCM Nederland;SCM Group Nederland B.V.;009875529B01;NL009875529B01;Soldaatweg 2;;Wormerveer;RL;Olanda;1521;;11;;22;ABN Amro bank 48 57 59 438 - BIC ABNANL2A;NL89ABNA0485759438;;;;;XXXXXXX;;;;;
+217;SCM Group Osterreich;SCM Group Osterreich;;;;;;;;;;11;;11;;;;;;;;;"Travelling hours and kilometres will be counted at the end of the job considering the departure from our office in Rimini.
+Rates also valid for technical interventions or installations in germany.";;;
+218;Al Botegon;Al Botegon di Tieppo Sergio;1015980251;;Via Cavassico Inferiore, 183;;Borgo Valbelluna;BL;Italia;32026;;9;650;13;;;;;;;;;;;;
+219;Bordini Arredamenti;Bordini Arredamenti s.r.l.;4813080233;4813080233;Via Molino di Sopra, 31;;Nogara;VR;Italia;37054;;9;450;13;;;;;;;W7YVJK9;;Routmat 2 AA1/009668;;;
+220;GM Imbalagggi;GM Imballaggi s.r.l.;1199230523;1199230523;Via delle Cave, s.n.;;Rapolano Terme;SI;Italia;53040;;9;370;13;;;;;;;;;Record 120 NWT;;;
+221;Errebi;Errebi s.n.c. di R. e G. Borella;387920283;387920283;Viale dell'Artigianato, 8;;Candiana;PD;Italia;35020;;9;430;13;;;;;;;KRRH6B9;;;;;
+222;Koropack;Koropack s.r.l.;4633750965;4633750965;Via Amerigo Vespucci, 1;;Fombio;LO;Italia;26861;;9;500;13;;;;;;;G4AI1U8;;;;;
+223;F.lli Volpi;Falegnameria F.lli Volpi s.n.c.;;;Via dei Falegnami, 20;;Umbertide;PG;Italia;6019;;9;300;13;;;;;;;;;;;;
+224;Falegnameria Greco;Greco Giovanni;4221450754;GRCGNN89H25D851H;Via Venezia, 17;;Castrignano del Capo;LE;Italia;73040;;9;1.500,00;13;;;;;;;M5UXCR1;;Cliente di De Giorgi;;;
+226;SCM Deutschland;SCM Group Deutschland;;;Seilerstraat 2;;Nürtingen;;Germany;72622;;11;;11;;;;;;;;;Travelling hours and kilometres will be counted at the end of the job considering the departure from our office in Rimini.;;;
+227;Falegnameria Favalli;Favalli Tiziano;1700440983;FVLTZN64L10F471J;Via San Bernardino, 134;;Montichiari;BS;Italia;25018;;9;570;13;;;;;;;;;;;;
+228;Roncato;Roncato s.r.l.;897530275;897530275;Via Bigolo, 34;;Noale;VE;Italia;30033;;9;580;13;;;;;;;SUBM70N;;;;;
+229;Flamarlegno;Flamarlegno di Salvato Flavio;2518250283;SLVFLV61S06F161N;Via Monte Sabotino, 21;;Lissaro di Mestrino;PD;Italia;35035;;9;480;13;;;;;;;;;;;;
+230;Illuminotechnica MP;Illuminotechnica M.P. s.r.l.;3909340402;3909340402;Via Archimede, 92;;Cesena;FC;Italia;47521;;9;80;13;;;;;;;SUBM70N;;;;;
+231;Autentik 2000;Autentik 2000;;;Xhemal Alla;;Tirana Kashar;;Albania;;;11;;18;;;;;;;;;;;;
+232;Biondini Serramenti;Biondini Serramenti s.r.l.;3412200549;3412200549;Zona C.A.I. San Terenziano;;Gualdo Cattaneo;PG;Italia;6035;;9;500;13;;;;;;;;;;;;
+233;Biallaquarta;Biallaquarta di Barba Alfredo;2038790750;;Via degli Artigiani, z.i.;;Ruffano;LE;Italia;73049;;9;1.500,00;13;;;;;;;;;;;;

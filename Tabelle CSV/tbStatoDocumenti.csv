@@ -1,0 +1,8 @@
+﻿idStatoDocumenti;DenominazioneStato;Ordinamento
+1;Da completare;1
+2;Completo - da inviare;2
+3;Inviato - in attesa di ricevuta di ritorno;3
+4;Parzialmente incassato;5
+5;Chiuso - pagato;6
+6;Annullato;7
+7;Ricevuto - in attesa di pagamento;4

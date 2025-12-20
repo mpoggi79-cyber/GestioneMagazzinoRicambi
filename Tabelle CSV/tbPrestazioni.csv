@@ -1,0 +1,142 @@
+﻿idPrestazione;Denominazione;idUnitaMisura 'FK';PrezzoUnitario;idCategorieTariffe 'FK';idCategoriaDettaglio 'FK';VisualizzaPreventivo;OrdineStampa
+5;Manodopera ordinaria;4;47;1;1;VERO;1
+12;Manodopera ordinaria Italia;4;38,5;2;8;VERO;1
+13;Manodopera straordinaria Italia;4;45;2;8;VERO;3
+14;Rimborso forfettario spese vitto;1;30;1;3;VERO;4
+15;Rimborso forfettario spese alloggio;1;90;1;3;VERO;5
+17;Giornata trasf. Italia senza pernottamento;3;240;3;1;FALSO;
+18;Giornata trasf. Italia con pernottamento;3;260;3;1;FALSO;
+22;Rimborso chilometrico;2;0,4;3;3;FALSO;
+26;Manodopera sabato e festivi Italia;4;50;2;8;VERO;6
+27;Ore viaggio;4;35;2;8;VERO;8
+29;Rimborso forfettario spese vitto (Italia);1;30;2;9;VERO;10
+30;Rimborso forfettario spese alloggio (Italia);1;90;2;9;VERO;9
+31;Rimborso chilometrico forfettario + pedaggi;2;0,65;2;9;VERO;11
+33;Rimborso pié di lista spese (estero);1;0;2;9;VERO;12
+34;Verifiche funzionalità macchine per accettazione;4;36;4;8;FALSO;
+36;Rimborso pié di lista spese mezzi di trasporto;1;0;2;9;FALSO;
+37;Giornata trasf. estero pernottamento;1;310;3;1;FALSO;
+38;Forfettario viaggio A/R Rimini-Mantova;1;120;3;3;FALSO;
+39;Giornata di corso/affiancamento;3;100;3;1;FALSO;
+40;Rimborso spese autostrada e trasporti;1;0;3;3;FALSO;
+41;Rimborso spese vitto/alloggio;1;0;3;3;FALSO;
+42;Giornata inserimento dati (da casa);1;190;3;1;FALSO;
+43;Sabato Italia lavorato (+20%);1;312;3;1;FALSO;
+44;Attività per la sicurezza;4;36;4;8;FALSO;
+47;Giornata trasf. Italia senza pernottamento;3;280;6;1;FALSO;
+48;Giornata trasf. Italia con pernottamento;3;320;6;1;FALSO;
+49;Giornata trasf. estero pernottamento;3;350;6;1;FALSO;
+50;Giornata inserimento dati (da casa);3;230;6;1;FALSO;
+51;Rimborso chilometrico;2;0,55;6;3;FALSO;
+52;Forfettario viaggio A/R Rimini-Mantova;1;160;6;3;FALSO;
+53;Giornata di corso/affiancamento;3;100;6;1;FALSO;
+54;Rimborso chilometrico forfettario + pedaggi;2;0,65;1;3;FALSO;3
+55;Ore viaggio;4;30;1;1;FALSO;2
+56;Rimborso spese tempo + materiale per sicurezza sul lavoro;1;0;2;9;FALSO;
+63;Manodopera ordinaria;4;47;8;1;VERO;1
+65;Ore viaggio;4;30;8;1;VERO;2
+66;Rimborso chilometrico forfettario + pedaggi;2;0,65;8;3;VERO;3
+67;Rimborso forfettario spese vitto;1;30;8;3;VERO;4
+68;Rimborso forfettario spese alloggio;1;90;8;3;VERO;5
+69;Manodopera ordinaria;4;36;4;8;VERO;
+70;Tariffa oraria assistenza tecnica;4;60;9;1;VERO;1
+71;Rimborso chilometrico forfettario + pedaggi;2;0,65;9;3;FALSO;7
+72;Ore viaggio;4;30;9;1;FALSO;6
+73;Diritto di chiamata (preparazione intervento);1;60;9;1;FALSO;5
+74;Rimborso forfettario spese vitto (a pasto);1;30;9;3;VERO;2
+77;Rimborso forfettario spese alloggio;1;90;9;3;VERO;3
+79;Tariffa oraria teleassistenza, assistenza telefonica e corsi on line;4;40;9;1;VERO;9
+80;Giornata a disposizione;3;100;2;8;VERO;7
+81;Ricambi;1;0;8;6;FALSO;
+83;Daily rate (or part of a day);7;500;11;8;VERO;1
+84;Accomodation and meals per day;7;180;11;9;VERO;3
+85;Sunday or holidays not worked;7;200;11;8;VERO;2
+86;Travel hours;8;35;11;8;VERO;5
+88;Indennità trasferta no pernottamento per installazione;1;20;12;3;FALSO;
+89;Manodopera ordinaria;4;40;12;1;VERO;1
+90;Forfettario viaggio A/R fino a sede TecnoMac;1;70;12;3;VERO;6
+92;Manodopera ordinaria giornaliera;3;260;13;1;FALSO;
+93;Manodopera ordinaria oraria;4;40;13;1;VERO;
+95;Rimborso forfettario spese vitto;1;30;12;3;VERO;4
+96;Rimborso forfettario spese alloggio;1;90;12;3;VERO;5
+97;Rimborso chilometrico forfettario + pedaggi;2;0,6;12;3;VERO;3
+98;Ore viaggio;4;25;12;1;VERO;2
+99;Imposta di bollo (esente iva per Art.15);1;2;2;7;FALSO;
+100;Imposta di bollo (esente iva per Art.15);1;2;4;7;FALSO;
+103;Weekly rate;1;2.030,00;14;8;FALSO;
+104;Daily refund;1;50;14;9;FALSO;
+105;Overtime rate;8;45;14;8;FALSO;
+106;Not worked days;7;140;14;8;FALSO;
+107;Extraordinary costs Refund;1;0;14;9;FALSO;
+113;Manodopera ordinaria estero;4;44;2;8;VERO;2
+114;Manodopera sabato e festivi estero;4;50;2;8;VERO;5
+115;Manodopera ordinaria;4;40;15;1;FALSO;
+116;Manodopera sabato e festivi;4;55;15;1;FALSO;
+117;Ore viaggio;4;30;15;1;FALSO;
+118;Giornata a disposizione non lavorata;3;150;15;1;FALSO;
+119;Rimborso chilometrico;2;0,6;15;3;FALSO;
+120;Rimborso pié di lista spese;1;0;15;3;FALSO;
+121;Manodopera ordinaria in sede;4;27;16;8;VERO;1
+122;Manodopera ordinaria in trasferta (incluso il sabato);4;35;16;8;VERO;2
+123;Manodopera domenica e festività italiane in trasferta;4;45;16;8;VERO;3
+124;Ore viaggio;4;25;16;8;VERO;4
+125;Giornata a disposizione;3;100;16;8;VERO;5
+126;Rimborso chilometrico forfettario + pedaggi;2;0,5;16;9;VERO;6
+127;Rimborso piè di lista spese sostenute;1;0;16;9;FALSO;7
+128;Manodopera ordinaria estero;4;40;17;1;VERO;2
+129;Rimborso chilometrico forfettario + pedaggi;2;0,65;17;3;VERO;7
+130;Manodopera ordinaria Italia;4;35;17;1;VERO;1
+131;Manodopera straordinaria;4;45;17;1;VERO;3
+132;Rimborso pié di lista spese (estero);1;0;17;3;VERO;10
+133;Ore viaggio;4;30;17;1;VERO;6
+134;Manodopera ordinaria;1;40;18;1;VERO;
+136;Indennità trasferta con pernottamento;3;120;18;3;VERO;
+137;Indennità trasferta senza pernottamento;3;30;18;1;VERO;
+138;Km viaggio e tempo impiegato (A/R);1;900;18;3;VERO;
+140;Merce;1;0;20;1;FALSO;
+141;Ricambi;1;0;21;6;FALSO;
+142;Rimborso chilometrico forfettario + pedaggi;2;0,65;21;3;FALSO;
+143;Ore viaggio;4;30;21;1;FALSO;
+145;Tariffa  giornata (rimborso forfettario vitto e alloggio inclusi);3;520;21;1;VERO;1
+147;Kilometric refund;2;0,7;11;9;VERO;6
+148;Remote assistance/Webminar;8;40;11;8;FALSO;4
+149;Manodopera ordinaria;4;55;22;1;VERO;1
+150;Rimborso forfettario spese vitto;1;30;22;3;VERO;4
+151;Ore viaggio;4;30;22;1;FALSO;2
+152;Rimborso chilometrico forfettario + pedaggi;2;0,65;22;3;FALSO;3
+153;Rimborso forfettario spese alloggio;1;90;22;3;VERO;5
+155;Manodopera ordinaria presso vs. sede;4;35;8;1;FALSO;
+157;Manodopera ordinaria;4;47;23;1;VERO;1
+158;Ore viaggio;4;30;23;1;VERO;2
+159;Rimborso chilometrico forfettario + pedaggi;2;0,65;23;3;VERO;3
+160;Rimborso forfettario spese vitto;1;30;23;3;FALSO;4
+161;Rimborso forfettario spese alloggio;1;90;23;3;FALSO;5
+164;Prezzo parti di ricambio da listino SCM Group;1;0;9;6;FALSO;10
+166;Sconto del 5% su ordini ricambi con importo superiore a € 1.000,00;1;0;9;6;VERO;11
+167;Prezzo parti di ricambio da listino SCM Group;1;0;1;6;FALSO;9
+168;Sconto del 5% su ordini ricambi con importo superiore a € 1.000,00;1;0;1;6;FALSO;10
+169;Materiale;1;0;13;6;FALSO;
+171;Rimborso forfettario spese alloggio (Italia);1;80;17;3;VERO;9
+172;Rimborso forfettario spese vitto (Italia);1;30;17;3;VERO;8
+173;Giornata a disposizione;1;100;17;1;VERO;5
+174;Discount 15% on second person daily rate and travel hours;1;0;11;8;VERO;7
+175;Rimborso forfettario viaggio (chilometri + tempo);1;0;9;3;FALSO;8
+176;Rimborso forfettario viaggio (chilometri + tempo viaggio);1;760;1;3;FALSO;2
+177;Tariffa a forfait A/R (escluso tariffa volo e noleggio auto in loco);1;0;21;3;FALSO;
+178;Rimborso pié di lista spese mezzi di trasporto;1;0;21;3;FALSO;
+180;Travel cost refund;1;0;11;9;FALSO;8
+184;Sconto su tariffa oraria per intervento pari o superiore ai 3gg.;4;-6;9;1;VERO;4
+185;Rimborso forfettario viaggio (chilometri + tempo viaggio);1;0;22;3;FALSO;
+186;Rimborso forfettario viaggio (chilometri + tempo);1;0;13;3;FALSO;
+187;Rimborso forfettario viaggio (chilometri + tempo viaggio);1;1.300,00;21;3;VERO;3
+188;Tariffa  giornata (indennità vitto e alloggio esclusi);1;420;25;1;VERO;1
+190;Rimborso forfettario viaggio (chilometri + tempo viaggio  escluso volo);1;1.300,00;25;3;VERO;3
+192;Giornata a disposizione;1;280;21;1;VERO;4
+193;Giornata a disposzione;1;150;25;1;VERO;
+194;Tariffa oraria assistenza tecnica;1;40;26;3;VERO;1
+195;Rimborso forfettario viaggio (chilometri + tempo);1;450;26;1;VERO;2
+196;Rimborso forfettario spese vitto;1;30;26;3;VERO;3
+197;Rimborso forfettario spese alloggio;1;90;26;3;VERO;4
+198;Manodopera straordinaria in festività;4;50;17;1;VERO;4
+199;Manodopera straordinaria estero;4;49;2;8;VERO;4
+200;Assistenza Hotliner;4;35;2;8;VERO;

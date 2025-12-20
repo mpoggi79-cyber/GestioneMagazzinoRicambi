@@ -1,0 +1,24 @@
+﻿idTipoPagamento;descrizione;DataRifScad;GiorniDataRif;GiornoAddebito
+6;Contanti;DF - data fattura;0;0
+7;Bonifico 30 gg D.F.;DF - data fattura;30;0
+8;Carta di credito;DF - data fattura;0;0
+11;Bonifico 60 gg F.M.;FM - Fine mese;60;0
+13;Bonifico bancario;DF - data fattura;0;0
+14;Pagato;DF - data fattura;0;0
+18;Rimessa Diretta;DF - data fattura;0;0
+19;SWIFT internazionale;DF - data fattura;0;0
+21;Bonifico 60 gg D.F.;DF - data fattura;60;0
+22;Bonifico 30 gg F.M.;FM - Fine mese;30;0
+23;RI.BA. 60gg F.M.;FM - Fine mese;60;0
+24;Modulo F24;DF - data fattura;0;0
+25;RI.BA. 30gg F.M.;FM - Fine mese;30;0
+26;RI.BA. 90gg F.M.;FM - Fine mese;90;0
+27;Bonifico 90 gg D.F.;DF - data fattura;90;0
+28;RI.BA. 120gg F.M.;FM - Fine mese;120;0
+29;Bank Transfer;DF - data fattura;0;0
+30;50% Fine lavori - 50% Bonifico 30 FM;FM - Fine mese;30;0
+31;Assegno a fine lavori;DF - data fattura;0;0
+32;Assegno;DF - data fattura;0;0
+33;RI.BA. 30gg F.M. scad. 10;FM - Fine mese;30;10
+34;RI.BA. 30gg F.M. scad. 5;FM - Fine mese;30;5
+35;Ri.Ba. 60gg FM;FM - Fine mese;60;0

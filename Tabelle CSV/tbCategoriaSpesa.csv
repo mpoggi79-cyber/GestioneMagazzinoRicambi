@@ -1,0 +1,32 @@
+﻿idCategoriaSpesa;Descrizione;ValoreDeducibile;PercentualeIVA;IVAScaricabile;Note;Attivo
+1;Fatture Vitto/Alloggio;1;0,100000001;1;Fattura per Vitto/Alloggio;VERO
+2;Fatture Auto fino a dicembre 2012;0,400000006;0,209999993;0,400000006;;FALSO
+3;Fatture Telefonia fino a settembre 2013;0,800000012;0,209999993;0,800000012;;FALSO
+4;Spese non scaricabili (scontrini ecc.);0;0;0;;VERO
+6;Assicurazioni/Ritenute acconto/Commercialista/CNA;1;0;0;Fattura Per :;VERO
+7;Fatture Italia fino a settembre 2013;1;0,209999993;1;;FALSO
+11;Ricevute/Fatture Estero;1;0;0;Deducibile solo importo no iva;VERO
+17;Spese Auto estero fino a Dicembre 2012;0,400000006;0;0;;FALSO
+19;Assicurazione AUTO fino a dicembre 2012;0,400000006;0;0;Assicurazione anno:;FALSO
+21;Tasse (IRPEF-INPS-IMU ecc.);0;0;0;Versamento tasse reddito IRPEF;VERO
+24;Fatture Acquisti San Marino;1;0;0;;VERO
+29;Fatture Auto da gennaio a settembre 2013;0,200000003;0,209999993;0,400000006;;FALSO
+31;Assicurazione AUTO da gennaio a settembre 2013;0,200000003;0,209999993;0,400000006;Assicurazione anno:;FALSO
+32;Spese auto Estero da gennaio 2013;0,200000003;0;0;;FALSO
+35;Fatture Telefonia;0,800000012;0,219999999;0,800000012;;FALSO
+36;Fatture Italia;1;0,219999999;1;;VERO
+37;Fatture Auto da settembre 2013 a Febbraio 2015;0,200000003;0,219999999;0,400000006;;FALSO
+38;Assicurazione AUTO da sett 2013 a Febb 2015;0,200000003;0;0,400000006;Assicurazione anno:;FALSO
+39;Tasse SNC;0;0;0;;VERO
+40;Tasse Matteo;0;0;0;;VERO
+41;Tasse Maurizio;0;0;0;;VERO
+43;--------- Fine lista attiva ----------;0;0;0;;FALSO
+44;Ricevute Italia (No IVA);1;0,219999999;0;;VERO
+45;Fattura biglietti Traghetti;0,400000006;0,100000001;1;;VERO
+47;Spese per Auto Italia;0,699999988;0,219999999;1;;VERO
+48;Assicurazione AUTO (srl);0,699999988;0;0;Assicurazione anno:;VERO
+50;Retribuzione dipendenti;1;0;0;;VERO
+52;Spese per Auto Estero;0,699999988;0;0;;VERO
+53;Assicurazione AUTCARRO (srl);1;0;0;Assicurazione anno:;VERO
+54;Spese per Autocarri Italia;1;0,219999999;1;;VERO
+55;Spese per Autocarri Estero;1;0;0;;VERO

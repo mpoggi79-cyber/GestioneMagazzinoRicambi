@@ -1,0 +1,21 @@
+﻿idRiferimentoSpesa;Descrizione
+1;Vitto/Alloggio
+2;Auto (fatture carburante, autostrade, autonoleggio)
+4;Assicurazioni varie (No auto)
+5;Materiale per assistenza
+6;Telefonia fissa e mobile
+7;Carta carburante
+8;Pedaggi Italia (Telepass)
+9;Spese Consulenze  (Commercialista/CNA/Notaio)
+11;Affitto capannone
+14;Assicurazione auto
+15;Versamenti INPS - INAIL - Regioni -IMU ecc
+16;Tasse IRPEF soci
+18;Materiale per Falegnameria
+19;Materiale per società
+20;Tasse capannone (Enel,Gas ecc.)
+21;Materiale per sicurezza (DPI ecc.)
+25;Altro (generico)
+27;Ricambi SCM
+29;Mezzi di Trasporto (traghetti, aerei, taxi, bus, treni)
+31;Retribuzione dipendenti
