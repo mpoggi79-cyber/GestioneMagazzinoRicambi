@@ -1,0 +1,9 @@
+﻿idModalitaPagamento;Nome
+1;Assegno
+2;Bonifico bancario
+3;Carta di credito
+4;Contanti
+5;Bancomat
+6;Modulo F24
+7;Effetti/Utenze
+8;Carta prepagata
