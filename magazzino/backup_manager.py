@@ -230,7 +230,7 @@ class BackupManager:
             if not backup_path.exists():
                 return False, "File di backup non trovato"
             
-            logger.warning(f"⚠️ RESTORE backup: {filename}")
+            logger.warning(f"[WARNING] RESTORE backup: {filename}")
             
             # Percorso mysql dal database o settings
             mysql_exe = os.path.join(self.mysql_bin_path, 'mysql.exe')

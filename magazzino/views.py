@@ -1,5 +1,5 @@
 """
-Views per l'applicazione Gestione Magazzino Ricambi.
+Views per l'applicazione Gestione Magazzino Ricambi..
 """
 
 from django.shortcuts import render, redirect, get_object_or_404

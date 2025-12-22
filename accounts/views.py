@@ -54,7 +54,7 @@ class LoginView(DjangoLoginView):
                 user_agent=user_agent,
                 success=True
             )
-            logger.info(f"✅ Login riuscito per utente: {request.user.username}")
+            logger.info(f"[LOGIN] Login riuscito per utente: {request.user.username}")
         else:
             # Accesso fallito
             try:
@@ -66,9 +66,9 @@ class LoginView(DjangoLoginView):
                     success=False,
                     motivo_fallimento='Password non corretta'
                 )
-                logger.warning(f"❌ Tentativo di login fallito per: {username}")
+                logger.warning(f"[LOGIN_FAILED] Tentativo di login fallito per: {username}")
             except User.DoesNotExist:
-                logger.warning(f"❌ Tentativo di login con utente inesistente: {username}")
+                logger.warning(f"[LOGIN_FAILED] Tentativo di login con utente inesistente: {username}")
         
         return response
     
@@ -115,7 +115,7 @@ class RegisterView(CreateView):
             self.request,
             _('Registrazione completata! Accedi con le tue credenziali.')
         )
-        logger.info(f"✨ Nuovo utente registrato: {form.cleaned_data['username']}")
+        logger.info(f"[REGISTER] Nuovo utente registrato: {form.cleaned_data['username']}")
         return response
     
     def form_invalid(self, form):
@@ -191,7 +191,7 @@ class EditProfileView(LoginRequiredMixin, TemplateView):
         if form.is_valid():
             form.save()
             messages.success(request, _('Profilo aggiornato con successo!'))
-            logger.info(f"✏️ Profilo aggiornato per: {user.username}")
+            logger.info(f"[PROFILE] Profilo aggiornato per: {user.username}")
             return redirect('accounts:profile')
         else:
             for field, errors in form.errors.items():

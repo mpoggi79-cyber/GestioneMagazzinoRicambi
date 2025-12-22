@@ -69,11 +69,11 @@ def process_articolo_image(sender, instance, **kwargs):
     - Immagine principale ottimizzata (max 800x800px, qualità 90%)
     - Thumbnail (300x300px cropped, qualità 85%)
     """
-    logger.info(f"🎯 Signal chiamato per: {getattr(instance, 'codice_interno', 'NUOVO')}")
+    logger.info(f"[IMG_SIGNAL] Signal chiamato per: {getattr(instance, 'codice_interno', 'NUOVO')}")
     
     # Se non c'è immagine, non fare nulla
     if not instance.immagine:
-        logger.info("❌ Nessuna immagine, skip")
+        logger.info("[IMG_SIGNAL] Nessuna immagine, skip")
         # Se l'immagine è stata rimossa, elimina anche il thumbnail
         if instance.pk:
             try:
@@ -85,14 +85,14 @@ def process_articolo_image(sender, instance, **kwargs):
                 pass
         return
     
-    logger.info(f"✅ Immagine presente: {instance.immagine.name}")
+    logger.info(f"[IMG_SIGNAL] Immagine presente: {instance.immagine.name}")
     
     # Controlla se l'immagine è stata modificata
     try:
         old_instance = PezzoRicambio.objects.get(pk=instance.pk)
         # Se l'immagine non è cambiata, non riprocessare
         if old_instance.immagine == instance.immagine:
-            logger.info("⏭️ Immagine non modificata")
+            logger.info("[IMG_SIGNAL] Immagine non modificata")
             return
         # Elimina le vecchie immagini
         if old_instance.immagine:
@@ -101,10 +101,10 @@ def process_articolo_image(sender, instance, **kwargs):
             old_instance.immagine_thumbnail.delete(save=False)
     except PezzoRicambio.DoesNotExist:
         # Nuovo record, nessuna immagine da eliminare
-        logger.info("🆕 Nuovo articolo con immagine")
+        logger.info("[IMG_SIGNAL] Nuovo articolo con immagine")
         pass
     
-    logger.info("🔄 Inizio processing...")
+    logger.info("[IMG_SIGNAL] Inizio processing...")
     
     # Salva il file originale in memoria prima di processarlo
     instance.immagine.seek(0)
@@ -119,7 +119,7 @@ def process_articolo_image(sender, instance, **kwargs):
     base_name = os.path.splitext(os.path.basename(original_name))[0]
     large_name = f"{base_name}_large.jpg"
     
-    logger.info(f"💾 Salvo large: {large_name}")
+    logger.info(f"[IMG_SIGNAL] Salvo large: {large_name}")
     # Salva immagine principale processata
     instance.immagine.save(large_name, large_image, save=False)
     
@@ -128,9 +128,9 @@ def process_articolo_image(sender, instance, **kwargs):
     
     # Salva thumbnail
     thumbnail_name = f"{base_name}_thumb.jpg"
-    logger.info(f"💾 Salvo thumb: {thumbnail_name}")
+    logger.info(f"[IMG_SIGNAL] Salvo thumb: {thumbnail_name}")
     instance.immagine_thumbnail.save(thumbnail_name, thumbnail_image, save=False)
-    logger.info("✨ Processing completato!")
+    logger.info("[IMG_SIGNAL] Processing completato!")
 
 
 @receiver(post_delete, sender=PezzoRicambio)

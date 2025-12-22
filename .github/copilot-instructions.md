@@ -44,21 +44,52 @@ def può_modificare_dati(self):
 - **FK auto-referenziata**: `categoria_padre` + `livello` (campo calcolato per ottimizzazione query)
 - **Vincolo chiave**: `PROTECT` in cancellazione per mantenere la gerarchia
 - **Ordinamento**: Per livello → ordine → nome_categoria
-- Vedi [models.py](magazzino/models.py#L16-L70) per la struttura
+- **Protezione loop**: Il metodo `save()` verifica loop infiniti (max 10 livelli di profondità)
+- Vedi [magazzino/models.py](magazzino/models.py#L16-L70) per la struttura
 
 ### PezzoRicambio ↔ Giacenza (Relazione 1:1)
 - Giacenza memorizza i livelli di stock (disponibile, impegnata, prenotata)
 - **Logica minimo/massimo applicata nelle regole di business**, non nei vincoli DB
 - MovimentoMagazzino aggiorna sia PezzoRicambio che Giacenza
+- **Immagini**: Signal `pre_save` processa automaticamente immagine principale (max 800x800px) + thumbnail (300x300px)
 
 ### MovimentoMagazzino (Audit Trail)
 - Scelte tipo: CARICO, SCARICO, RETTIFICA, RESO
 - Immutabile una volta creato; memorizza operatore, data, note
 - Non modificare direttamente; creare nuovi movimenti RETTIFICA per correzioni
+- **Invariante critica**: Ogni MovimentoMagazzino DEVE aggiornare Giacenza associata via signal
+
+### ModelloMacchinaSCM & MatricolaMacchinaSCM
+- Relazione 1:Many per associare articoli a specifiche macchine SCM
+- MatricolaMacchinaSCM usa widget personalizzato `MatricolaSelectWidget` con data-attributes per JS interop
+- Importabili via management command per integrazioni esterne
 
 ---
 
-## ⚙️ Comandi Developer
+## 📐 Schemi Modelli & Relazioni
+
+### Modelli Magazzino (magazzino/models.py)
+```
+Categoria ──┬─→ Categoria (self FK, PROTECT) [Gerarchia]
+            └─→ PezzoRicambio
+                    ├─ Giacenza (1:1) ←── MovimentoMagazzino
+                    ├─ Fornitore (FK)
+                    ├─ TbUnitaMisura (FK)
+                    └─ MatricolaMacchinaSCM (Many)
+
+ModelloMacchinaSCM ─→ MatricolaMacchinaSCM (1:Many)
+                            ↓
+                       PezzoRicambio
+
+Inventario ──→ DettaglioInventario ──→ PezzoRicambio
+    (Stato: NON_INIZIATO, IN_CORSO, COMPLETATO)
+```
+
+**Conteggio modelli**:
+- **Magazzino app**: Categoria, PezzoRicambio, Giacenza, Fornitore, TbUnitaMisura, MovimentoMagazzino, Inventario, DettaglioInventario, ModelloMacchinaSCM, MatricolaMacchinaSCM, Configurazione (11 totali)
+- **Accounts app**: User (Django built-in), ProfiloUtente, RuoloUtente, LogAccesso (4 modelli custom)
+
+---
 
 ### Setup & Database
 ```bash
@@ -147,12 +178,20 @@ python manage.py shell  # poi: from magazzino.models import *
 - Widget personalizzati: `MatricolaSelectWidget` aggiunge data attributes per interop JS
 - Crispy-forms: sempre usare `{% load crispy_forms_tags %}` + `{{ form|crispy }}`
 
-### Signals & Automazione
-- **MovimentoMagazzino**: Signal `post_save` aggiorna automaticamente Giacenza (vedi [magazzino/signals.py](magazzino/signals.py))
-- **PezzoRicambio immagini**: Signal `pre_save` processa automaticamente:
-  - Immagine principale: ridimensionata a max 800x800px (qualità 90%, JPEG)
-  - Thumbnail: generato automaticamente 300x300px crop centrato (qualità 85%)
-  - Conversione RGBA/PNG → RGB/JPEG con sfondo bianco
+### 🖼️ Elaborazione Immagini (Signal pre_save)
+**File**: [magazzino/signals.py](magazzino/signals.py#L65-L135)
+
+Automatico per ogni PezzoRicambio.immagine upload:
+1. **Immagine principale**: Ridimensionata max 800x800px (aspect ratio preservato), JPEG qualità 90%
+2. **Thumbnail**: Generato 300x300px (crop centrato), JPEG qualità 85%
+3. **Conversione formato**: PNG/RGBA → RGB con sfondo bianco (Pillow Image.new)
+4. **Eliminazione**: Signal `post_delete` rimuove file fisici quando articolo cancellato
+
+**Nota**: Non carica mai immagini manualmente nel database; il signal le elabora automaticamente.
+
+### Signals & Automazione Dati
+- **MovimentoMagazzino** → **Giacenza**: Signal `post_save` aggiorna stock disponibile/impegnata/prenotata
+- **PezzoRicambio**: Signal `pre_save` processa immagini (vedi sezione "Elaborazione Immagini" sopra)
 - **CRITICO**: Non aggiornare mai manualmente Giacenza; creare sempre MovimentoMagazzino
 - Campi `auto_now_add`: creato_il (timestamp creazione) - NON modificare manualmente
 - Campi `auto_now`: modificato_il, ultimo_accesso (timestamp aggiornamento automatico)
@@ -183,19 +222,87 @@ python manage.py shell  # poi: from magazzino.models import *
 
 ---
 
-## ⚠️ Gotcha Critici
+## 🐛 Debugging & Troubleshooting
 
-1. **PyMySQL, non mysqlclient**: Config DB usa PyMySQL; query potrebbero differire leggermente
-2. **Auto-timestamp**: `auto_now_add=True` crea, `auto_now=True` aggiorna — non impostare manualmente
-3. **Vincoli Categoria**: PROTECT in FK previene cancellazione accidentale; gestire ProtectedError in view
-4. **Accesso basato ruolo**: Sempre verificare via mixin, non fidarsi mai di controlli client-side
-5. **Movimenti immutabili**: Design previene modifica dati storici; forzare in view + form
-6. **Query gerarchiche**: Sempre filtrare per `livello` quando implementare logica genitore/figlio
-7. **File media**: Memorizzati in [media/articoli/](media/articoli/); configurare MEDIA_URL in settings per serving
+### Errori Comuni Database
+```bash
+# "Table doesn't exist" dopo git pull
+python manage.py migrate
+python manage.py populate_db  # Ri-carica dati test
+
+# Errore connessione MySQL "Connection refused"
+# → XAMPP: MySQL non avviato. Avviare → MySQL admin
+# → O eseguire: mysql -u root < database_creation.sql
+
+# Errore "Foreign key constraint fails" su DELETE
+# → Verificare se modello ha FK con PROTECT (categoria_padre, etc)
+# Soluzione: Eliminare prima gli oggetti dipendenti o usa ON_DELETE=CASCADE
+```
+
+### Debug Django Shell
+```bash
+# Ispezionare modelli in tempo reale
+python manage.py shell
+>>> from magazzino.models import *
+>>> c = Categoria.objects.first()
+>>> c.livello  # Verifica gerarchia
+>>> c.sottocategorie.all()  # Query figli
+>>> m = MovimentoMagazzino.objects.last()
+>>> m.pezzo_ricambio.giacenza.disponibile  # Navigare relazioni
+```
+
+### Log & Debugging Signals
+- Signal image processing: Controlla logs in [logs/](logs/) per errori elaborazione immagini
+- Attiva `DEBUG=True` in [config/settings.py](config/settings.py) per tracciare SQL queries
+- Usa `logger.info()` e `logger.error()` nei signal handler per monitoraggio
+
+### Errori di Permessi Comuni
+```python
+# ❌ Errore: ProtectedError quando elimini categoria con sottocategorie
+# Soluzione: Eliminare ricorsivamente oppure usare cleanup script
+Categoria.objects.filter(categoria_padre=None).delete()  # Solo root
+
+# ❌ Errore: "Non hai i permessi" ma sei admin
+# Soluzione: Verifica ProfiloUtente.ruolo in shell
+>>> admin = User.objects.get(username='admin')
+>>> admin.profilo.ruolo  # Deve essere 'ADMIN'
+>>> admin.profilo.può_modificare_dati()  # Deve tornare True
+```
 
 ---
 
-## 📚 Struttura Documentazione
+## ⚠️ Gotcha Critici
+
+1. **PyMySQL, non mysqlclient**: Config DB usa PyMySQL; query potrebbero differire leggermente da MySQL nativo
+2. **Auto-timestamp**: `auto_now_add=True` crea, `auto_now=True` aggiorna — non impostare manualmente mai
+3. **Vincoli Categoria**: PROTECT in FK previene cancellazione accidentale; **sempre** gestire `ProtectedError` in view Delete
+4. **Accesso basato ruolo**: **Sempre** verificare via `CanEditMixin`/`CanViewMixin`, non fidarsi mai di controlli client-side
+5. **Movimenti immutabili**: Design previene modifica dati storici; riportare errori via form validation + RETTIFICA
+6. **Query gerarchiche**: Sempre filtrare per `livello` quando implementare logica genitore/figlio per ottimizzare query
+7. **File media**: Memorizzati in `media/articoli/`; configurare MEDIA_URL/MEDIA_ROOT in settings per serving locale
+8. **Signal image processing**: Affidati a `pre_save` per processamento; **non** salvare immagini raw direttamente nel DB
+9. **Crispy forms obbligatorio**: Tutte le form HTML devono usare `{% load crispy_forms_tags %}` + `{{ form|crispy }}`
+10. **Protezione CSRF**: Ogni form POST deve avere `{% csrf_token %}`; Django lo verifica automatico ma è obbligatorio nei template
+
+---
+
+## � Checklista AI Agent: Decisioni Comuni
+
+| Domanda | Risposta | Riferimento |
+|---------|----------|-------------|
+| Devo permettere edit a questo campo? | Controlla `CanEditMixin` in view CRUD e `può_modificare_dati()` in form | [magazzino/views.py#L50-L61](magazzino/views.py#L50-L61) |
+| Come aggiunge stock correttamente? | **Sempre** crea `MovimentoMagazzino`; **mai** modificare `Giacenza` direttamente | [magazzino/models.py#L669-L750](magazzino/models.py#L669-L750) |
+| Dove vanno le immagini? | `media/articoli/` auto-gestito da signals; non toccare manualmente | [magazzino/signals.py](magazzino/signals.py) |
+| Categoria padre può avere loop? | **NO** - `save()` verifica max 10 livelli di profondità | [magazzino/models.py#L83-L95](magazzino/models.py#L83-L95) |
+| Quale DB driver usiamo? | **PyMySQL** (non mysqlclient) - può differire da MySQL standar | [requirements.txt](requirements.txt) |
+| Come gestisco validazione cross-field? | Usa `clean()` nel form, non nel modello | [magazzino/forms.py](magazzino/forms.py) |
+| Aggiungo una nuova app? | **NO** - tutto in `accounts` + `magazzino`. Creare modello + view + form in queste | [config/settings.py#L37-L45](config/settings.py#L37-L45) |
+| Come testo in locale? | `populate_db` carica dati test; accedi con admin/admin | [README.md](README.md#L10-L25) |
+| File sensibili a non committare? | `settings.py` (SECRET_KEY), `.env` (se usato), `media/articoli/` | [.gitignore](../.gitignore) |
+
+---
+
+## �📚 Struttura Documentazione
 
 | File | Scopo |
 |------|-------|

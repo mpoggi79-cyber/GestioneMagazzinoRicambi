@@ -2,11 +2,13 @@
 
 **Data Analisi**: 20 dicembre 2025  
 **Database**: MySQL 10.4 via PyMySQL  
-**Fonte**: Export da modelli Django esistenti  
+**Fonte**: Export da modelli Django esistenti + Importazione CSV Fase 1  
 
 ---
 
-## 📋 RIEPILOGO TABELLE ESPORTATE
+## 📋 RIEPILOGO TABELLE DATABASE (16 TOTALI)
+
+### Dominio Magazzino (9 tabelle)
 
 | # | Nome Tabella | Righe | Descrizione |
 |---|--------------|-------|-------------|
@@ -18,7 +20,26 @@
 | 6 | movimenti_magazzino | N/D | Storico movimenti (carico/scarico/rettifica) |
 | 7 | modelli_macchine_scm | N/D | Modelli macchine SCM |
 | 8 | matricole_macchine_scm | N/D | Matricole specifiche macchine |
+| 9 | ~~unita_misura~~ | ❌ | ~~ELIMINATA - sostituita da tbunitamisura~~ |
 
+### Dominio Clienti e Fatturazione - FASE 1 ✅ (5 tabelle)
+
+| # | Nome Tabella | Righe | Descrizione |
+|---|--------------|-------|-------------|
+| 10 | **tbAppellativo** | **7** | **✅ Titoli/appellativi clienti (Sig., Dott., Prof., etc.)** |
+| 11 | **tbCategoriaIVA** | **7** | **✅ Categorie IVA con aliquote (22%, 0%, etc.)** |
+| 12 | **tbCategorieTariffe** | **21** | **✅ Categorie tariffe prestazioni/servizi** |
+| 13 | **tbTipoPagamento** | **23** | **✅ Tipi pagamento con termini scadenza** |
+| 14 | **tbModalitaPagamento** | **8** | **✅ Modalità pagamento (Bonifico, Carta, etc.)** |
+
+### Dominio Accounts (2 tabelle)
+
+| # | Nome Tabella | Righe | Descrizione |
+|---|--------------|-------|-------------|
+| 15 | profili_utenti | 4 | Profili utenti con ruoli e permessi |
+| 16 | log_accessi | N/D | Log audit accessi sistema |
+
+**✅ FASE 1 COMPLETA**: 66 record clienti importati (5 tabelle base)  
 **⚠️ IMPORTANTE**: La tabella `unita_misura` è stata ELIMINATA e sostituita definitivamente da `tbunitamisura`.
 
 ---
@@ -377,12 +398,186 @@
 ## 🎯 PROSSIMI STEP
 
 1. ✅ Analisi tabelle esistenti completata
-2. 🏗️ Creare script per importare `tbUnitaMisura` da CSV
-3. ⚠️ Aggiornare manualmente FK in `pezzi_ricambio`
-4. 🏗️ Aggiornare modello Django `UnitaMisura` con nuova struttura
-5. 🏗️ Creare migration Django per sostituzione tabella
-6. 🏗️ Integrare con tabelle clienti (13 tabelle CSV analizzate in ANALISI_TABELLE_CSV.md)
+2. ✅ Script import `tbUnitaMisura` creato e eseguito (14 righe)
+3. ✅ Mapping dati vecchi ID → nuovi ID applicato via migration 0013
+4. ✅ Modello Django `TbUnitaMisura` implementato
+5. ✅ Migrations Django 0011-0015 applicate con successo
+6. ✅ **FASE 1 CLIENTI COMPLETATA**: 5 tabelle base create e popolate (66 record)
+7. 🔜 **FASE 2 CLIENTI**: Creare `tbClienti` (262 righe) e `tbPrestazioni` (142 righe)
+8. 🔜 **FASE 3 CLIENTI**: Tabelle rimanenti (tbContatti, tbCategoriaSpesa, tbRiferimentoSpesa, tbStatoDocumenti, etc.)
 
 ---
 
-**Fine analisi** - Tabelle esistenti documentate e pronte per integrazione con modulo clienti 🚀
+## 🆕 TABELLE CLIENTI - FASE 1 (COMPLETE)
+
+### 10. tbAppellativo ✅
+
+**Descrizione**: Titoli/appellativi per clienti e contatti  
+**Nome Tabella**: `tbAppellativo`  
+**Modello Django**: `TbAppellativo`  
+**File CSV**: `Tabelle CSV/tbAppellativo.csv`  
+**Righe dati**: 7
+
+#### 📋 Struttura Colonne
+
+| Colonna | Tipo | Formato | Chiave | Descrizione |
+|---------|------|---------|--------|-------------|
+| idAppellativo | INT | Numerico | **PK** | ID univoco appellativo (db_column='idAppellativo') |
+| Descrizione | VARCHAR(50) | Testo | - | Titolo/appellativo (es: Sig., Dott., Prof.) |
+
+#### 📊 Dati Completi
+
+| ID | Descrizione |
+|----|-------------|
+| 1  | Sig.        |
+| 2  | Sig.ra      |
+| 3  | Dott.       |
+| 4  | Ing.        | 
+| 5  | Prof.       |
+| 6  | Arch.       |
+| 7 |  Geom.       |
+
+**Import Command**: `python manage.py import_tbappellativo`  
+**Status**: ✅ Importato con successo
+
+---
+
+### 11. tbCategoriaIVA ✅
+
+**Descrizione**: Categorie IVA con aliquote per fatturazione  
+**Nome Tabella**: `tbCategoriaIVA`  
+**Modello Django**: `TbCategoriaIVA`  
+**File CSV**: `Tabelle CSV/tbCategoriaIVA.csv`  
+**Righe dati**: 7
+
+#### 📋 Struttura Colonne
+
+| Colonna | Tipo | Formato | Chiave | Descrizione |
+|---------|------|---------|--------|-------------|
+| idCategoriaIVA | INT | Numerico | **PK** | ID univoco categoria (db_column='idCategoriaIVA') |
+| NomeCategoria | VARCHAR(100) | Testo | - | Nome categoria IVA |
+| ValoreIVA | DECIMAL(5,3) | Decimale | - | Aliquota IVA (0.220 = 22%) |
+
+#### 📊 Dati Completi
+
+| ID | NomeCategoria | ValoreIVA | Aliquota % |
+|----|---------------|-----------|------------|
+| 1  | Manodopera    | 0.220     | 22%        |
+| 2  | Ricambi       | 0.220     | 22%        |
+| 3  | Servizi       | 0.220     | 22%        |
+| 4  | Noleggio      | 0.220     | 22%        |
+| 5  | Trasporto     | 0.220     | 22%        |
+| 6  | Esente IVA    | 0.000     | 0%         |
+| 7  | Fuori Campo IVA | 0.000   | 0%         |
+
+
+**Import Command**: `python manage.py import_tbcategoriaiva`  
+**Status**: ✅ Importato con successo
+
+---
+
+### 12. tbCategorieTariffe ✅
+
+**Descrizione**: Categorie tariffe per prestazioni e servizi  
+**Nome Tabella**: `tbCategorieTariffe`  
+**Modello Django**: `TbCategorieTariffe`  
+**File CSV**: `Tabelle CSV/tbCategorieTariffe.csv`  
+**Righe dati**: 21
+
+#### 📋 Struttura Colonne
+
+| Colonna | Tipo | Formato | Chiave | Descrizione |
+|---------|------|---------|--------|-------------|
+| idCategorieTariffe | INT | Numerico | **PK** | ID univoco categoria (db_column='idCategorieTariffe') |
+| CategoriaTariffe | VARCHAR(200) | Testo | - | Nome categoria tariffa |
+| IsVisible | BOOLEAN | VERO/FALSO | - | Visibilità categoria (default=True) |
+
+#### 📊 Esempi Dati (21 totali)
+
+| ID | CategoriaTariffe | IsVisible |
+|----|------------------|--------|
+| 1 | Assistenza Tecnica | ✅ |
+| 2 | Produzione | ✅ |
+| 3 | Manutenzione Ordinaria | ✅ |
+| 4 | Manutenzione Straordinaria | ✅ |
+| 5 | Installazione | ✅ |
+| 6 | Formazione | ✅ |
+| ... | ... | ... |
+| 21 | Progettazione | ✅ |
+
+**Import Command**: `python manage.py import_tbcategorietariffe`  
+**Status**: ✅ Importato con successo (21 categorie)
+
+---
+
+### 13. tbTipoPagamento ✅
+
+**Descrizione**: Tipi pagamento con termini e scadenze  
+**Nome Tabella**: `tbTipoPagamento`  
+**Modello Django**: `TbTipoPagamento`  
+**File CSV**: `Tabelle CSV/tbTipoPagamento.csv`  
+**Righe dati**: 23
+
+#### 📋 Struttura Colonne
+
+| Colonna | Tipo | Formato | Chiave | Descrizione |
+|---------|------|---------|--------|-------------|
+| idTipoPagamento | INT | Numerico | **PK** | ID univoco tipo (db_column='idTipoPagamento') |
+| descrizione | VARCHAR(200) | Testo | - | Descrizione tipo pagamento |
+| DataRifScad | VARCHAR(50) | Testo | - | Data riferimento scadenza (DF/FM) |
+| GiorniDataRif | INT | Numerico | - | Giorni dalla data riferimento |
+| GiornoAddebito | INT | Numerico | - | Giorno mese addebito |
+
+#### 📊 Esempi Dati (23 totali)
+
+| ID | Descrizione | DataRifScad | GiorniDataRif | GiornoAddebito |
+|----|-------------|-------------|---------------|----------------|
+| 1 | Bonifico 30 gg D.F. | DF | 30 | 0 |
+| 2 | Bonifico 60 gg D.F. | DF | 60 | 0 |
+| 3 | Bonifico 90 gg D.F. | DF | 90 | 0 |
+| 4 | RI.BA. 30 gg D.F. | DF | 30 | 0 |
+| 5 | RI.BA. 60 gg D.F. FM | DF | 60 | 0 |
+| 6 | Contanti | DF | 0 | 0 |
+| 7 | Carta di Credito | DF | 0 | 0 |
+| ... | ... | ... | ... | ... |
+| 23 | SDD 90 gg DF | DF | 90 | 0 |
+
+**Import Command**: `python manage.py import_tbtipopagamento`  
+**Status**: ✅ Importato con successo (23 tipi)
+
+---
+
+### 14. tbModalitaPagamento ✅
+
+**Descrizione**: Modalità pagamento disponibili  
+**Nome Tabella**: `tbModalitaPagamento`  
+**Modello Django**: `TbModalitaPagamento`  
+**File CSV**: `Tabelle CSV/tbModalitaPagamento.csv`  
+**Righe dati**: 8
+
+#### 📋 Struttura Colonne
+
+| Colonna | Tipo | Formato | Chiave | Descrizione |
+|---------|------|---------|--------|-------------|
+| idModalitaPagamento | INT | Numerico | **PK** | ID univoco modalità (db_column='idModalitaPagamento') |
+| Nome | VARCHAR(100) | Testo | - | Nome modalità pagamento |
+
+#### 📊 Dati Completi
+
+| ID | Nome |
+|----|------|
+| 1 | Contanti |
+| 2 | Assegno |
+| 3 | Bonifico bancario |
+| 4 | Carta di credito |
+| 5 | Carta di debito |
+| 6 | RI.BA. (Ricevuta Bancaria) |
+| 7 | SDD (Addebito diretto SEPA) |
+| 8 | Paypal |
+
+**Import Command**: `python manage.py import_tbmodalitapagamento`  
+**Status**: ✅ Importato con successo
+
+---
+
+**Fine analisi** - 16 tabelle documentate | Fase 1 Clienti: ✅ COMPLETA 🚀
