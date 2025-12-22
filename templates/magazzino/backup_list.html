@@ -162,18 +162,25 @@
                                             <!-- Download -->
                                             <a href="{% url 'magazzino:backup_download' backup.filename %}" 
                                                class="btn btn-success"
-                                               title="Scarica backup">
+                                               data-bs-toggle="tooltip" 
+                                               data-bs-placement="top" 
+                                               data-bs-html="true"
+                                               title="<strong>Scarica Backup</strong><br>Salva una copia locale del backup per conservarla in modo sicuro (disco esterno, cloud, etc.)">
                                                 <i class="fas fa-download"></i>
                                             </a>
                                             
                                             <!-- Ripristina -->
-                                            <button type="button"
-                                                    class="btn btn-warning"
-                                                    title="Ripristina backup (ATTENZIONE!)"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#restoreModal{{ forloop.counter }}">
-                                                <i class="fas fa-upload"></i>
-                                            </button>
+                                            <span data-bs-toggle="tooltip" 
+                                                  data-bs-placement="top" 
+                                                  data-bs-html="true"
+                                                  title="<strong>⚠️ Ripristina Database</strong><br>ATTENZIONE: Sostituisce TUTTI i dati attuali con quelli del backup. Operazione IRREVERSIBILE!">
+                                                <button type="button"
+                                                        class="btn btn-warning"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#restoreModal{{ forloop.counter }}">
+                                                    <i class="fas fa-upload"></i>
+                                                </button>
+                                            </span>
                                             
                                             <!-- Elimina -->
                                             <form method="post" 
@@ -183,7 +190,10 @@
                                                 {% csrf_token %}
                                                 <button type="submit" 
                                                         class="btn btn-danger"
-                                                        title="Elimina backup">
+                                                        data-bs-toggle="tooltip" 
+                                                        data-bs-placement="top" 
+                                                        data-bs-html="true"
+                                                        title="<strong>Elimina Backup</strong><br>Rimuove definitivamente questo file di backup dal server">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -335,5 +345,135 @@
             </div>
         </div>
     </div>
+    
+    <!-- LEGENDA AZIONI -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-info-circle"></i> Legenda Azioni Backup
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Scarica Backup -->
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex align-items-start">
+                                <button class="btn btn-success btn-sm me-3" disabled>
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <div>
+                                    <h6 class="mb-1"><strong>Scarica Backup</strong></h6>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-arrow-right text-success"></i> 
+                                        Salva una copia locale del file di backup sul tuo computer.
+                                    </p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-shield-alt text-success"></i> 
+                                        Consigliato per conservare copie di sicurezza su disco esterno o cloud.
+                                    </p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-file-archive text-success"></i> 
+                                        File formato: <code>.sql.gz</code> (compresso)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ripristina Backup -->
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex align-items-start">
+                                <button class="btn btn-warning btn-sm me-3" disabled>
+                                    <i class="fas fa-upload"></i>
+                                </button>
+                                <div>
+                                    <h6 class="mb-1"><strong>Ripristina Database</strong></h6>
+                                    <p class="text-danger small mb-1">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        <strong>ATTENZIONE: Operazione critica!</strong>
+                                    </p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-database text-warning"></i> 
+                                        Sostituisce TUTTI i dati attuali del database con quelli del backup selezionato.
+                                    </p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-ban text-danger"></i> 
+                                        Operazione IRREVERSIBILE - tutte le modifiche successive al backup verranno perse.
+                                    </p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-check-circle text-warning"></i> 
+                                        Richiede conferma digitando "RESTORE"
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Elimina Backup -->
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex align-items-start">
+                                <button class="btn btn-danger btn-sm me-3" disabled>
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <div>
+                                    <h6 class="mb-1"><strong>Elimina Backup</strong></h6>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-trash-alt text-danger"></i> 
+                                        Rimuove definitivamente il file di backup dal server.
+                                    </p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-hdd text-danger"></i> 
+                                        Utile per liberare spazio su disco eliminando backup obsoleti.
+                                    </p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-clock text-muted"></i> 
+                                        Backup più vecchi di {{ retention_days }} giorni vengono segnalati per l'eliminazione
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Nota Emergenza -->
+                    <div class="alert alert-info mt-3 mb-0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-life-ring"></i> In Caso di Emergenza</h6>
+                                <p class="small mb-0">
+                                    Se il database è corrotto e non riesci ad accedere all'applicazione web, 
+                                    puoi ripristinare un backup tramite:
+                                </p>
+                                <ul class="small mb-0">
+                                    <li><strong>Terminale</strong>: <code>python manage.py restore_backup --latest</code></li>
+                                    <li><strong>PowerShell</strong>: <code>.\restore_db_emergency.ps1 -Latest</code></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-book"></i> Documentazione Completa</h6>
+                                <p class="small mb-0">
+                                    Per procedure dettagliate di ripristino emergenza, consulta:
+                                </p>
+                                <ul class="small mb-0">
+                                    <li><a href="{{ STATIC_URL }}BACKUP_RECOVERY_GUIDE.md" target="_blank" class="text-decoration-none">
+                                        <i class="fas fa-file-alt"></i> BACKUP_RECOVERY_GUIDE.md
+                                    </a></li>
+                                    <li><i class="fas fa-terminal"></i> 3 metodi di ripristino (Web, Terminale, PowerShell)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Script per attivare tooltip Bootstrap -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inizializza tutti i tooltip
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
 {% endblock %}

@@ -641,6 +641,72 @@ Per il deploy in produzione, consulta [MANUALE_AMMINISTRATORE.md](MANUALE_AMMINI
 
 ---
 
+## 🆘 BACKUP & RECOVERY
+
+Il sistema include **3 metodi di ripristino** database per ogni scenario:
+
+### 📊 Metodi Disponibili
+
+| Metodo | Quando Usare | Richiede Login | Complessità |
+|--------|--------------|----------------|-------------|
+| **Interfaccia Web** | Database OK, interfaccia accessibile | ✅ SI | ⭐ Facile |
+| **Management Command** | Database corrotto, Django funzionante | ❌ NO | ⭐⭐ Medio |
+| **Script PowerShell** | Emergenza totale, Django non funziona | ❌ NO | ⭐⭐⭐ Avanzato |
+
+### 🌐 Metodo 1: Interfaccia Web (Normale)
+
+```
+1. Accedi a http://127.0.0.1:8000/backup/
+2. Clicca "Ripristina" sul backup desiderato
+3. Digita "RESTORE" per confermare
+4. Riavvia server Django
+```
+
+### 💻 Metodo 2: Management Command (Emergenza Media)
+
+```bash
+# Lista backup disponibili
+python manage.py restore_backup --list
+
+# Ripristina backup specifico
+python manage.py restore_backup backup_gmr_20251223_120530.sql.gz
+
+# Oppure ripristina il più recente
+python manage.py restore_backup --latest
+```
+
+### 🚨 Metodo 3: Script PowerShell (Emergenza Critica)
+
+**Quando Django è completamente inaccessibile:**
+
+```powershell
+# Lista backup
+.\restore_db_emergency.ps1 -ListBackups
+
+# Ripristina il più recente
+.\restore_db_emergency.ps1 -Latest
+
+# Ripristina backup specifico
+.\restore_db_emergency.ps1 -BackupFile backup_gmr_20251223_120530.sql.gz
+```
+
+**📘 Guida Completa**: Vedi [BACKUP_RECOVERY_GUIDE.md](BACKUP_RECOVERY_GUIDE.md) per procedure dettagliate e troubleshooting.
+
+### ✅ Completezza Backup
+
+I backup includono:
+- ✅ Struttura completa database (CREATE TABLE)
+- ✅ Tutti i dati (INSERT con nomi colonne)
+- ✅ Stored procedures e functions
+- ✅ Trigger database
+- ✅ Eventi schedulati
+- ✅ Charset UTF8MB4 corretto
+- ✅ Compressione gzip automatica
+
+**Nota**: File media (immagini) NON inclusi - backup manuale di `media/articoli/` consigliato.
+
+---
+
 ## 📚 STRUTTURA DOCUMENTAZIONE
 
 | Documento | Scopo | Audience |

@@ -57,18 +57,26 @@ class BackupManager:
             # Percorso mysqldump dal database o settings
             mysqldump_exe = os.path.join(self.mysql_bin_path, 'mysqldump.exe')
             
-            # Comando mysqldump
+            # Comando mysqldump con flag completi per backup affidabile
             cmd = [
                 mysqldump_exe,
                 f'--user={self.db_user}',
                 f'--password={self.db_password}',
                 f'--host={self.db_host}',
                 f'--port={self.db_port}',
-                '--single-transaction',
-                '--routines',
-                '--triggers',
-                '--add-drop-table',
-                '--extended-insert',
+                '--single-transaction',       # Backup consistente senza lock tabelle
+                '--routines',                 # Include stored procedures/functions
+                '--triggers',                 # Include trigger
+                '--events',                   # Include eventi schedulati
+                '--add-drop-table',           # Aggiungi DROP TABLE prima di CREATE
+                '--extended-insert',          # INSERT multipli (backup più piccolo)
+                '--default-character-set=utf8mb4',  # Charset esplicito
+                '--set-charset',              # Imposta charset nel dump
+                '--hex-blob',                 # Dati binari in formato hex (più sicuro)
+                '--complete-insert',          # INSERT con nomi colonne (più sicuro per restore)
+                '--create-options',           # Include opzioni CREATE TABLE
+                '--disable-keys',             # Ottimizzazione import con ALTER TABLE DISABLE KEYS
+                '--lock-tables=false',        # Non bloccare tabelle (single-transaction già gestisce)
                 self.db_name
             ]
             
