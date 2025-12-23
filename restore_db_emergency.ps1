@@ -164,7 +164,8 @@ try {
     $mysqlExe = Join-Path $MYSQL_BIN "mysql.exe"
     $testCmd = "SELECT 'OK' as status;"
     
-    $testResult = & $mysqlExe --user=$DB_USER --password=$DB_PASSWORD -e $testCmd 2>&1
+    # Esegui test connessione MySQL (il risultato non viene utilizzato, solo il codice di uscita)
+    & $mysqlExe --user=$DB_USER --password=$DB_PASSWORD -e $testCmd 2>&1 | Out-Null
     
     if ($LASTEXITCODE -ne 0) {
         throw "MySQL non risponde. Verifica che XAMPP sia avviato."
