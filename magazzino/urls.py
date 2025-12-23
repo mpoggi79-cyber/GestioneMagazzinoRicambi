@@ -81,4 +81,8 @@ urlpatterns = [
     path('backup/cleanup/', views.BackupCleanupView.as_view(), name='backup_cleanup'),
     path('backup/restore/<str:filename>/', views.BackupRestoreView.as_view(), name='backup_restore'),
     path('backup/settings/', views.BackupSettingsView.as_view(), name='backup_settings'),
+    
+    # GESTIONE TABELLE DATABASE
+    path('gestione-tabelle/', views.GestioneTabelleView.as_view(), name='gestione_tabelle'),
+    path('modifica-tabella/<str:nome_tabella>/', views.ModificaTabellaView.as_view(), name='modifica_tabella'),
 ]

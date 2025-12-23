@@ -27,8 +27,9 @@ from .forms import (
     MovimentoMagazzinoForm, InventarioForm
 )
 from .models import (
-    Categoria, TbUnitaMisura, Fornitore, PezzoRicambio, 
-    Giacenza, MovimentoMagazzino, Inventario, DettaglioInventario
+    Categoria, UnitaMisura, Fornitore, PezzoRicambio, 
+    Giacenza, MovimentoMagazzino, Inventario, DettaglioInventario,
+    TbTipoPagamento, TbCategoriaIVA, TbContatti
 )
 from accounts.models import RuoloUtente
 
@@ -1999,3 +2000,127 @@ def get_articolo_fornitore(request, articolo_id):
             'success': False,
             'error': 'Errore server: ' + str(e)
         }, status=500)
+
+
+# ============================================================================
+# GESTIONE TABELLE DATABASE
+# ============================================================================
+
+class GestioneTabelleView(CanEditMixin, TemplateView):
+    """Vista per la gestione delle tabelle del database"""
+    template_name = 'magazzino/gestione_tabelle.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Lista delle tabelle modificabili (solo quelle sicure)
+        tabelle_modificabili = [
+            {
+                'nome': 'tbunitamisura',
+                'descrizione': 'Unità di Misura',
+                'modello': 'UnitaMisura',
+                'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbunitamisura'})
+            },
+            {
+                'nome': 'tbtipopagamento',
+                'descrizione': 'Tipo Pagamento',
+                'modello': 'TbTipoPagamento',
+                'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbtipopagamento'})
+            },
+            {
+                'nome': 'tbcategoriaiva',
+                'descrizione': 'Categoria IVA',
+                'modello': 'TbCategoriaIVA',
+                'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbcategoriaiva'})
+            },
+            {
+                'nome': 'tbcontatti',
+                'descrizione': 'Contatti',
+                'modello': 'TbContatti',
+                'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbcontatti'})
+            },
+            # Aggiungere altre tabelle qui in futuro
+        ]
+        
+        context['tabelle_modificabili'] = tabelle_modificabili
+        return context
+
+
+class ModificaTabellaView(CanEditMixin, TemplateView):
+    """Vista per modificare i record di una tabella specifica"""
+    template_name = 'magazzino/modifica_tabella.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        nome_tabella = kwargs.get('nome_tabella')
+        
+        # Solo tabelle autorizzate
+        tabelle_permesse = {
+            'tbunitamisura': {
+                'modello': UnitaMisura,
+                'descrizione': 'Unità di Misura',
+                'campi': ['id_unita_misura', 'denominazione', 'denominazione_stampa', 'stato_attivo']
+            },
+            'tbtipopagamento': {
+                'modello': TbTipoPagamento,
+                'descrizione': 'Tipo Pagamento',
+                'campi': ['id_tipo_pagamento', 'descrizione', 'data_rif_scad', 'giorni_data_rif', 'giorno_addebito']
+            },
+            'tbcategoriaiva': {
+                'modello': TbCategoriaIVA,
+                'descrizione': 'Categoria IVA',
+                'campi': ['id_categoria_iva', 'nome_categoria', 'valore_iva']
+            },
+            'tbcontatti': {
+                'modello': TbContatti,
+                'descrizione': 'Contatti',
+                'campi': ['id_contatto', 'id_cliente', 'nome', 'cognome', 'ruolo', 'email_azienda', 'telefono_azienda']
+            }
+        }
+        
+        if nome_tabella not in tabelle_permesse:
+            raise Http404("Tabella non autorizzata")
+        
+        config = tabelle_permesse[nome_tabella]
+        modello = config['modello']
+        
+        # Ottieni tutti i record e converti in lista di dizionari
+        records = []
+        if nome_tabella == 'tbcontatti':
+            # Per contatti, ordina prima quelli con cognome/nome popolati
+            queryset = modello.objects.extra(
+                select={'has_name': "CASE WHEN cognome != '' AND nome != '' THEN 1 ELSE 0 END"}
+            ).extra(
+                order_by=['-has_name', 'cognome', 'nome']
+            )
+        else:
+            queryset = modello.objects.all()
+            
+        for record in queryset:
+            valori_campi = []
+            for campo in config['campi']:
+                valore = getattr(record, campo)
+                # Formatta date
+                if campo in ['creato_il', 'modificato_il'] and valore:
+                    valore = valore.strftime('%d/%m/%Y %H:%M')
+                # Formatta booleani
+                elif campo == 'stato_attivo':
+                    valore = 'Attivo' if valore else 'Disattivo'
+                # Gestisci valori None per campi FK
+                elif valore is None:
+                    valore = ''
+                valori_campi.append(valore)
+            
+            records.append({
+                'pk': record.pk,
+                'valori': valori_campi
+            })
+        
+        context.update({
+            'nome_tabella': nome_tabella,
+            'descrizione_tabella': config['descrizione'],
+            'campi': config['campi'],
+            'records': records,
+        })
+        
+        return context

@@ -1,7 +1,7 @@
 # Istruzioni AI Copilot per Gestione Magazzino Ricambi
 
 **Progetto**: Sistema di gestione magazzino Django 5.2 ("Gestione Magazzino Ricambi Goose")  
-**Status**: v1.0 pronto per produzione | Database: MySQL 10.4 | Modelli: 11 | View: 22 | Template: 22 | Python: 3.10+
+**Status**: v1.1 CLIENTI MODULE + BACKUP SYSTEM | Database: MySQL 10.4 | Modelli: 16 | View: 47 | Template: 40 | Python: 3.10+
 
 ---
 
@@ -9,14 +9,14 @@
 
 ### Struttura a Tre Livelli
 - **Backend**: Django 5.2.8 CBV (class-based views) con LoginRequiredMixin + mixin personalizzati
-- **Database**: MySQL 10.4 (via PyMySQL, NON mysqlclient) con 11 modelli su 2 app
+- **Database**: MySQL 10.4 (via PyMySQL, NON mysqlclient) con 16 modelli su 2 app
 - **Frontend**: Template Bootstrap 5.3 + crispy-forms + crispy-bootstrap5 + Font Awesome 6.4
 
 ### Due App Principali
 | App | Scopo | Modelli Chiave |
 |-----|-------|-----------|
 | **accounts** | Autenticazione e autorizzazione | ProfiloUtente, RuoloUtente (4 ruoli: ADMIN, GESTORE_MAGAZZINO, OPERATORE, VISUALIZZATORE), LogAccesso |
-| **magazzino** | Logica di dominio magazzino | Categoria (gerarchica), PezzoRicambio, Fornitore, MovimentoMagazzino, Giacenza, Inventario, DettaglioInventario, ModelloMacchinaSCM, MatricolaMacchinaSCM |
+| **magazzino** | Logica di dominio magazzino + clienti | **Magazzino**: Categoria (gerarchica), PezzoRicambio, Fornitore, MovimentoMagazzino, Giacenza, Inventario, DettaglioInventario, ModelloMacchinaSCM, MatricolaMacchinaSCM<br>**Clienti**: tbappellativo, tbcategoriaiva, tbcontatti, tbcategorieTariffe, tbtipopagamento, tbmodalitapagamento |
 
 ---
 
@@ -64,6 +64,15 @@ def può_modificare_dati(self):
 - MatricolaMacchinaSCM usa widget personalizzato `MatricolaSelectWidget` con data-attributes per JS interop
 - Importabili via management command per integrazioni esterne
 
+### Tabelle Clienti (Modulo Fatturazione - Fase 1)
+- **TbAppellativo**: Titoli onorifici (Sig., Dott., Prof., etc.) - 7 record
+- **TbCategoriaIVA**: Aliquote IVA (22%, 10%, 0%, etc.) - 7 record  
+- **TbContatti**: Anagrafica clienti/fornitori con campi estesi - relazione con TbAppellativo
+- **TbCategorieTariffe**: Classificazione servizi (Assistenza, Produzione, etc.) - 21 record
+- **TbTipoPagamento**: Condizioni pagamento (Bonifico 30gg, RI.BA., etc.) - 23 record
+- **TbModalitaPagamento**: Metodi pagamento (Contanti, Carta, Assegno, etc.) - 8 record
+- **Importazione**: Via management commands dedicati per ogni tabella
+
 ---
 
 ## 📐 Schemi Modelli & Relazioni
@@ -74,7 +83,7 @@ Categoria ──┬─→ Categoria (self FK, PROTECT) [Gerarchia]
             └─→ PezzoRicambio
                     ├─ Giacenza (1:1) ←── MovimentoMagazzino
                     ├─ Fornitore (FK)
-                    ├─ TbUnitaMisura (FK)
+                    ├─ tbunitamisura (FK)
                     └─ MatricolaMacchinaSCM (Many)
 
 ModelloMacchinaSCM ─→ MatricolaMacchinaSCM (1:Many)
@@ -85,9 +94,57 @@ Inventario ──→ DettaglioInventario ──→ PezzoRicambio
     (Stato: NON_INIZIATO, IN_CORSO, COMPLETATO)
 ```
 
+### Modelli Clienti (magazzino/models.py)
+```
+TbAppellativo (7 record)
+├── idAppellativo: AutoField(PK)
+└── Descrizione: CharField(max_length=50)
+
+TbCategoriaIVA (7 record)  
+├── idCategoriaIVA: AutoField(PK)
+├── NomeCategoria: CharField(max_length=100)
+└── ValoreIVA: DecimalField(5,3) - es: 0.22 = 22%
+
+TbContatti (Clienti/Fornitori)
+├── idContatto: AutoField(PK)
+├── idAppellativo: ForeignKey(TbAppellativo)
+├── RagioneSociale: CharField(max_length=200)
+├── Nome: CharField(max_length=100, null=True)
+├── Cognome: CharField(max_length=100, null=True)
+├── Indirizzo: TextField(null=True)
+├── CAP: CharField(max_length=10, null=True)
+├── Città: CharField(max_length=100, null=True)
+├── Provincia: CharField(max_length=5, null=True)
+├── Telefono: CharField(max_length=20, null=True)
+├── Fax: CharField(max_length=20, null=True)
+├── Cellulare: CharField(max_length=20, null=True)
+├── Email: EmailField(null=True)
+├── PIVA: CharField(max_length=20, null=True)
+├── CodiceFiscale: CharField(max_length=20, null=True)
+└── idCliente: IntegerField(unique=True) - campo legacy
+
+TbCategorieTariffe (21 record)
+├── idCategorieTariffe: AutoField(PK)
+├── CategoriaTariffe: CharField(max_length=200)
+└── IsVisible: BooleanField(default=True)
+
+TbTipoPagamento (23 record)
+├── idTipoPagamento: AutoField(PK)
+├── descrizione: CharField(max_length=200)
+├── DataRifScad: CharField(max_length=50)
+├── GiorniDataRif: IntegerField
+└── GiornoAddebito: IntegerField
+
+TbModalitaPagamento (8 record)
+├── idModalitaPagamento: AutoField(PK)
+└── Nome: CharField(max_length=100)
+```
+
 **Conteggio modelli**:
-- **Magazzino app**: Categoria, PezzoRicambio, Giacenza, Fornitore, TbUnitaMisura, MovimentoMagazzino, Inventario, DettaglioInventario, ModelloMacchinaSCM, MatricolaMacchinaSCM, Configurazione (11 totali)
+- **Magazzino app**: Categoria, PezzoRicambio, Giacenza, Fornitore, tbunitamisura, MovimentoMagazzino, Inventario, DettaglioInventario, ModelloMacchinaSCM, MatricolaMacchinaSCM, Configurazione (11 totali)
+- **Clienti app**: TbAppellativo, TbCategoriaIVA, TbContatti, TbCategorieTariffe, TbTipoPagamento, TbModalitaPagamento (6 totali)
 - **Accounts app**: User (Django built-in), ProfiloUtente, RuoloUtente, LogAccesso (4 modelli custom)
+- **TOTALE**: 16 modelli
 
 ---
 
@@ -101,6 +158,13 @@ python manage.py migrate
 
 # Caricare dati di test (8 categorie, 5 fornitori, 19 articoli, 77 movimenti, 4 utenti)
 python manage.py populate_db
+
+# Caricare dati clienti (66 record totali)
+python manage.py import_tbappellativo
+python manage.py import_tbcategoriaiva
+python manage.py import_tbcategorietariffe
+python manage.py import_tbtipopagamento
+python manage.py import_tbmodalitapagamento
 
 # Testare connessione DB
 python test_db_connection.py
@@ -154,6 +218,21 @@ python manage.py shell  # poi: from magazzino.models import *
 - Verificare profondità gerarchia tramite campo `livello` prima delle operazioni
 - Usare `categoria_padre` con PROTECT per prevenire rotture di catene
 
+### Gestire Sistema Backup
+- **Backup automatici**: Giornalieri compressi con retention policy (30 giorni)
+- **3 metodi ripristino**: 
+  - Web UI (`/backup/` - solo ADMIN)
+  - Management command (`python manage.py restore_backup`)
+  - Script PowerShell emergenza (`.\restore_db_emergency.ps1`)
+- **File backup**: `backups/backup_gmr_YYYYMMDD_HHMMSS.sql.gz`
+- **Monitoraggio**: BackupManager traccia spazio e pulizia automatica
+
+### Gestire Tabelle Clienti
+- **Interfaccia web**: `/gestione-tabelle/` (ADMIN/GESTORE) per selezione tabella
+- **Visualizzazione**: `/modifica-tabella/<nome>/` per vedere/modificare record
+- **Permessi**: Solo ADMIN e GESTORE_MAGAZZINO possono accedere
+- **Importazione**: Management commands dedicati per ogni tabella CSV
+
 ---
 
 ## 🔧 Convenzioni Specifiche Progetto
@@ -163,6 +242,7 @@ python manage.py shell  # poi: from magazzino.models import *
 - **Colonne PK**: Sempre `id_<model_minuscolo>` (es. `id_categoria`, `id_pezzo`)
 - **Riferimenti FK**: Usare `db_column` per matching naming legacy (es. `id_categoria_padre`)
 - **Campi timestamp**: `creato_il` (auto_now_add), `modificato_il` (auto_now) - naming standard
+- **Modelli clienti**: Nomi tabella legacy (es. `TbAppellativo`, `TbCategoriaIVA`) con campi legacy (`idAppellativo`, `idCategoriaIVA`)
 
 ### Naming View
 - `<Model>ListView` per pagine lista/ricerca
@@ -271,7 +351,7 @@ Categoria.objects.filter(categoria_padre=None).delete()  # Solo root
 
 ---
 
-## ⚠️ Gotcha Critici
+## ⚠️ Gotcha Critici - AGGIORNAMENTO v1.1
 
 1. **PyMySQL, non mysqlclient**: Config DB usa PyMySQL; query potrebbero differire leggermente da MySQL nativo
 2. **Auto-timestamp**: `auto_now_add=True` crea, `auto_now=True` aggiorna — non impostare manualmente mai
@@ -283,6 +363,9 @@ Categoria.objects.filter(categoria_padre=None).delete()  # Solo root
 8. **Signal image processing**: Affidati a `pre_save` per processamento; **non** salvare immagini raw direttamente nel DB
 9. **Crispy forms obbligatorio**: Tutte le form HTML devono usare `{% load crispy_forms_tags %}` + `{{ form|crispy }}`
 10. **Protezione CSRF**: Ogni form POST deve avere `{% csrf_token %}`; Django lo verifica automatico ma è obbligatorio nei template
+11. **Modelli clienti legacy**: Nomi tabella `Tb*` e campi `id*` (senza underscore) per compatibilità legacy
+12. **Sistema backup**: **Mai** modificare direttamente file backup; usare sempre BackupManager
+13. **Tabelle clienti**: Importare sempre via management commands dedicati, non inserimenti diretti
 
 ---
 
@@ -298,6 +381,8 @@ Categoria.objects.filter(categoria_padre=None).delete()  # Solo root
 | Come gestisco validazione cross-field? | Usa `clean()` nel form, non nel modello | [magazzino/forms.py](magazzino/forms.py) |
 | Aggiungo una nuova app? | **NO** - tutto in `accounts` + `magazzino`. Creare modello + view + form in queste | [config/settings.py#L37-L45](config/settings.py#L37-L45) |
 | Come testo in locale? | `populate_db` carica dati test; accedi con admin/admin | [README.md](README.md#L10-L25) |
+| Come gestisco backup database? | **3 metodi**: Web UI (/backup/), management command, script PowerShell emergenza | [BACKUP_RECOVERY_GUIDE.md](BACKUP_RECOVERY_GUIDE.md) |
+| Come accedo tabelle clienti? | **Interfaccia web**: /gestione-tabelle/ (solo ADMIN/GESTORE) | [magazzino/views.py](magazzino/views.py#L2009-L2100) |
 | File sensibili a non committare? | `settings.py` (SECRET_KEY), `.env` (se usato), `media/articoli/` | [.gitignore](../.gitignore) |
 
 ---
@@ -312,6 +397,7 @@ Categoria.objects.filter(categoria_padre=None).delete()  # Solo root
 | [PROJECT_STATUS.md](PROJECT_STATUS.md) | Architettura + schemi modelli |
 | [MANUALE_AMMINISTRATORE.md](MANUALE_AMMINISTRATORE.md) | Procedure amministratore |
 | [GESTIONE_UTENTI.md](GESTIONE_UTENTI.md) | Guida gestione utenti e ruoli |
+| [BACKUP_RECOVERY_GUIDE.md](BACKUP_RECOVERY_GUIDE.md) | **Guida backup & recovery 3 metodi** |
 
 **→ Consultare sempre prima di implementare feature; risparmi 2-3 ore di raccolta contesto.**
 
@@ -326,5 +412,13 @@ Dopo `python manage.py populate_db`:
 - **19 articoli** (con livelli stock minimo/massimo)
 - **77 movimenti** (CARICO/SCARICO/RETTIFICA, ultimi 30 giorni)
 - **4 utenti di test**: admin/admin, gestore/gestore, operatore/operatore, visualizzatore/visualizzatore
+
+Dopo import tabelle clienti:
+- **7 appellativi** (Sig., Dott., Prof., etc.)
+- **7 categorie IVA** con aliquote (22%, 0%, etc.)
+- **21 categorie tariffe** (Assistenza, Produzione, etc.)
+- **23 tipi pagamento** (Bonifico 30gg, 60gg, RI.BA., etc.)
+- **8 modalità pagamento** (Contanti, Assegno, Carta, etc.)
+- **TOTALE**: 66 record clienti + dati magazzino completi
 
 → Usare per sviluppo; reset con `mysql -u root < database_creation.sql` + `python manage.py migrate` + `python manage.py populate_db`

@@ -3,10 +3,17 @@
   "python.terminal.activateEnvironment": true,
   "python.terminal.activateEnvInCurrentTerminal": true,
   "python.linting.enabled": false,
+  "python.linting.pylintEnabled": false,
   "python.linting.pylanceEnabled": false,
+  "python.linting.pylintArgs": [
+    "--rcfile=${workspaceFolder}/.pylintrc"
+  ],
   "[python]": {
     "editor.defaultFormatter": null,
-    "editor.formatOnSave": false
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
   },
   "[markdown]": {
     "editor.defaultFormatter": null,
@@ -15,10 +22,35 @@
   "[html]": {
     "editor.defaultFormatter": null
   },
+  "[django-html]": {
+    "editor.defaultFormatter": null
+  },
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {},
   "files.associations": {
+    "*.html": "html",
+    "**/templates/**/*.html": "django-html",
     "*.md": "markdown",
     "*.py": "python"
+  },
+  "emmet.includeLanguages": {
+    "django-html": "html"
+  },
+  "python.testing.pytestEnabled": false,
+  "python.testing.unittestEnabled": true,
+  "python.testing.unittestArgs": [
+    "-v",
+    "-s",
+    "."
+  ],
+  "django.settingsModule": "config.settings",
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/venv": true,
+    "**/media": true,
+    "**/static": true,
+    "**/logs": true,
+    "**/backups": true,
+    "**/*.log": true
   }
 }

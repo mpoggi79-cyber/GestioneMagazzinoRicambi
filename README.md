@@ -1,7 +1,7 @@
 # 🏭 Gestione Magazzino Ricambi Goose By Matteo
 
-**Status**: ✅ v1.1 CLIENTI MODULE - FASE 1 | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
-**Completamento**: 22 view magazzino | 16 modelli | 22 template | 4 ruoli | **+5 tabelle clienti Fase 1**
+**Status**: ✅ v1.1 CLIENTI MODULE - FASE 1 + BACKUP SYSTEM | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
+**Completamento**: 47 view totali | 16 modelli | 40 template | 4 ruoli | **+5 tabelle clienti Fase 1** | **Sistema Backup**
 
 ---
 
@@ -45,14 +45,18 @@ python manage.py runserver
 
 | Componente | Stato | Dettagli |
 |-----------|-------|---------|
-| **Backend Django 5.2.8** | ✅ Completo | 22 CBV magazzino, 16 modelli ORM, 5 form |
+| **Backend Django 5.2.8** | ✅ Completo | 47 CBV totali (22 magazzino + 25 altre), 16 modelli ORM, 5 form |
 | **Database MySQL 10.4** | ✅ Operativo | 77 movimenti, 19 articoli, **+66 record clienti (5 tabelle)** |
-| **Frontend Bootstrap 5.3** | ✅ Completo | 22 template HTML responsive, Font Awesome 6.4 |
+| **Frontend Bootstrap 5.3** | ✅ Completo | 40 template HTML responsive, Font Awesome 6.4 |
 | **Modulo Clienti - Fase 1** | ✅ **COMPLETATA** | **5 tabelle base: tbAppellativo (7), tbCategoriaIVA (7), tbCategorieTariffe (21), tbTipoPagamento (23), tbModalitaPagamento (8)** |
+| **Sistema Backup Database** | ✅ **COMPLETATO** | **3 metodi ripristino: Web, Management Command, PowerShell emergenza** |
+| **Sistema Gestione Tabelle** | ✅ **IMPLEMENTATO** | **Interfaccia web per visualizzare/modificare tabelle clienti** |
 | **Autenticazione** | ✅ Funzionante | Login/logout, 4 ruoli, ProfiloUtente, LogAccesso |
 | **Permessi** | ✅ Implementati | CanEditMixin, CanViewMixin, controlli basati su ruolo |
 | **CRUD Operazioni** | ✅ Testate | Categoria, PezzoRicambio, Fornitore, MovimentoMagazzino, Giacenza, Inventario |
 | **Report & Statistiche** | ✅ Funzionanti | Dashboard, report_giacenze, report_movimenti |
+| **Sistema Backup Database** | ✅ **3 Metodi Ripristino** | **Web UI, Management Command, Script PowerShell emergenza** |
+| **Sistema Gestione Tabelle** | ✅ **Interfaccia Web** | **Visualizzazione/modifica tabelle clienti (ADMIN/GESTORE)** |
 | **Sicurezza** | ✅ Implementata | Protezione CSRF, hashing Argon2, session security |
 | **Deploy** | ✅ Pronto | Pronto per produzione con Gunicorn + Nginx |
 
@@ -313,6 +317,16 @@ TbModalitaPagamento
 /fornitori/<id>/update/        → FornitoreUpdateView
 /fornitori/<id>/delete/        → FornitoreDeleteView
 
+/modelli-scm/                  → ModelloSCMListView
+/modelli-scm/create/           → ModelloSCMCreateView
+/modelli-scm/<id>/update/      → ModelloSCMUpdateView
+/modelli-scm/<id>/delete/      → ModelloSCMDeleteView
+
+/matricole-scm/                → MatricolaSCMListView
+/matricole-scm/create/         → MatricolaSCMCreateView
+/matricole-scm/<id>/update/    → MatricolaSCMUpdateView
+/matricole-scm/<id>/delete/    → MatricolaSCMDeleteView
+
 /movimenti/                    → MovimentoListView
 /movimenti/create/             → MovimentoCreateView
 /movimenti/<id>/               → MovimentoDetailView
@@ -322,6 +336,12 @@ TbModalitaPagamento
 
 /report/giacenze/              → ReportGiacenzeView
 /report/movimenti/             → ReportMovimentiView
+
+/backup/                       → BackupListView (solo ADMIN)
+/backup/settings/              → BackupSettingsView (solo ADMIN)
+
+/gestione-tabelle/             → GestioneTabelleView (ADMIN/GESTORE)
+/modifica-tabella/<nome>/      → ModificaTabellaView (ADMIN/GESTORE)
 ```
 
 ### URL Accounts
@@ -382,15 +402,21 @@ templates/
 │   ├── login.html
 │   ├── profile.html
 │   └── edit_profile.html
+│   ├── utente_list.html, utente_form.html, utente_detail.html, utente_confirm_delete.html (4)
 └── magazzino/
     ├── dashboard.html (dashboard statistiche)
-    ├── categoria_list.html, categoria_form.html, categoria_confirm_delete.html (3)
+    ├── categoria_list.html, categoria_form.html, categoria_confirm_delete.html, categoria_tree_item.html (4)
     ├── pezzoricambio_list.html, pezzoricambio_form.html, pezzoricambio_detail.html, pezzoricambio_confirm_delete.html (4)
     ├── fornitore_list.html, fornitore_form.html, fornitore_detail.html, fornitore_confirm_delete.html (4)
+    ├── modello_scm_list.html, modello_scm_form.html, modello_scm_confirm_delete.html (3)
+    ├── matricola_scm_list.html, matricola_scm_form.html, matricola_scm_confirm_delete.html (3)
     ├── movimento_list.html, movimento_form.html, movimento_detail.html (3)
     ├── giacenza_list.html, giacenza_detail.html (2)
     ├── report_giacenze.html (report giacenze)
-    └── report_movimenti.html (report movimenti 30gg)
+    ├── report_movimenti.html (report movimenti 30gg)
+    ├── backup_list.html, backup_settings.html (2 - sistema backup)
+    ├── gestione_tabelle.html, modifica_tabella.html (2 - gestione tabelle clienti)
+    └── [40 template totali]
 ```
 
 ### Caratteristiche Design
@@ -598,16 +624,10 @@ GestioneMagazzinoRicambi Goose/
 │
 ├── venv/                      # Virtual environment Python
 │
-├── README.md                  # Questo file
-├── GESTIONE_UTENTI.md         # Guida gestione utenti
-├── MANUALE_AMMINISTRATORE.md  # Procedure amministratore
-├── .github/copilot-instructions.md  # Guida AI agents
-├── database_creation.sql      # Schema MySQL
-├── test_db_connection.py      # Script test connessione
-├── check_system.py            # Script controllo sistema
-├── requirements.txt           # Dipendenze Python
-├── manage.py                  # Django CLI
-└── init_database.py           # Legacy - usare manage.py populate_db
+├── BACKUP_RECOVERY_GUIDE.md  # Guida completa backup & recovery
+├── restore_db_emergency.ps1  # Script PowerShell ripristino emergenza
+├── .pylintrc                 # Configurazione linting Python
+├── _INFO_RISCHI_SERVICE_IT_ENG_Scm.pdf  # Documentazione rischi servizio
 ```
 
 ---
@@ -714,6 +734,7 @@ I backup includono:
 | **README.md** (questo file) | Referimento tecnico completo con setup | Developer, IT Staff |
 | **GESTIONE_UTENTI.md** | Guida completa al sistema utenti | Admin, Support Staff |
 | **MANUALE_AMMINISTRATORE.md** | Procedure amministratore avanzate | System Admin |
+| **BACKUP_RECOVERY_GUIDE.md** | **Guida backup & recovery 3 metodi** | **System Admin, DBA** |
 | **.github/copilot-instructions.md** | Guida per AI agents nello sviluppo | AI/Copilot |
 
 **Nota**: START_HERE.md, QUICK_START.md, PROJECT_STATUS.md sono stati consolidati in questo README.
@@ -724,6 +745,7 @@ I backup includono:
 
 | Versione | Data | Cambiamenti |
 |----------|------|-----------|
+| **1.1** | 23 Dic 2025 | **Sistema Backup completo + Gestione Tabelle Clienti** |
 | **1.0** | 30 Nov 2025 | Release iniziale produzione - tutti 22 template, 22 view, 11 modelli completi |
 
 ---
@@ -754,7 +776,7 @@ I backup includono:
 
 **Creato**: 30 Novembre 2025  
 **Status**: ✅ Pronto per Produzione  
-**Versione**: 1.0.0  
-**Ultimo Aggiornamento**: 14 Dicembre 2025
+**Versione**: 1.1.0  
+**Ultimo Aggiornamento**: 23 Dicembre 2025
 
 Per domande o problemi, consultare [MANUALE_AMMINISTRATORE.md](MANUALE_AMMINISTRATORE.md) sezione "Troubleshooting".

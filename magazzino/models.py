@@ -180,7 +180,7 @@ class Categoria(models.Model):
 # 2. UNITÀ DI MISURA - Standardizzazione delle unità
 # ============================================================================
 
-class TbUnitaMisura(models.Model):
+class UnitaMisura(models.Model):
     """Unità di misura per articoli e prestazioni"""
     
     id_unita_misura = models.AutoField(primary_key=True, db_column='idUnitaMisura')
@@ -214,7 +214,7 @@ class TbUnitaMisura(models.Model):
     )
     
     class Meta:
-        db_table = 'tbUnitaMisura'
+        db_table = 'tbunitamisura'
         ordering = ['denominazione']
         indexes = [
             models.Index(fields=['denominazione']),
@@ -513,7 +513,7 @@ class PezzoRicambio(models.Model):
         help_text=_('Fornitore associato al prezzo di acquisto')
     )
     unita_misura = models.ForeignKey(
-        TbUnitaMisura,
+        UnitaMisura,
         on_delete=models.PROTECT,
         verbose_name=_('Unità di Misura'),
         db_column='idUnitaMisura',
@@ -1172,6 +1172,108 @@ class TbCategoriaIVA(models.Model):
         return f"{self.valore_iva * 100:.1f}%"
 
 
+class TbContatti(models.Model):
+    """Contatti di clienti e fornitori"""
+    
+    id_contatto = models.AutoField(
+        primary_key=True,
+        db_column='idContatto'
+    )
+    id_cliente = models.IntegerField(
+        null=True,
+        blank=True,
+        db_column='idCliente',
+        verbose_name=_('ID Cliente'),
+        help_text=_('Riferimento al cliente (FK)')
+    )
+    id_fornitore = models.IntegerField(
+        null=True,
+        blank=True,
+        db_column='idFornitore',
+        verbose_name=_('ID Fornitore'),
+        help_text=_('Riferimento al fornitore (FK)')
+    )
+    id_appellativo = models.IntegerField(
+        null=True,
+        blank=True,
+        db_column='idAppellativo',
+        verbose_name=_('ID Appellativo'),
+        help_text=_('Riferimento all\'appellativo (FK)')
+    )
+    nome = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name=_('Nome'),
+        help_text=_('Nome del contatto')
+    )
+    cognome = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name=_('Cognome'),
+        help_text=_('Cognome del contatto')
+    )
+    ruolo = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name=_('Ruolo'),
+        help_text=_('Ruolo del contatto nell\'azienda')
+    )
+    telefono_azienda = models.CharField(
+        max_length=50,
+        blank=True,
+        db_column='TelefonoAzienda',
+        verbose_name=_('Telefono Azienda'),
+        help_text=_('Telefono aziendale')
+    )
+    cellulare_azienda = models.CharField(
+        max_length=50,
+        blank=True,
+        db_column='CellulareAzienda',
+        verbose_name=_('Cellulare Azienda'),
+        help_text=_('Cellulare aziendale')
+    )
+    email_azienda = models.EmailField(
+        blank=True,
+        db_column='emailAzienda',
+        verbose_name=_('Email Azienda'),
+        help_text=_('Email aziendale')
+    )
+    cellulare_personale = models.CharField(
+        max_length=50,
+        blank=True,
+        db_column='CellularePersonale',
+        verbose_name=_('Cellulare Personale'),
+        help_text=_('Cellulare personale')
+    )
+    email_personale = models.EmailField(
+        blank=True,
+        db_column='eMailPersonale',
+        verbose_name=_('Email Personale'),
+        help_text=_('Email personale')
+    )
+    nota = models.TextField(
+        blank=True,
+        verbose_name=_('Nota'),
+        help_text=_('Note aggiuntive sul contatto')
+    )
+    
+    class Meta:
+        db_table = 'tbcontatti'
+        ordering = ['cognome', 'nome']
+        verbose_name = _('Contatto')
+        verbose_name_plural = _('Contatti')
+    
+    def __str__(self):
+        if self.cognome and self.nome:
+            return f"{self.cognome} {self.nome}"
+        elif self.cognome:
+            return self.cognome
+        elif self.nome:
+            return self.nome
+        else:
+            return f"Contatto {self.id_contatto}"
+
+
 class TbCategorieTariffe(models.Model):
     """Categorie di tariffe per clienti (assistenza, produzione, etc.)"""
     
@@ -1233,7 +1335,7 @@ class TbTipoPagamento(models.Model):
     )
     
     class Meta:
-        db_table = 'tbTipoPagamento'
+        db_table = 'tbtipopagamento'
         ordering = ['descrizione']
         verbose_name = _('Tipo Pagamento')
         verbose_name_plural = _('Tipi Pagamento')
@@ -1264,10 +1366,13 @@ class TbModalitaPagamento(models.Model):
     )
     
     class Meta:
-        db_table = 'tbModalitaPagamento'
+        db_table = 'tbmodalitapagamento'
         ordering = ['nome']
         verbose_name = _('Modalità Pagamento')
         verbose_name_plural = _('Modalità Pagamento')
     
     def __str__(self):
         return self.nome
+
+
+

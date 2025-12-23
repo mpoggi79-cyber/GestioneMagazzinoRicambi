@@ -17,11 +17,24 @@ db.sqlite3
 media/
 staticfiles/
 
-# Backup SQL (escludi backup, MA non gli script di setup)
-backups/
-backups/*.sql
-backups/*.sql.gz
-fix_columns.sql
+# Database MySQL (escludi dump locali, mantieni script setup)
+*.sql
+!database_creation.sql
+!populate_scm_tables.sql
+
+# Environment & Config
+.env
+.env.*
+settings_local.py
+config/settings_local.py
+
+# Logs & Cache
+logs/
+*.log
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # IDE - Escludi quasi tutto ECCETTO settings.json di progetto
 .vscode/*

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Gestione Tabelle Database{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-database"></i>
+                        Gestione Tabelle Database
+                    </h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Seleziona una tabella per visualizzare e modificare i suoi record.
+                        Questa funzionalità è riservata agli utenti con privilegi di modifica.
+                    </p>
+                    
+                    <div class="row">
+                        {% for tabella in tabelle_modificabili %}
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-table fa-3x text-primary mb-3"></i>
+                                    <h5 class="card-title">{{ tabella.descrizione }}</h5>
+                                    <p class="card-text text-muted">{{ tabella.nome }}</p>
+                                    <a href="{{ tabella.url_modifica }}" class="btn btn-primary">
+                                        <i class="fas fa-edit"></i> Modifica
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if not tabelle_modificabili %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Nessuna tabella modificabile disponibile.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

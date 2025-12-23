@@ -2,7 +2,7 @@
 Script per esportare tutte le tabelle esistenti del database Django in formato CSV.
 
 Esporta i modelli esistenti da:
-- magazzino (Categoria, UnitaMisura, Fornitore, PezzoRicambio, Giacenza, MovimentoMagazzino, etc.)
+- magazzino (Categoria, tbunitamisura, Fornitore, PezzoRicambio, Giacenza, MovimentoMagazzino, etc.)
 - accounts (ProfiloUtente, LogAccesso)
 """
 
@@ -18,7 +18,7 @@ django.setup()
 
 from django.apps import apps
 from magazzino.models import (
-    Categoria, UnitaMisura, Fornitore, PezzoRicambio, 
+    Categoria, tbunitamisura, Fornitore, PezzoRicambio, 
     Giacenza, MovimentoMagazzino, Inventario, DettaglioInventario,
     ModelloMacchinaSCM, MatricolaMacchinaSCM
 )
