@@ -26,6 +26,7 @@ class Command(BaseCommand):
         with open(csv_file, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             for row in reader:
+                count += 1
                 # Gestione campi vuoti e conversioni
                 id_cliente = int(row['idCliente \'FK\'']) if row['idCliente \'FK\''] else None
                 id_fornitore = int(row['idFornitore \'FK\'']) if row['idFornitore \'FK\''] else None
@@ -36,6 +37,17 @@ class Command(BaseCommand):
                 cellulare_azienda = self._clean_phone_number(row['CellulareAzienda'])
                 cellulare_personale = self._clean_phone_number(row['CellularePersonale'])
 
+                # Correzione automatica: se Ruolo è vuoto ma Nota contiene un ruolo, sposta il valore
+                ruolo = row['Ruolo'].strip()
+                nota = row['Nota'].strip()
+                
+                if not ruolo and nota:
+                    # Controlla se la nota sembra contenere un ruolo
+                    ruoli_tipici = ['titolare', 'amministrazione', 'segretario', 'direttore', 'manager', 'responsabile']
+                    if any(ruolo_tipico.lower() in nota.lower() for ruolo_tipico in ruoli_tipici):
+                        ruolo = nota
+                        nota = ''  # Svuota la nota
+
                 TbContatti.objects.create(
                     id_contatto=int(row['idContatto']),
                     id_cliente=id_cliente,
@@ -43,13 +55,13 @@ class Command(BaseCommand):
                     id_appellativo=id_appellativo,
                     nome=row['Nome'],
                     cognome=row['Cognome'],
-                    ruolo=row['Ruolo'],
+                    ruolo=ruolo,
                     telefono_azienda=telefono_azienda,
                     cellulare_azienda=cellulare_azienda,
                     email_azienda=row['emailAzienda'],
                     cellulare_personale=cellulare_personale,
                     email_personale=row['eMailPersonale'],
-                    nota=row['Nota']
+                    nota=nota
                 )
                 count += 1
 
