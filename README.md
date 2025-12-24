@@ -1,7 +1,7 @@
 # 🏭 Gestione Magazzino Ricambi Goose By Matteo
 
 **Status**: ✅ v1.1 CLIENTI MODULE - FASE 1 + BACKUP SYSTEM | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
-**Completamento**: 47 view totali | 16 modelli | 40 template | 4 ruoli | **+5 tabelle clienti Fase 1** | **Sistema Backup**
+**Completamento**: 47 view totali | 16 modelli | 40 template | 4 ruoli | **+10 tabelle gestibili** | **Sistema Backup**
 
 ---
 
@@ -46,9 +46,9 @@ python manage.py runserver
 | Componente | Stato | Dettagli |
 |-----------|-------|---------|
 | **Backend Django 5.2.8** | ✅ Completo | 47 CBV totali (22 magazzino + 25 altre), 16 modelli ORM, 5 form |
-| **Database MySQL 10.4** | ✅ Operativo | 77 movimenti, 19 articoli, **+66 record clienti (5 tabelle)** |
+| **Database MySQL 10.4** | ✅ Operativo | 77 movimenti, 19 articoli, **+74 record clienti (6 tabelle)** |
 | **Frontend Bootstrap 5.3** | ✅ Completo | 40 template HTML responsive, Font Awesome 6.4 |
-| **Modulo Clienti - Fase 1** | ✅ **COMPLETATA** | **5 tabelle base: tbAppellativo (7), tbCategoriaIVA (7), tbCategorieTariffe (21), tbTipoPagamento (23), tbModalitaPagamento (8)** |
+| **Modulo Clienti - Fase 1** | ✅ **COMPLETATA** | **6 tabelle gestibili: tbAppellativo (7), tbCategoriaIVA (7), tbCategorieTariffe (21), tbTipoPagamento (23), tbModalitaPagamento (8), tbContatti (0)** |
 | **Sistema Backup Database** | ✅ **COMPLETATO** | **3 metodi ripristino: Web, Management Command, PowerShell emergenza** |
 | **Sistema Gestione Tabelle** | ✅ **IMPLEMENTATO** | **Interfaccia web per visualizzare/modificare tabelle clienti** |
 | **Autenticazione** | ✅ Funzionante | Login/logout, 4 ruoli, ProfiloUtente, LogAccesso |
@@ -289,7 +289,7 @@ TbModalitaPagamento
 └── Nome: CharField(max_length=100) - es: Bonifico bancario
 📊 8 righe importate
 
-✅ TOTALE FASE 1: 66 record in 5 tabelle
+✅ TOTALE FASE 1: 74 record in 6 tabelle gestibili
 ```
 
 ---
@@ -418,6 +418,31 @@ templates/
     ├── gestione_tabelle.html, modifica_tabella.html (2 - gestione tabelle clienti)
     └── [40 template totali]
 ```
+
+### 🎛️ SISTEMA GESTIONE TABELLE CLIENTI
+
+**URL**: `/gestione-tabelle/` (solo ADMIN/GESTORE)  
+**Funzionalità**: Interfaccia web per visualizzare e modificare tabelle clienti senza SQL
+
+#### 🗂️ Tabelle Gestibili (10 totali)
+
+| Tabella | Descrizione | Record | Icona | Filtro Stato |
+|---------|-------------|--------|-------|-------------|
+| `tbappellativo` | Appellativi | 7 | 👤 | ❌ |
+| `tbunitamisura` | Unità di Misura | 14 | ⚖️ | ✅ |
+| `tbtipopagamento` | Tipo Pagamento | 23 | 🏪 | ❌ |
+| `tbprestazioni` | Prestazioni | 0 | 🔧 | ✅ |
+| `tbcategorietariffe` | Categorie Tariffe | 21 | 🏷️ | ✅ |
+| `tbcategoriaiva` | Categoria IVA | 7 | 🧮 | ❌ |
+| `tbcontatti` | Contatti | 0 | 📇 | ❌ |
+| `modelli_macchine_scm` | Modelli Macchine SCM | 0 | ⚙️ | ✅ |
+| `matricole_macchine_scm` | Matricole Macchine SCM | 0 | 📊 | ✅ |
+| `tbmodalitapagamento` | Modalità Pagamento | 8 | 💳 | ❌ |
+
+**Legenda**:
+- **Record**: Numero di record attualmente nel database
+- **Icona**: Icona visualizzata nella card della tabella
+- **Filtro Stato**: ✅ = disponibile filtro show_inactive, ❌ = tabella semplice
 
 ### Caratteristiche Design
 - **Framework**: Bootstrap 5.3 (CDN)
@@ -745,7 +770,7 @@ I backup includono:
 
 | Versione | Data | Cambiamenti |
 |----------|------|-----------|
-| **1.1** | 23 Dic 2025 | **Sistema Backup completo + Gestione Tabelle Clienti** |
+| **1.1** | 24 Dic 2025 | **Sistema Backup completo + 10 Tabelle Gestibili (icone specifiche)** |
 | **1.0** | 30 Nov 2025 | Release iniziale produzione - tutti 22 template, 22 view, 11 modelli completi |
 
 ---

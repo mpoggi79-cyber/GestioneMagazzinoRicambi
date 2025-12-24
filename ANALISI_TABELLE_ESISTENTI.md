@@ -22,7 +22,7 @@
 | 8 | matricole_macchine_scm | N/D | Matricole specifiche macchine |
 | 9 | ~~unita_misura~~ | ❌ | ~~ELIMINATA - sostituita da tbunitamisura~~ |
 
-### Dominio Clienti e Fatturazione - FASE 1 ✅ (5 tabelle)
+### Dominio Clienti e Fatturazione - FASE 1 ✅ (6 tabelle gestibili)
 
 | # | Nome Tabella | Righe | Descrizione |
 |---|--------------|-------|-------------|
@@ -39,7 +39,7 @@
 | 15 | profili_utenti | 4 | Profili utenti con ruoli e permessi |
 | 16 | log_accessi | N/D | Log audit accessi sistema |
 
-**✅ FASE 1 COMPLETA**: 66 record clienti importati (5 tabelle base)  
+**✅ FASE 1 COMPLETA**: 74 record clienti importati (6 tabelle gestibili via interfaccia web)  
 **⚠️ IMPORTANTE**: La tabella `unita_misura` è stata ELIMINATA e sostituita definitivamente da `tbunitamisura`.
 
 ---

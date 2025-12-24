@@ -29,7 +29,8 @@ from .forms import (
 from .models import (
     Categoria, UnitaMisura, Fornitore, PezzoRicambio, 
     Giacenza, MovimentoMagazzino, Inventario, DettaglioInventario,
-    TbTipoPagamento, TbCategoriaIVA, TbContatti
+    ModelloMacchinaSCM, MatricolaMacchinaSCM,
+    TbAppellativo, TbTipoPagamento, TbCategoriaIVA, TbCategorieTariffe, TbContatti, TbPrestazioni, TbModalitaPagamento
 )
 from accounts.models import RuoloUtente
 
@@ -2016,28 +2017,74 @@ class GestioneTabelleView(CanEditMixin, TemplateView):
         # Lista delle tabelle modificabili (solo quelle sicure)
         tabelle_modificabili = [
             {
+                'nome': 'tbappellativo',
+                'descrizione': 'Appellativi',
+                'modello': 'TbAppellativo',
+                'icona': 'fas fa-user-tag',
+                'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbappellativo'})
+            },
+            {
                 'nome': 'tbunitamisura',
                 'descrizione': 'Unità di Misura',
                 'modello': 'UnitaMisura',
+                'icona': 'fas fa-weight-hanging',
                 'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbunitamisura'})
             },
             {
                 'nome': 'tbtipopagamento',
                 'descrizione': 'Tipo Pagamento',
                 'modello': 'TbTipoPagamento',
+                'icona': 'fas fa-cash-register',
                 'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbtipopagamento'})
+            },
+            {
+                'nome': 'tbprestazioni',
+                'descrizione': 'Prestazioni',
+                'modello': 'TbPrestazioni',
+                'icona': 'fas fa-tools',
+                'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbprestazioni'})
+            },
+            {
+                'nome': 'tbcategorietariffe',
+                'descrizione': 'Categorie Tariffe',
+                'modello': 'TbCategorieTariffe',
+                'icona': 'fas fa-tags',
+                'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbcategorietariffe'})
             },
             {
                 'nome': 'tbcategoriaiva',
                 'descrizione': 'Categoria IVA',
                 'modello': 'TbCategoriaIVA',
+                'icona': 'fas fa-calculator',
                 'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbcategoriaiva'})
             },
             {
                 'nome': 'tbcontatti',
                 'descrizione': 'Contatti',
                 'modello': 'TbContatti',
+                'icona': 'fas fa-address-book',
                 'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbcontatti'})
+            },
+            {
+                'nome': 'modelli_macchine_scm',
+                'descrizione': 'Modelli Macchine SCM',
+                'modello': 'ModelloMacchinaSCM',
+                'icona': 'fas fa-cogs',
+                'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'modelli_macchine_scm'})
+            },
+            {
+                'nome': 'matricole_macchine_scm',
+                'descrizione': 'Matricole Macchine SCM',
+                'modello': 'MatricolaMacchinaSCM',
+                'icona': 'fas fa-barcode',
+                'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'matricole_macchine_scm'})
+            },
+            {
+                'nome': 'tbmodalitapagamento',
+                'descrizione': 'Modalità Pagamento',
+                'modello': 'TbModalitaPagamento',
+                'icona': 'fas fa-credit-card',
+                'url_modifica': reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbmodalitapagamento'})
             },
             # Aggiungere altre tabelle qui in futuro
         ]
@@ -2054,8 +2101,16 @@ class ModificaTabellaView(CanEditMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         nome_tabella = kwargs.get('nome_tabella')
         
+        # Parametro per mostrare/nascondere record inattivi
+        show_inactive = self.request.GET.get('show_inactive', 'false').lower() == 'true'
+        
         # Solo tabelle autorizzate
         tabelle_permesse = {
+            'tbappellativo': {
+                'modello': TbAppellativo,
+                'descrizione': 'Appellativi',
+                'campi': ['id_appellativo', 'descrizione']
+            },
             'tbunitamisura': {
                 'modello': UnitaMisura,
                 'descrizione': 'Unità di Misura',
@@ -2066,6 +2121,12 @@ class ModificaTabellaView(CanEditMixin, TemplateView):
                 'descrizione': 'Tipo Pagamento',
                 'campi': ['id_tipo_pagamento', 'descrizione', 'data_rif_scad', 'giorni_data_rif', 'giorno_addebito']
             },
+            'tbcategorietariffe': {
+                'modello': TbCategorieTariffe,
+                'descrizione': 'Categorie Tariffe',
+                'campi': ['id_categorie_tariffe', 'categoria_tariffe', 'is_visible'],
+                'campo_stato': 'is_visible'
+            },
             'tbcategoriaiva': {
                 'modello': TbCategoriaIVA,
                 'descrizione': 'Categoria IVA',
@@ -2075,6 +2136,29 @@ class ModificaTabellaView(CanEditMixin, TemplateView):
                 'modello': TbContatti,
                 'descrizione': 'Contatti',
                 'campi': ['id_contatto', 'id_cliente', 'nome', 'cognome', 'ruolo', 'email_azienda', 'telefono_azienda']
+            },
+            'tbprestazioni': {
+                'modello': TbPrestazioni,
+                'descrizione': 'Prestazioni',
+                'campi': ['id_prestazione', 'denominazione', 'id_unita_misura', 'prezzo_unitario', 'id_categorie_tariffe', 'id_categoria_iva', 'visualizza_preventivo', 'ordine_stampa'],
+                'campo_stato': 'visualizza_preventivo'
+            },
+            'modelli_macchine_scm': {
+                'modello': ModelloMacchinaSCM,
+                'descrizione': 'Modelli Macchine SCM',
+                'campi': ['id_modello', 'nome_modello', 'gamma', 'stato_attivo', 'creato_il', 'modificato_il'],
+                'campo_stato': 'stato_attivo'
+            },
+            'matricole_macchine_scm': {
+                'modello': MatricolaMacchinaSCM,
+                'descrizione': 'Matricole Macchine SCM',
+                'campi': ['id_matricola', 'modello', 'matricola_macchina', 'anno', 'stato_attivo', 'creato_il', 'modificato_il'],
+                'campo_stato': 'stato_attivo'
+            },
+            'tbmodalitapagamento': {
+                'modello': TbModalitaPagamento,
+                'descrizione': 'Modalità Pagamento',
+                'campi': ['id_modalita_pagamento', 'nome']
             }
         }
         
@@ -2095,6 +2179,10 @@ class ModificaTabellaView(CanEditMixin, TemplateView):
             )
         else:
             queryset = modello.objects.all()
+            
+        # Applica filtro per tabelle con campo_stato se show_inactive è False
+        if 'campo_stato' in config and not show_inactive:
+            queryset = queryset.filter(**{config['campo_stato']: True})
             
         for record in queryset:
             valori_campi = []
@@ -2121,6 +2209,8 @@ class ModificaTabellaView(CanEditMixin, TemplateView):
             'descrizione_tabella': config['descrizione'],
             'campi': config['campi'],
             'records': records,
+            'show_inactive': show_inactive,
+            'has_status_filter': 'campo_stato' in config,
         })
         
         return context

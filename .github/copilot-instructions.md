@@ -1,7 +1,7 @@
 # Istruzioni AI Copilot per Gestione Magazzino Ricambi
 
 **Progetto**: Sistema di gestione magazzino Django 5.2 ("Gestione Magazzino Ricambi Goose")  
-**Status**: v1.1 CLIENTI MODULE + BACKUP SYSTEM | Database: MySQL 10.4 | Modelli: 16 | View: 47 | Template: 40 | Python: 3.10+
+**Status**: v1.1 CLIENTI MODULE + BACKUP SYSTEM | Database: MySQL 10.4 | Modelli: 16 | View: 47 | Template: 40 | **10 tabelle gestibili** | Python: 3.10+
 
 ---
 
@@ -233,6 +233,20 @@ python manage.py shell  # poi: from magazzino.models import *
 - **Permessi**: Solo ADMIN e GESTORE_MAGAZZINO possono accedere
 - **Importazione**: Management commands dedicati per ogni tabella CSV
 
+#### 🗂️ Tabelle Gestibili (10 totali)
+| Tabella | Descrizione | Icona | Filtro Stato |
+|---------|-------------|-------|-------------|
+| `tbappellativo` | Appellativi | `fas fa-user-tag` | ❌ |
+| `tbunitamisura` | Unità di Misura | `fas fa-weight-hanging` | ✅ |
+| `tbtipopagamento` | Tipo Pagamento | `fas fa-cash-register` | ❌ |
+| `tbprestazioni` | Prestazioni | `fas fa-tools` | ✅ |
+| `tbcategorietariffe` | Categorie Tariffe | `fas fa-tags` | ✅ |
+| `tbcategoriaiva` | Categoria IVA | `fas fa-calculator` | ❌ |
+| `tbcontatti` | Contatti | `fas fa-address-book` | ❌ |
+| `modelli_macchine_scm` | Modelli Macchine SCM | `fas fa-cogs` | ✅ |
+| `matricole_macchine_scm` | Matricole Macchine SCM | `fas fa-barcode` | ✅ |
+| `tbmodalitapagamento` | Modalità Pagamento | `fas fa-credit-card` | ❌ |
+
 ---
 
 ## 🔧 Convenzioni Specifiche Progetto
@@ -419,6 +433,7 @@ Dopo import tabelle clienti:
 - **21 categorie tariffe** (Assistenza, Produzione, etc.)
 - **23 tipi pagamento** (Bonifico 30gg, 60gg, RI.BA., etc.)
 - **8 modalità pagamento** (Contanti, Assegno, Carta, etc.)
-- **TOTALE**: 66 record clienti + dati magazzino completi
+- **0 contatti** (tabella gestibile ma popolata manualmente)
+- **TOTALE**: 74 record clienti + dati magazzino completi
 
 → Usare per sviluppo; reset con `mysql -u root < database_creation.sql` + `python manage.py migrate` + `python manage.py populate_db`

@@ -28,13 +28,13 @@
                     
                     <div class="row">
                         {% for tabella in tabelle_modificabili %}
-                        <div class="col-md-4 col-sm-6 mb-3">
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
                             <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-table fa-3x text-primary mb-3"></i>
-                                    <h5 class="card-title">{{ tabella.descrizione }}</h5>
-                                    <p class="card-text text-muted">{{ tabella.nome }}</p>
-                                    <a href="{{ tabella.url_modifica }}" class="btn btn-primary">
+                                <div class="card-body text-center py-3">
+                                    <i class="{{ tabella.icona }} fa-2x text-primary mb-2"></i>
+                                    <h6 class="card-title mb-2">{{ tabella.descrizione }}</h6>
+                                    <p class="card-text text-muted small mb-2">{{ tabella.nome }}</p>
+                                    <a href="{{ tabella.url_modifica }}" class="btn btn-primary btn-sm">
                                         <i class="fas fa-edit"></i> Modifica
                                     </a>
                                 </div>

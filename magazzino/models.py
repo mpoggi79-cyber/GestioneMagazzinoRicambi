@@ -1375,4 +1375,68 @@ class TbModalitaPagamento(models.Model):
         return self.nome
 
 
+class TbPrestazioni(models.Model):
+    """Prestazioni/servizi con prezzi e categorie"""
+
+    id_prestazione = models.AutoField(
+        primary_key=True,
+        db_column='idPrestazione'
+    )
+    denominazione = models.CharField(
+        max_length=200,
+        db_column='Denominazione',
+        verbose_name=_('Denominazione'),
+        help_text=_('Nome della prestazione')
+    )
+    id_unita_misura = models.ForeignKey(
+        UnitaMisura,
+        on_delete=models.PROTECT,
+        db_column='idUnitaMisura',
+        verbose_name=_('Unità di Misura'),
+        help_text=_('Unità di misura per la prestazione')
+    )
+    prezzo_unitario = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        db_column='PrezzoUnitario',
+        verbose_name=_('Prezzo Unitario'),
+        help_text=_('Prezzo unitario della prestazione')
+    )
+    id_categorie_tariffe = models.ForeignKey(
+        'TbCategorieTariffe',
+        on_delete=models.PROTECT,
+        db_column='idCategorieTariffe',
+        verbose_name=_('Categoria Tariffe'),
+        help_text=_('Categoria di tariffa')
+    )
+    id_categoria_iva = models.ForeignKey(
+        TbCategoriaIVA,
+        on_delete=models.PROTECT,
+        db_column='idCategoriaIVA',
+        verbose_name=_('Categoria IVA'),
+        help_text=_('Aliquota IVA applicabile')
+    )
+    visualizza_preventivo = models.BooleanField(
+        db_column='VisualizzaPreventivo',
+        verbose_name=_('Visualizza in Preventivo'),
+        help_text=_('Se mostrare nel preventivo')
+    )
+    ordine_stampa = models.IntegerField(
+        null=True,
+        blank=True,
+        db_column='OrdineStampa',
+        verbose_name=_('Ordine Stampa'),
+        help_text=_('Ordine di stampa nel documento')
+    )
+
+    class Meta:
+        db_table = 'tbPrestazioni'
+        ordering = ['ordine_stampa', 'denominazione']
+        verbose_name = _('Prestazione')
+        verbose_name_plural = _('Prestazioni')
+
+    def __str__(self):
+        return self.denominazione
+
+
 
