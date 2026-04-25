@@ -3,7 +3,7 @@
 **Totale tabelle**: 13  
 **Separatore CSV**: `;` (punto e virgola)  
 **Encoding**: UTF-8-sig (con BOM)
-**Ultima modifica**: **24/12/2025** - Aggiornamento status implementazione Fase 1 completata
+**Ultima modifica**: **23/04/2026** - Aggiornamento documentazione
 
 ---
 

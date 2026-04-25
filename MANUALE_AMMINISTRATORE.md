@@ -1,6 +1,6 @@
 # 👨‍💼 MANUALE AMMINISTRATORE - GESTIONE MAGAZZINO RICAMBI
 
-**Versione**: 1.0 | **Data**: 30 Novembre 2025 | **Audience**: System Admin, IT Staff, Support
+**Versione**: 1.1 | **Data**: 23 Aprile 2026 | **Audience**: System Admin, IT Staff, Support
 
 ---
 
@@ -24,7 +24,10 @@
 ### Accesso Admin Panel
 
 ```bash
-# URL
+# URL Applicazione
+http://localhost:8000/accounts/login/
+
+# URL Admin Django
 http://localhost:8000/admin/
 
 # Credenziali default (dopo populate_db)
@@ -457,7 +460,7 @@ Soluzione:
 pip install -r requirements.txt
 # O installa specifica dipendenza:
 pip install django==5.2.8
-pip install mysqlclient==2.2.0
+pip install pymysql==1.1.2
 ```
 
 #### Errore: "PermissionDenied" su view CRUD
@@ -841,5 +844,5 @@ sudo systemctl status gmr
 ---
 
 **Documento creato**: 30 Novembre 2025  
-**Ultimo update**: 30 Novembre 2025  
-**Versione**: 1.0 - Production Ready
+**Ultimo update**: 23 Aprile 2026  
+**Versione**: 1.1 - Production Ready

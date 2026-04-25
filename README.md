@@ -24,23 +24,6 @@ python manage.py runserver
 
 ---
 
-## 🚀 FASTEST START (3 COMMANDS)
-
-```bash
-# 1. Create database (MySQL must run: XAMPP → MySQL START)
-mysql -u root < database_creation.sql
-
-# 2. Setup Django
-python manage.py migrate
-python manage.py populate_db
-
-# 3. Run server
-python manage.py runserver
-# Then: http://localhost:8000 → admin/admin
-```
-
----
-
 ## ✅ STATO APPLICAZIONE
 
 | Componente | Stato | Dettagli |
@@ -156,7 +139,7 @@ Importa:
 python manage.py runserver
 ```
 
-Accedere: **http://localhost:8000** con credenziali `admin` / `admin`
+Accedere: **http://localhost:8000/accounts/login/** con credenziali `admin` / `admin`
 
 ---
 
@@ -590,7 +573,7 @@ mysql -u root GMR
 | "Connessione database rifiutata" | MySQL non in esecuzione | Avviare XAMPP → START su MySQL |
 | "Porta 8000 già in uso" | Un altro processo usa la porta 8000 | Eseguire su porta diversa: `manage.py runserver 8001` |
 | "ModuleNotFoundError" | Dipendenza mancante | `pip install -r requirements.txt` |
-| "TemplateDoesNotExist" | File template mancante | Verificare che tutti i 22 template esistano in templates/ |
+| "TemplateDoesNotExist" | File template mancante | Verificare che i template esistano in templates/ |
 | "Permission Denied su CRUD" | Ruolo utente non permette operazione | Controllare ProfiloUtente.ruolo nel panel admin |
 | "Login fallisce con password corretta" | Dati test non caricati | Eseguire `python manage.py populate_db` |
 
@@ -617,17 +600,20 @@ GestioneMagazzinoRicambi Goose/
 │   └── migrations/            # Migrazioni database
 │
 ├── magazzino/                 # App Magazzino
-│   ├── models.py              # 9 modelli magazzino
-│   ├── views.py               # 22 view CRUD
-│   ├── forms.py               # 5 form CRUD
-│   ├── urls.py                # Rotte /magazzino/
-│   ├── admin.py               # Interfaccia admin
+│   ├── models.py              # 16 modelli (11 magazzino + 6 clienti)
+│   ├── views.py               # 47 CBV totali
+│   ├── forms.py               # Form Django con crispy-forms
+│   ├── urls.py                # 40+ URL routes
+│   ├── admin.py               # Admin interface
+│   ├── backup_manager.py      # Gestione backup DB
 │   ├── management/
 │   │   └── commands/
-│   │       └── populate_db.py # Management command dati test
+│   │       ├── populate_db.py # Dati test magazzino
+│   │       ├── create_backup.py
+│   │       └── import_tb*.py  # Import tabelle clienti
 │   └── migrations/            # Migrazioni database
 │
-├── templates/                 # Template HTML (22 file)
+├── templates/                 # Template HTML (40+ totali)
 │   ├── base.html              # Template base (navbar, sidebar)
 │   ├── accounts/
 │   │   ├── login.html
@@ -651,8 +637,11 @@ GestioneMagazzinoRicambi Goose/
 │
 ├── BACKUP_RECOVERY_GUIDE.md  # Guida completa backup & recovery
 ├── restore_db_emergency.ps1  # Script PowerShell ripristino emergenza
+├── fix_mysql.ps1             # Ripristino MySQL XAMPP corrotto
+├── export_db_to_csv.py       # Export modelli → CSV
+├── test_db_connection.py     # Verifica connessione MySQL
+├── check_system.py           # Verifica dipendenze sistema
 ├── .pylintrc                 # Configurazione linting Python
-├── _INFO_RISCHI_SERVICE_IT_ENG_Scm.pdf  # Documentazione rischi servizio
 ```
 
 ---

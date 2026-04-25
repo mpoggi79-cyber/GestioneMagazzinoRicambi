@@ -1,11 +1,24 @@
 # Istruzioni AI Copilot per Gestione Magazzino Ricambi
 
 **Progetto**: Sistema di gestione magazzino Django 5.2 ("Gestione Magazzino Ricambi Goose")  
-**Status**: v1.1 CLIENTI MODULE + BACKUP SYSTEM | Database: MySQL 10.4 | Modelli: 16 | View: 47 | Template: 40 | **10 tabelle gestibili** | Python: 3.10+
+**Status**: ✅ v1.1 CLIENTI MODULE + BACKUP SYSTEM | Database: MySQL 10.4 | Modelli: 16 | View: 47+ | Template: 40+ | **10 tabelle gestibili** | Python: 3.10+ | PyMySQL 1.1.2
 
 ---
 
-## 🏗️ Panoramica Architettura
+## � Lingua e Localizzazione
+
+**IMPORTANTE**: Copilot DEVE rispondere **SEMPRE in italiano**. Questo vale per:
+- ✅ Risposte a domande e spiegazioni
+- ✅ Commenti nel codice da scrivere
+- ✅ Messaggi di errore e log
+- ✅ Documentazione inline e docstring
+- ✅ Nomi variabili/funzioni: **USARE SEMPRE ITALIANO** (es. `giacenza_disponibile`, `operatore`, `calcola_saldo`, NON `available_stock` o `calculate_balance`)
+
+**Convenzione**: Tutti i nomi in italiano rispecchiano il dominio del business (magazzino ricambi italiano) e facilitano la lettura dal team locale.
+
+---
+
+## �🏗️ Panoramica Architettura
 
 ### Struttura a Tre Livelli
 - **Backend**: Django 5.2.8 CBV (class-based views) con LoginRequiredMixin + mixin personalizzati
@@ -17,6 +30,29 @@
 |-----|-------|-----------|
 | **accounts** | Autenticazione e autorizzazione | ProfiloUtente, RuoloUtente (4 ruoli: ADMIN, GESTORE_MAGAZZINO, OPERATORE, VISUALIZZATORE), LogAccesso |
 | **magazzino** | Logica di dominio magazzino + clienti | **Magazzino**: Categoria (gerarchica), PezzoRicambio, Fornitore, MovimentoMagazzino, Giacenza, Inventario, DettaglioInventario, ModelloMacchinaSCM, MatricolaMacchinaSCM<br>**Clienti**: tbappellativo, tbcategoriaiva, tbcontatti, tbcategorieTariffe, tbtipopagamento, tbmodalitapagamento |
+
+### Decisioni Architetturali Critiche per AI Agent
+
+**1. Perché PyMySQL e non mysqlclient?**
+- PyMySQL è un driver "pure Python" (no C extensions) → portabilità XAMPP cross-platform
+- Nessuna dipendenza da librerie C; compatibile Windows nativo
+- **Implicazione per AI**: alcune query edge-case potrebbero comportarsi diversamente da MySQL nativo
+
+**2. Perché SignalBased per Giacenza Updates?**
+- MovimentoMagazzino è append-only (audit trail) → **mai modificare**
+- Ogni inserimento MovimentoMagazzino **DEVE** triggherare via `@receiver(post_save)` l'aggiornamento di Giacenza
+- **Invariante critica**: Giacenza.disponibile = PezzoRicambio stock - MovimentoMagazzino(SCARICO) + MovimentoMagazzino(CARICO)
+- **Implicazione per AI**: Non creare logica diretta di modifica Giacenza; affidarsi sempre a signals
+
+**3. Perché CBV con Mixin e non FBV?**
+- CBV offre **riusabilità automixins** (CanViewMixin, CanEditMixin)
+- Autorizzazione concentrata in mixin → **riduce errori di sicurezza**
+- **Implicazione per AI**: Sempre ereditare dalle classi mixin giuste; non implementare logica auth in view
+
+**4. Gerarchia Categorie: Self-Referencing FK con PROTECT**
+- Categoria.categoria_padre è self-FK con PROTECT → **previene accidentale orphaning**
+- `save()` verifica anti-loop (max 10 livelli di profondità)
+- **Implicazione per AI**: Le cancellazioni falliscono se categoria ha sottocategorie → gestire ProtectedError in Delete view
 
 ---
 
@@ -316,6 +352,51 @@ Automatico per ogni PezzoRicambio.immagine upload:
 
 ---
 
+## 🔗 Pattern di Integrazione Cross-Component
+
+**Flusso Movimento di Stock (critico)**:
+```
+1. AI agent crea MovimentoMagazzino (tipo=CARICO/SCARICO/RETTIFICA/RESO)
+2. Model.save() memorizza movimento (immutabile) + timestamp + operatore
+3. Signal @receiver(post_save) aggiorna Giacenza.disponibile automaticamente
+4. View restituisce success_message con saldo nuovo
+```
+→ **Mai** creare/aggiornare Giacenza direttamente; sempre via MovimentoMagazzino
+
+**Flusso Caricamento Articolo (immagini)**:
+```
+1. User carica PNG/JPEG in PezzoRicambio.immagine (form field)
+2. Signal @receiver(pre_save) processa:
+   - Immagine principale → ridimensiona 800x800px JPEG 90%
+   - Thumbnail → genera 300x300px JPEG 85%
+   - PNG/RGBA → converte RGB con sfondo bianco
+3. File salvati in media/articoli/YYYY/MM/DD/
+4. Signal @receiver(post_delete) pulisce file quando articolo cancellato
+```
+→ **Non** salvare mai immagini raw nel DB; il signal gestisce tutto
+
+**Flusso Autorizzazione (permission gates)**:
+```
+1. Request entra in View CBV che eredita CanViewMixin/CanEditMixin
+2. Mixin.test_func() verifica LoginRequiredMixin + profilo.può_modificare_dati()
+3. Se non autorizzato → messages.error() + redirect dashboard
+4. Se autorizzato → proceed a get_context_data() / form_valid()
+```
+→ **Sempre** usare mixin; non implementare auth logica in view body
+
+**Flusso Backup Database (3 metodi)**:
+```
+Metodo 1 (Web UI): /backup/ → BackupListView → click "Ripristina" → BackupRestoreView
+Metodo 2 (CLI): python manage.py restore_backup → scegli backup da lista interattiva
+Metodo 3 (PowerShell): .\restore_db_emergency.ps1 → script standalone XAMPP
+
+BackupManager traccia: backup_dir, retention_days (30), mysql_bin_path
+File backup: backups/backup_gmr_YYYYMMDD_HHMMSS.sql.gz (auto-cleanup vecchi)
+```
+→ **Preferisci metodo 1 o 2**; PowerShell solo emergenza (Windows-only)
+
+---
+
 ## 🐛 Debugging & Troubleshooting
 
 ### Errori Comuni Database
@@ -437,3 +518,48 @@ Dopo import tabelle clienti:
 - **TOTALE**: 74 record clienti + dati magazzino completi
 
 → Usare per sviluppo; reset con `mysql -u root < database_creation.sql` + `python manage.py migrate` + `python manage.py populate_db`
+
+---
+
+## 🧪 Riferimento Rapido: Comandi AI-Agent
+
+```bash
+# SETUP INIZIALE (eseguire una volta)
+mysql -u root < database_creation.sql     # Crea DB da schema
+python manage.py migrate                   # Applica migrazioni Django
+python manage.py populate_db               # Carica dati test (8 cat, 5 fornitori, 19 articoli)
+python manage.py import_tbappellativo      # Importa 7 record appellativi
+python manage.py import_tbcategoriaiva     # Importa 7 record categorie IVA
+python manage.py import_tbcategorietariffe # Importa 21 record categorie tariffe
+python manage.py import_tbtipopagamento    # Importa 23 record tipi pagamento
+python manage.py import_tbmodalitapagamento # Importa 8 record modalità pagamento
+
+# SVILUPPO QUOTIDIANO
+python manage.py runserver                 # Avvia server porta 8000
+python manage.py shell                     # Django shell per debug modelli
+python manage.py test                      # Esegui test suite
+
+# TROUBLESHOOTING
+python test_db_connection.py               # Verifica connessione MySQL
+python manage.py migrate --plan            # Visualizza migrazioni pendenti
+python manage.py showmigrations             # Lista migrazioni applicate
+
+# BACKUP & RECOVERY
+python manage.py create_backup              # Crea backup compresso
+python manage.py restore_backup             # Ripristina da backup (interattivo)
+.\restore_db_emergency.ps1                 # Script PowerShell emergenza
+```
+
+---
+
+## 🧪 Riferimento Comandi Quick per AI-Agent
+
+| Comando | Uso | Nota |
+|---------|-----|------|
+| `python manage.py populate_db` | Carica 8 categorie + 19 articoli + 77 movimenti | Reset test data completo |
+| `python manage.py shell` + `from magazzino.models import *` | Debug interattivo | Prova queries, ispeziona relazioni |
+| `python manage.py migrate` | Applica migrazioni database | Esegui SEMPRE dopo `git pull` |
+| `python manage.py test magazzino` | Esegui test app magazzino | Validazione pre-push |
+| `python manage.py runserver 8001` | Server porta alternativa | Se 8000 è occupata |
+| `mysql -u root < database_creation.sql` | Ricrea DB da zero | **ATTENZIONE**: cancella dati |
+| `grep -r "TODO\|FIXME" magazzino/` | Cerca task pendenti | Trovare aree incomplete |

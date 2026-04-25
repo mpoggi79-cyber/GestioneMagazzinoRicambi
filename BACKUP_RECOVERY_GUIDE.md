@@ -1,8 +1,8 @@
 # 🆘 GUIDA RIPRISTINO DATABASE - PROCEDURE EMERGENZA
 
 **Progetto**: Gestione Magazzino Ricambi Goose  
-**Data**: 23 dicembre 2025  
-**Versione**: 1.0
+**Data**: 23 Aprile 2026  
+**Versione**: 1.1
 
 ---
 
