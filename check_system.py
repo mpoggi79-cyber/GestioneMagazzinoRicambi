@@ -9,6 +9,7 @@ import os
 import sys
 import django
 from pathlib import Path
+from importlib.metadata import PackageNotFoundError, version as package_version
 
 print("\n" + "="*70)
 print("🔍 VERIFICA SISTEMA - Gestione Magazzino Ricambi")
@@ -48,18 +49,22 @@ print("\n📚 3. VERIFICA DIPENDENZE")
 print("-" * 70)
 
 dependencies = {
-    'django': 'Django',
-    'pymysql': 'PyMySQL',
-    'argon2': 'argon2-cffi',
-    'crispy_forms': 'django-crispy-forms',
-    'crispy_bootstrap5': 'crispy-bootstrap5',
+    'django': ('Django', 'Django'),
+    'pymysql': ('PyMySQL', 'PyMySQL'),
+    'argon2': ('argon2-cffi', 'argon2-cffi'),
+    'crispy_forms': ('django-crispy-forms', 'django-crispy-forms'),
+    'crispy_bootstrap5': ('crispy-bootstrap5', 'crispy-bootstrap5'),
 }
 
-for module, name in dependencies.items():
+for module, dependency_info in dependencies.items():
+    name, package_name = dependency_info
     try:
-        mod = __import__(module)
-        version = getattr(mod, '__version__', 'sconosciuta')
-        print(f"✅ {name}: {version}")
+        __import__(module)
+        try:
+            installed_version = package_version(package_name)
+        except PackageNotFoundError:
+            installed_version = 'sconosciuta'
+        print(f"✅ {name}: {installed_version}")
     except ImportError:
         print(f"❌ {name}: NON INSTALLATO")
 
@@ -91,7 +96,6 @@ for dir_name, description in required_dirs.items():
 required_files = {
     'manage.py': 'Gestione Django',
     'database_creation.sql': 'Script DB',
-    'init_database.py': 'Inizializzazione DB',
     'requirements.txt': 'Dipendenze',
     'README.md': 'Documentazione',
 }
@@ -226,7 +230,8 @@ if user_count > 0:
         print(f"   ... e altri {user_count - 5} utenti")
 else:
     print("⚠️  Nessun utente nel sistema")
-    print("   Esegui: python init_database.py")
+    print("   Esegui: python manage.py migrate")
+    print("   Poi, se vuoi dati demo: python manage.py populate_db")
 
 # ============================================================================
 # SUMMARY
@@ -238,5 +243,5 @@ print("="*70 + "\n")
 print("🚀 Prossimi step:")
 print("   1. Se tutto è ✅: python manage.py runserver")
 print("   2. Vai a: http://localhost:8000")
-print("   3. Login con admin / Admin@12345")
+print("   3. Login con admin / admin")
 print("\n")

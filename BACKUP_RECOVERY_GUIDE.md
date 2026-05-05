@@ -311,7 +311,7 @@ Remove-Item: Access to the path is denied
 Dopo ogni ripristino, verifica:
 
 - [ ] Server Django si avvia senza errori
-- [ ] Puoi accedere con utente admin/admin
+- [ ] Puoi accedere con utente admin / admin
 - [ ] Dashboard mostra dati corretti
 - [ ] Articoli e giacenze visibili
 - [ ] Movimenti magazzino presenti

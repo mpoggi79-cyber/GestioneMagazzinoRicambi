@@ -5,6 +5,28 @@
 
 ---
 
+## 📑 Indice Contenuti
+
+1. [Avvio Rapido](#-avvio-rapido-3-comandi)
+2. [Stato Applicazione](#-stato-applicazione)
+3. [Setup Passo-Passo](#-setup-passo-passo)
+4. [Modelli Dati](#-modelli-dati-16-totali)
+5. [View & URL](#-view--url-22-class-based-view)
+6. [Permessi](#-permessi-basati-su-ruolo)
+7. [Template](#-template-22-totali)
+8. [Gestione Tabelle](#%EF%B8%8F-sistema-gestione-tabelle-clienti)
+9. [Sicurezza](#-implementazione-sicurezza)
+10. [Dati Test](#-dati-di-test-populate_dbpy)
+11. [Comandi Utili](#%EF%B8%8F-comandi-utili)
+12. [Troubleshooting](#-troubleshooting)
+13. [Struttura Progetto](#-struttura-progetto)
+14. [Backup & Recovery](#-backup--recovery)
+15. [Come Contribuire](#-come-contribuire)
+16. [Licenza](#-licenza)
+17. [Supporto](#-supporto)
+
+---
+
 ## 🚀 AVVIO RAPIDO (3 COMANDI)
 
 ```bash
@@ -17,7 +39,7 @@ python manage.py populate_db
 
 # 3. Eseguire server
 python manage.py runserver
-# Accedere: http://localhost:8000 → admin/admin
+# Accedere: http://localhost:8000 → admin / admin
 ```
 
 **Per primo avvio più dettagliato**, vedi sezione "Setup Passo-Passo" sotto.
@@ -755,7 +777,249 @@ I backup includono:
 
 ---
 
-## ✨ CRONOLOGIA VERSIONI
+## 🤝 Come Contribuire
+
+Questo è un progetto Django per la gestione di magazzino ricambi. Se desideri contribuire al miglioramento del progetto, segui le linee guida di seguito:
+
+### Come Segnalare Bug
+
+Se trovi un bug, apri una **Issue** con:
+1. **Titolo chiaro**: Descrizione breve del problema
+2. **Dettagli del bug**: 
+   - Passaggi per riprodurre
+   - Comportamento osservato
+   - Comportamento atteso
+3. **Ambiente**: Python version, Django version, SO
+4. **Log/Screenshot**: Errori o schermate rilevanti
+
+**Esempio Issue:**
+```
+Titolo: Errore 500 quando creo movimento con quantità negativa
+
+Descrizione:
+- Passaggi: Accedi → Movimenti → Crea nuovo → Tipo SCARICO → Quantità -5 → Salva
+- Errore: "ValueError: quantita cannot be negative"
+- Atteso: Validazione form con messaggio di errore chiaro
+```
+
+### Come Proporre Feature
+
+Per proporre una nuova feature:
+1. Apri una **Issue** con label `enhancement`
+2. Descrivi il caso d'uso e i benefici
+3. Suggerisci l'implementazione (se possibile)
+4. Discuti con il team prima di codificare
+
+### Linee Guida Sviluppo
+
+#### 1️⃣ **Naming Convention**
+- **Nomi Python**: snake_case italiano (es. `giacenza_disponibile`, `calcola_saldo`)
+- **Nomi database**: Colonne PK come `id_<model>` (es. `id_categoria`, `id_pezzo`)
+- **URL routes**: kebab-case italiano (es. `/categorie/`, `/articoli/`)
+- **Modelli legacy**: Nomenclatura Tb* mantenuta per compatibilità (es. `TbAppellativo`)
+
+#### 2️⃣ **Struttura Codice**
+- **View**: CBV con mixin (CanEditMixin, CanViewMixin)
+- **Form**: Usare crispy-forms + crispy-bootstrap5
+- **Modelli**: Campi italiani, auto_now_add/auto_now per timestamp
+- **Permessi**: Sempre verificare ruolo via mixin, non view logic
+
+#### 3️⃣ **Testing**
+Prima di fare commit:
+```bash
+# Verificare sintassi
+python manage.py check
+
+# Eseguire test (se esistono)
+python manage.py test
+
+# Validazione migrazioni
+python manage.py migrate --plan
+```
+
+#### 4️⃣ **Migrazioni Database**
+```bash
+# Se modifichi modelli, crea migrazione
+python manage.py makemigrations
+
+# Verifica prima di commit
+python manage.py migrate --plan
+```
+
+#### 5️⃣ **Documentazione**
+- Aggiungi docstring alle funzioni complesse
+- Documenta workflow critico nei commenti
+- Aggiorna README.md se aggiungi feature importante
+- Mantieni AGENTS.md aggiornato con patterns
+
+#### 6️⃣ **Sicurezza**
+- Valida sempre input server-side
+- Usa ORM Django (prevenzione SQL injection)
+- Protezione CSRF: `{% csrf_token %}` nei form
+- Permessi: **Mai** bypassare mixin di autorizzazione
+
+#### 7️⃣ **Template**
+- Ereditare da `base.html`
+- Usare Bootstrap 5.3 (classi standard)
+- Font Awesome 6.4 per icone
+- Responsive: testare su mobile
+
+### Workflow Contribuzione
+
+```
+1. Fork il repository
+   git clone https://github.com/YOUR_USERNAME/GestioneMagazzinoRicambi.git
+
+2. Crea branch feature
+   git checkout -b feature/nome-feature
+
+3. Fai i cambiamenti
+   - Modifica codice
+   - Crea test (se applicabile)
+   - Aggiorna documentazione
+
+4. Commit con messaggio chiaro
+   git commit -m "Descrizione concisa della feature"
+   git commit -m "Descrizione: 
+   - Cosa è stato fatto
+   - Perché è necessario
+   - Impatto"
+
+5. Push branch
+   git push origin feature/nome-feature
+
+6. Crea Pull Request
+   - Descrizione della feature
+   - Link a issues correlate
+   - Testing performed
+
+7. Code Review
+   - Attendi revisione del team
+   - Risolvi commenti reviewer
+```
+
+### Aree di Contribuzione Prioritarie
+
+- [ ] **Unit Tests**: Implementare test coverage per modelli/view critiche
+- [ ] **Ottimizzazione Query**: Ridurre N+1 query, aggiungere select_related/prefetch_related
+- [ ] **REST API**: Creare API endpoints per integrazione mobile/esterna
+- [ ] **Internazionalizzazione**: Supporto multi-lingua (Django i18n)
+- [ ] **Performance**: Caching, indexing database, compressione asset
+- [ ] **Documentazione**: Ampliare guide per operatori
+- [ ] **UX/UI**: Migliorare interfaccia admin
+
+### Code Review Checklist
+
+Prima di approvare una PR, verificare:
+- ✅ Codice segue naming convention del progetto
+- ✅ Test passano (se creati)
+- ✅ Nessuna regressione su feature esistente
+- ✅ Documentazione aggiornata
+- ✅ Nessun debug code lasciato (print, debugger)
+- ✅ Performance accettabili (no N+1 queries)
+- ✅ Sicurezza: validazione input, protezione CSRF
+
+### Domande Frequenti Sviluppo
+
+**D: Dove posso salvare immagini?**
+A: Signal `pre_save` in PezzoRicambio elabora automaticamente. Salva in `media/articoli/YYYY/MM/DD/`. Non toccare manualmente.
+
+**D: Come aggiorno stock/giacenza?**
+A: **Mai** modificare Giacenza direttamente. Crea MovimentoMagazzino; il signal lo aggiorna automaticamente.
+
+**D: Quali ruoli hanno accesso a questa view?**
+A: Controlla il mixin della view:
+- `CanViewMixin`: Tutti autenticati (solo lettura)
+- `CanEditMixin`: Solo ADMIN + GESTORE_MAGAZZINO
+
+**D: Come gestisco nuove categorie non gerarchiche?**
+A: Mantieni la self-FK (`categoria_padre`). Se non assegnata, è root. Verifica profondità max 10 nel `save()`.
+
+---
+
+## 📜 Licenza
+
+Questo progetto è proprietario e riservato. Tutti i diritti sono riservati.
+
+**Restrizioni d'uso:**
+- ❌ Vietato copiare, modificare, distribuire senza autorizzazione
+- ❌ Vietato usare per scopi commerciali senza licenza esplicita
+- ❌ Vietato rivelare il codice sorgente a terzi
+
+**Autorizzazioni per contributori:**
+- ✅ È consentito contribuire tramite pull request
+- ✅ I contributori cedono i diritti al proprietario del progetto
+- ✅ Il proprietario può usare il contributo come ritiene opportuno
+
+Per informazioni su licenze alternative o utilizzo commerciale, contattare il proprietario.
+
+**Proprietario**: Matteo Poggi  
+**Email**: [contattare via issue tracker]
+
+---
+
+## 💬 Supporto
+
+Hai domande o hai bisogno di aiuto? Ecco come contattarci:
+
+### 📍 Canali di Supporto
+
+| Canale | Uso | Tempo Risposta |
+|--------|-----|----------------|
+| **GitHub Issues** | Bug report, domande technical | 24-48 ore |
+| **Email** | Supporto commerciale, licenze | 48-72 ore |
+| **Wiki/Documentazione** | Domande frequenti (risposte immediate) | - |
+
+### ❓ Domande Frequenti (FAQ)
+
+**Q: Come resetto i dati di test?**
+A: 
+```bash
+mysql -u root < database_creation.sql
+python manage.py migrate
+python manage.py populate_db
+```
+
+**Q: Come cambio la password di un utente?**
+A: `python manage.py changepassword <username>`
+
+**Q: Posso usare Postgres al posto di MySQL?**
+A: Sì, ma richiede:
+- Installare `psycopg2`
+- Modificare DATABASES in settings.py
+- Testare (alcune query potrebbero differire)
+
+**Q: Come aggiungo un nuovo modello?**
+A: Vedi [AGENTS.md](AGENTS.md#-checklista-ai-agent-decisioni-comuni) - sezione "Aggiungere una Nuova View CRUD"
+
+**Q: Dove posso trovare la documentazione completa?**
+A: Consulta:
+- [README.md](README.md) - Setup & architettura
+- [AGENTS.md](AGENTS.md) - Patterns & best practices (per AI agents)
+- [MANUALE_AMMINISTRATORE.md](MANUALE_AMMINISTRATORE.md) - Procedure admin
+- [GESTIONE_UTENTI.md](GESTIONE_UTENTI.md) - Sistema utenti
+- [BACKUP_RECOVERY_GUIDE.md](BACKUP_RECOVERY_GUIDE.md) - Backup & recovery
+
+### 🐛 Segnalare un Bug
+
+Se trovi un bug:
+1. Verifica se è già segnalato in [Issues](../../issues)
+2. Se no, apri una nuova issue con:
+   - **Titolo**: Descrizione breve
+   - **Dettagli**: Passaggi per riprodurre, comportamento osservato, atteso
+   - **Ambiente**: Python, Django, MySQLversion
+   - **Log**: Stacktrace o screenshot
+
+### 📧 Contatti Diretti
+
+**Proprietario del Progetto:**
+- Nome: Matteo Poggi
+- Ruolo: Lead Developer
+- GitHub: mpoggi79-cyber
+
+**Note**: Per issues urgenti, preferisci GitHub Issues in modo che la comunità possa beneficiare della soluzione.
+
+---
 
 | Versione | Data | Cambiamenti |
 |----------|------|-----------|
@@ -791,6 +1055,19 @@ I backup includono:
 **Creato**: 30 Novembre 2025  
 **Status**: ✅ Pronto per Produzione  
 **Versione**: 1.1.0  
-**Ultimo Aggiornamento**: 23 Dicembre 2025
+**Ultimo Aggiornamento**: 4 Maggio 2026 (Aggiunto: Sezione Contributi, Licenza, Supporto)
 
-Per domande o problemi, consultare [MANUALE_AMMINISTRATORE.md](MANUALE_AMMINISTRATORE.md) sezione "Troubleshooting".
+---
+
+## 🔗 Link Utili
+
+- 📚 **Documentazione Completa**: [AGENTS.md](AGENTS.md) - Patterns architettura per AI agents
+- 🛠️ **Guida Amministratore**: [MANUALE_AMMINISTRATORE.md](MANUALE_AMMINISTRATORE.md) - Procedure admin avanzate
+- 👥 **Gestione Utenti**: [GESTIONE_UTENTI.md](GESTIONE_UTENTI.md) - Sistema ruoli & autenticazione
+- 💾 **Backup & Recovery**: [BACKUP_RECOVERY_GUIDE.md](BACKUP_RECOVERY_GUIDE.md) - 3 metodi ripristino
+
+---
+
+**Per domande, bug report, o contribuzioni**: Vedi sezione [💬 Supporto](#-supporto) sopra.
+
+Per problemi avanzati, consultare [MANUALE_AMMINISTRATORE.md](MANUALE_AMMINISTRATORE.md#troubleshooting).

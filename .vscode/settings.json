@@ -1,7 +1,22 @@
 {
+  "files.encoding": "utf8bom",
   "python.defaultInterpreterPath": "${workspaceFolder}\\venv\\Scripts\\python.exe",
+  "terminal.integrated.defaultProfile.windows": "PowerShell (GMR venv)",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell (GMR venv)": {
+      "path": "powershell.exe",
+      "args": [
+        "-NoExit",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        ". \"${workspaceFolder}\\venv\\Scripts\\Activate.ps1\""
+      ]
+    }
+  },
   "python.terminal.activateEnvironment": true,
   "python.terminal.activateEnvInCurrentTerminal": true,
+  "python.terminal.executeInFileDir": false,
   "python.linting.enabled": false,
   "python.linting.pylintEnabled": false,
   "python.linting.pylanceEnabled": false,
@@ -46,7 +61,6 @@
   "django.settingsModule": "config.settings",
   "files.exclude": {
     "**/__pycache__": true,
-    "**/venv": true,
     "**/media": true,
     "**/static": true,
     "**/logs": true,

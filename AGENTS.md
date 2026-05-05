@@ -214,7 +214,7 @@ python manage.py runserver
 # Porta personalizzata se 8000 è occupata
 python manage.py runserver 8001
 
-# Interfaccia admin: http://localhost:8000/admin (utente: admin/admin)
+# Interfaccia admin: http://localhost:8000/admin (utente: admin / admin)
 ```
 
 ### Test & Validazione
@@ -475,7 +475,7 @@ Categoria.objects.filter(categoria_padre=None).delete()  # Solo root
 | Quale DB driver usiamo? | **PyMySQL** (non mysqlclient) - può differire da MySQL standar | [requirements.txt](requirements.txt) |
 | Come gestisco validazione cross-field? | Usa `clean()` nel form, non nel modello | [magazzino/forms.py](magazzino/forms.py) |
 | Aggiungo una nuova app? | **NO** - tutto in `accounts` + `magazzino`. Creare modello + view + form in queste | [config/settings.py#L37-L45](config/settings.py#L37-L45) |
-| Come testo in locale? | `populate_db` carica dati test; accedi con admin/admin | [README.md](README.md#L10-L25) |
+| Come testo in locale? | `populate_db` carica dati test; accedi con admin / admin | [README.md](README.md#L10-L25) |
 | Come gestisco backup database? | **3 metodi**: Web UI (/backup/), management command, script PowerShell emergenza | [BACKUP_RECOVERY_GUIDE.md](BACKUP_RECOVERY_GUIDE.md) |
 | Come accedo tabelle clienti? | **Interfaccia web**: /gestione-tabelle/ (solo ADMIN/GESTORE) | [magazzino/views.py](magazzino/views.py#L2009-L2100) |
 | File sensibili a non committare? | `settings.py` (SECRET_KEY), `.env` (se usato), `media/articoli/` | [.gitignore](../.gitignore) |
@@ -506,7 +506,7 @@ Dopo `python manage.py populate_db`:
 - **5 fornitori** (con email, telefono, indirizzo)
 - **19 articoli** (con livelli stock minimo/massimo)
 - **77 movimenti** (CARICO/SCARICO/RETTIFICA, ultimi 30 giorni)
-- **4 utenti di test**: admin/admin, gestore/gestore, operatore/operatore, visualizzatore/visualizzatore
+- **4 utenti di test**: admin / admin, gestore / gestore, operatore / operatore, visualizzatore / visualizzatore
 
 Dopo import tabelle clienti:
 - **7 appellativi** (Sig., Dott., Prof., etc.)
