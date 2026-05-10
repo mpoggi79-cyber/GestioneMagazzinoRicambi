@@ -29,17 +29,27 @@ class Migration(migrations.Migration):
                 'ordering': ['modello', 'matricola_macchina'],
             },
         ),
-        migrations.AddField(
+        migrations.RenameField(
+            model_name='pezzoricambio',
+            old_name='matricola_macchina_scm',
+            new_name='matricola_scm_old',
+        ),
+        migrations.AlterField(
             model_name='pezzoricambio',
             name='matricola_scm_old',
             field=models.CharField(blank=True, db_column='matricola_macchina_scm', max_length=100, null=True, verbose_name='Matricola Macchina SCM (OLD)'),
         ),
-        migrations.AddField(
+        migrations.RenameField(
+            model_name='pezzoricambio',
+            old_name='modello_macchina_scm',
+            new_name='modello_scm_old',
+        ),
+        migrations.AlterField(
             model_name='pezzoricambio',
             name='modello_scm_old',
             field=models.CharField(blank=True, db_column='modello_macchina_scm', max_length=100, null=True, verbose_name='Modello Macchina SCM (OLD)'),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='pezzoricambio',
             name='matricola_macchina_scm',
             field=models.ForeignKey(blank=True, db_column='id_matricola_scm', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='articoli', to='magazzino.matricolamacchinascm', verbose_name='Matricola Macchina SCM'),
@@ -67,7 +77,7 @@ class Migration(migrations.Migration):
             name='modello',
             field=models.ForeignKey(db_column='id_modello', on_delete=django.db.models.deletion.PROTECT, related_name='matricole', to='magazzino.modellomacchinascm', verbose_name='Modello Macchina'),
         ),
-        migrations.AlterField(
+        migrations.AddField(
             model_name='pezzoricambio',
             name='modello_macchina_scm',
             field=models.ForeignKey(blank=True, db_column='id_modello_scm', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='articoli', to='magazzino.modellomacchinascm', verbose_name='Modello Macchina SCM'),

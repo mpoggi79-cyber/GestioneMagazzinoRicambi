@@ -147,7 +147,7 @@ class PezzoRicambioAdmin(admin.ModelAdmin):
     list_display = ('codice_interno', 'descrizione', 'categoria', 'unita_misura', 'stato_attivo')
     list_filter = ('stato_attivo', 'categoria', 'creato_il')
     search_fields = ('codice_interno', 'descrizione', 'codice_fornitore', 'codice_scm')
-    readonly_fields = ('creato_il', 'modificato_il')
+    readonly_fields = ('codice_interno', 'creato_il', 'modificato_il')
     
     fieldsets = (
         (_('Codici'), {

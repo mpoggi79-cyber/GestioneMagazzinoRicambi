@@ -4,38 +4,51 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def _get_colonne(schema_editor, table_name):
+    with schema_editor.connection.cursor() as cursor:
+        descrizione = schema_editor.connection.introspection.get_table_description(cursor, table_name)
+    return {col.name for col in descrizione}
+
+
+def _get_fk_names(schema_editor, table_name, column_name):
+    with schema_editor.connection.cursor() as cursor:
+        constraints = schema_editor.connection.introspection.get_constraints(cursor, table_name)
+
+    return [
+        nome for nome, meta in constraints.items()
+        if meta.get('foreign_key') and column_name in meta.get('columns', [])
+    ]
+
+
 def rimuovi_tb_unita_misura_field(apps, schema_editor):
     """
     Rimuove il campo id_tb_unita_misura dalla tabella pezzi_ricambio.
     La colonna idUnitaMisura ora punta direttamente a tbUnitaMisura.
     """
+    colonne = _get_colonne(schema_editor, 'pezzi_ricambio')
+    if 'id_tb_unita_misura' not in colonne:
+        return
+
     with schema_editor.connection.cursor() as cursor:
-        # Rimuovo la FK constraint su id_tb_unita_misura
-        cursor.execute("""
-            ALTER TABLE pezzi_ricambio 
-            DROP FOREIGN KEY pezzi_ricambio_id_tb_unita_misura_9ff4dcae_fk_tbUnitaMi
-        """)
-        # Rimuovo la colonna id_tb_unita_misura
-        cursor.execute("""
-            ALTER TABLE pezzi_ricambio 
-            DROP COLUMN id_tb_unita_misura
-        """)
+        for fk_name in _get_fk_names(schema_editor, 'pezzi_ricambio', 'id_tb_unita_misura'):
+            cursor.execute(f"ALTER TABLE pezzi_ricambio DROP FOREIGN KEY {fk_name}")
+
+        cursor.execute("ALTER TABLE pezzi_ricambio DROP COLUMN id_tb_unita_misura")
 
 
 def ripristina_tb_unita_misura_field(apps, schema_editor):
     """Reverse operation - riaggiunge il campo"""
+    colonne = _get_colonne(schema_editor, 'pezzi_ricambio')
+    if 'id_tb_unita_misura' in colonne:
+        return
+
     with schema_editor.connection.cursor() as cursor:
-        # Riaggiungo la colonna id_tb_unita_misura
-        cursor.execute("""
-            ALTER TABLE pezzi_ricambio 
-            ADD COLUMN id_tb_unita_misura INT(11) NULL
-        """)
-        # Riaggiungo la FK constraint
-        cursor.execute("""
-            ALTER TABLE pezzi_ricambio 
-            ADD CONSTRAINT pezzi_ricambio_id_tb_unita_misura_9ff4dcae_fk_tbUnitaMi 
-            FOREIGN KEY (id_tb_unita_misura) REFERENCES tbUnitaMisura(idUnitaMisura)
-        """)
+        cursor.execute("ALTER TABLE pezzi_ricambio ADD COLUMN id_tb_unita_misura INT(11) NULL")
+        cursor.execute(
+            "ALTER TABLE pezzi_ricambio "
+            "ADD CONSTRAINT pezzi_ricambio_id_tb_unita_misura_fk "
+            "FOREIGN KEY (id_tb_unita_misura) REFERENCES tbUnitaMisura(idUnitaMisura)"
+        )
 
 
 class Migration(migrations.Migration):

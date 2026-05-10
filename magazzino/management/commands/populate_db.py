@@ -13,6 +13,7 @@ from magazzino.models import (
     Categoria, UnitaMisura, Fornitore, PezzoRicambio,
     Giacenza, MovimentoMagazzino
 )
+from magazzino.codici import genera_codice_articolo
 from django.contrib.auth.models import User
 from accounts.models import ProfiloUtente, RuoloUtente
 
@@ -204,10 +205,9 @@ class Command(BaseCommand):
         articoli = []
         for idx, (nome, descr, cat_idx, um_idx, prezzo, min_stock, max_stock) in enumerate(articoli_data):
             articolo, _ = PezzoRicambio.objects.get_or_create(
-                codice_interno=f"RIC-{idx+1:04d}",
+                descrizione=descr,
+                categoria=categorie[cat_idx],
                 defaults={
-                    'descrizione': descr,
-                    'categoria': categorie[cat_idx],
                     'unita_misura': unita_misura[um_idx],
                     'prezzo_acquisto': prezzo,
                     'giacenza_minima': min_stock,
@@ -215,6 +215,10 @@ class Command(BaseCommand):
                     'stato_attivo': True,
                 }
             )
+            codice_atteso = genera_codice_articolo(articolo.id_articolo)
+            if articolo.codice_interno != codice_atteso:
+                articolo.codice_interno = codice_atteso
+                articolo.save(update_fields=['codice_interno'])
             articoli.append(articolo)
         
         return articoli

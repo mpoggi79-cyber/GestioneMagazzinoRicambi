@@ -364,21 +364,23 @@ class PezzoRicambioForm(forms.ModelForm):
         # Codice interno
         self.fields['codice_interno'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': _('Codice interno univoco'),
-            'autofocus': True,
+            'placeholder': _('Generato automaticamente al salvataggio'),
+            'readonly': True,
         })
+        self.fields['codice_interno'].required = False
+        self.fields['codice_interno'].disabled = True
         self.fields['codice_interno'].label = _('Codice Interno')
-        self.fields['codice_interno'].help_text = _('Identificativo univoco dell\'articolo')
+        self.fields['codice_interno'].help_text = _('Assegnato automaticamente dal sistema e non modificabile')
         
         # Codici alternativi
         self.fields['codice_scm'].widget.attrs.update({
             'class': 'form-control',
-            'placeholder': _('Es. 1234567890A'),
+            'placeholder': _('Es. 07L0320061B'),
             'maxlength': '11',
-            'pattern': r'\d{10}[A-Z]',
+            'pattern': r'[A-Za-z0-9]{11}',
         })
         self.fields['codice_scm'].required = False
-        self.fields['codice_scm'].help_text = _('10 cifre + 1 lettera maiuscola (es. 1234567890A)')
+        self.fields['codice_scm'].help_text = _('11 caratteri alfanumerici (es. 07L0320061B). Le lettere vengono convertite automaticamente in maiuscolo.')
         
         self.fields['codice_fornitore'].widget.attrs.update({
             'class': 'form-control',
@@ -408,9 +410,10 @@ class PezzoRicambioForm(forms.ModelForm):
             'class': 'form-control',
             'placeholder': _('Descrizione estesa dell\'articolo'),
             'rows': 3,
+            'autofocus': True,
         })
         
-        # Categoria nascosta (valorizzata da JS) - opzionale
+        # Categoria nascosta (valorizzata da JS)
         self.fields['categoria'].required = False
         # Popola il queryset per permettere la validazione di qualsiasi categoria attiva
         self.fields['categoria'].queryset = Categoria.objects.filter(
@@ -438,6 +441,10 @@ class PezzoRicambioForm(forms.ModelForm):
                 'type': 'number',
                 'min': '0',
             })
+            self.fields[field].required = False
+
+        self.fields['giacenza_minima'].initial = self.instance.giacenza_minima or 5
+        self.fields['giacenza_massima'].initial = self.instance.giacenza_massima or 100
         
         # Prezzi
         for field in ['prezzo_acquisto', 'prezzo_acquisto_scm']:
@@ -470,6 +477,7 @@ class PezzoRicambioForm(forms.ModelForm):
         sottocategoria = cleaned_data.get('sottocategoria')
         categoria_livello2 = cleaned_data.get('categoria_livello2')
         macrocategoria = cleaned_data.get('macrocategoria')
+        categoria_nascosta = cleaned_data.get('categoria')
         
         if sottocategoria:
             cleaned_data['categoria'] = sottocategoria
@@ -477,9 +485,19 @@ class PezzoRicambioForm(forms.ModelForm):
             cleaned_data['categoria'] = categoria_livello2
         elif macrocategoria:
             cleaned_data['categoria'] = macrocategoria
+        elif categoria_nascosta:
+            # Fallback: se i dropdown non arrivano nel POST, usa la categoria nascosta valorizzata dal JS.
+            cleaned_data['categoria'] = categoria_nascosta
         else:
-            # Categoria opzionale - non sollevare errore
+            self.add_error(
+                'macrocategoria',
+                _('Seleziona una categoria prima di salvare l\'articolo.')
+            )
             cleaned_data['categoria'] = None
+
+        for nome_campo, valore_default in [('giacenza_minima', 5), ('giacenza_massima', 100)]:
+            if cleaned_data.get(nome_campo) in (None, ''):
+                cleaned_data[nome_campo] = valore_default
         
         # Gestione upload immagine da URL
         immagine_url = cleaned_data.get('immagine_url')
@@ -528,18 +546,18 @@ class PezzoRicambioForm(forms.ModelForm):
                     'immagine_url': _('Errore nel download dell\'immagine: {}').format(str(e))
                 })
         
-        # Validazione Codice SCM: formato 10 cifre + 1 lettera maiuscola
+        # Validazione Codice SCM: campo opzionale, ma se valorizzato deve avere 11 caratteri alfanumerici.
         codice_scm = cleaned_data.get('codice_scm')
         if codice_scm:
-            # Rimuovi eventuali spazi
-            codice_scm = codice_scm.strip()
+            # Normalizza il valore per avere un confronto univoco lato server.
+            codice_scm = codice_scm.strip().upper()
             cleaned_data['codice_scm'] = codice_scm
             
-            # Validazione formato: 10 cifre + 1 lettera maiuscola
+            # Validazione formato: esattamente 11 caratteri alfanumerici.
             import re
-            if not re.match(r'^\d{10}[A-Z]$', codice_scm):
+            if not re.fullmatch(r'[A-Z0-9]{11}', codice_scm):
                 raise forms.ValidationError({
-                    'codice_scm': _('Il Codice SCM deve essere formato da 10 cifre seguite da 1 lettera maiuscola (es. 1234567890A)')
+                    'codice_scm': _('Il Codice SCM deve contenere esattamente 11 caratteri alfanumerici (es. 07L0320061B)')
                 })
             
             # Verifica univocità (escludendo l'istanza corrente in modifica)

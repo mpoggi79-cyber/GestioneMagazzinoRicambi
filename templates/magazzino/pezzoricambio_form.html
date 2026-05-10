@@ -6,6 +6,25 @@
 
 {% block content %}
 
+<style>
+    .sezione-classificazione {
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 0.5rem 0.6rem;
+        transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .sezione-classificazione.in-errore {
+        border-color: #dc3545;
+        background-color: #fff5f5;
+        box-shadow: inset 0 0 0 1px rgba(220, 53, 69, 0.1);
+    }
+
+    .titolo-classificazione.in-errore {
+        color: #b02a37 !important;
+    }
+</style>
+
 <h1 class="page-title">
     <i class="fas fa-cube"></i> 
     {% if form.instance.id_articolo %}
@@ -34,6 +53,21 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                     {% endif %}
+
+                    {% if form.errors %}
+                    <div id="riepilogo-errori-form" class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Controlla i campi con errori:</strong>
+                        <ul class="mb-0 mt-2">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
                     
                     <!-- CODICI -->
                     <h6 class="mb-2 mt-2 fw-bold text-primary">Codici Identificativi</h6>
@@ -41,9 +75,15 @@
                         <div class="col-md-6 mb-2">
                             <label for="{{ form.codice_interno.id_for_label }}" class="form-label">
                                 {{ form.codice_interno.label }}
-                                <span class="text-danger">*</span>
                             </label>
                             {{ form.codice_interno }}
+                            <small class="text-muted d-block mt-1">
+                                {% if form.instance.id_articolo %}
+                                    Codice assegnato automaticamente dal sistema e non modificabile.
+                                {% else %}
+                                    Verrà assegnato automaticamente al salvataggio del nuovo articolo.
+                                {% endif %}
+                            </small>
                             {% if form.codice_interno.errors %}
                             <div class="invalid-feedback d-block">{{ form.codice_interno.errors.0 }}</div>
                             {% endif %}
@@ -52,6 +92,9 @@
                         <div class="col-md-6 mb-2">
                             <label for="{{ form.codice_fornitore.id_for_label }}" class="form-label">{{ form.codice_fornitore.label }}</label>
                             {{ form.codice_fornitore }}
+                            {% if form.codice_fornitore.errors %}
+                            <div class="invalid-feedback d-block">{{ form.codice_fornitore.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -61,10 +104,19 @@
                         <div class="col-md-6 mb-2">
                             <label for="{{ form.codice_scm.id_for_label }}" class="form-label">{{ form.codice_scm.label }}</label>
                             {{ form.codice_scm }}
+                            {% if form.codice_scm.help_text %}
+                            <small class="text-muted d-block mt-1">{{ form.codice_scm.help_text }}</small>
+                            {% endif %}
+                            {% if form.codice_scm.errors %}
+                            <div class="invalid-feedback d-block">{{ form.codice_scm.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         <div class="col-md-6 mb-2">
                             <label for="{{ form.descrizione_scm.id_for_label }}" class="form-label">{{ form.descrizione_scm.label }}</label>
                             {{ form.descrizione_scm }}
+                            {% if form.descrizione_scm.errors %}
+                            <div class="invalid-feedback d-block">{{ form.descrizione_scm.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -72,10 +124,16 @@
                         <div class="col-md-6 mb-2">
                             <label for="{{ form.modello_macchina_scm.id_for_label }}" class="form-label">{{ form.modello_macchina_scm.label }}</label>
                             {{ form.modello_macchina_scm }}
+                            {% if form.modello_macchina_scm.errors %}
+                            <div class="invalid-feedback d-block">{{ form.modello_macchina_scm.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         <div class="col-md-6 mb-2">
                             <label for="{{ form.matricola_macchina_scm.id_for_label }}" class="form-label">{{ form.matricola_macchina_scm.label }}</label>
                             {{ form.matricola_macchina_scm }}
+                            {% if form.matricola_macchina_scm.errors %}
+                            <div class="invalid-feedback d-block">{{ form.matricola_macchina_scm.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -93,13 +151,19 @@
                     </div>
 
                     <!-- CATEGORIA, FORNITORE E UNITÀ MISURA -->
-                    <h6 class="mb-2 mt-3 fw-bold text-primary">Classificazione</h6>
-                    
-                    <!-- CATEGORIA GERARCHICA (3 livelli) - Opzionale -->
+                    <div id="sezione-classificazione" class="sezione-classificazione">
+                    <h6 id="titolo-classificazione" class="mb-2 mt-3 fw-bold text-primary titolo-classificazione">Classificazione</h6>
+                    <div id="avviso-errore-classificazione" class="alert alert-danger py-2 mb-2" style="display:none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Sezione classificazione incompleta: controlla la categoria selezionata.
+                    </div>
+
+                    <!-- CATEGORIA GERARCHICA (3 livelli) -->
                     <div class="row">
                         <div class="col-md-4 mb-2">
                             <label for="{{ form.macrocategoria.id_for_label }}" class="form-label">
                                 {{ form.macrocategoria.label }}
+                                <span class="text-danger">*</span>
                             </label>
                             {{ form.macrocategoria }}
                             {% if form.macrocategoria.errors %}
@@ -130,7 +194,7 @@
                     
                     <small class="text-muted mb-2 d-block">
                         <i class="fas fa-info-circle"></i> 
-                        La categoria è opzionale. Puoi assegnarla in un secondo momento.
+                        La categoria è obbligatoria. Seleziona almeno un livello prima del salvataggio.
                     </small>
                     
                     <!-- Breadcrumb categoria selezionata -->
@@ -162,6 +226,7 @@
                             {% endif %}
                         </div>
                     </div>
+                    </div>
 
                     <!-- GIACENZE E PREZZI -->
                     <h6 class="mb-2 mt-3 fw-bold text-primary">Giacenze e Prezzi</h6>
@@ -169,11 +234,17 @@
                         <div class="col-md-6 mb-2">
                             <label for="{{ form.giacenza_minima.id_for_label }}" class="form-label">{{ form.giacenza_minima.label }}</label>
                             {{ form.giacenza_minima }}
+                            {% if form.giacenza_minima.errors %}
+                            <div class="invalid-feedback d-block">{{ form.giacenza_minima.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         
                         <div class="col-md-6 mb-2">
                             <label for="{{ form.giacenza_massima.id_for_label }}" class="form-label">{{ form.giacenza_massima.label }}</label>
                             {{ form.giacenza_massima }}
+                            {% if form.giacenza_massima.errors %}
+                            <div class="invalid-feedback d-block">{{ form.giacenza_massima.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -181,11 +252,17 @@
                         <div class="col-md-6 mb-2">
                             <label for="{{ form.prezzo_acquisto.id_for_label }}" class="form-label">{{ form.prezzo_acquisto.label }}</label>
                             {{ form.prezzo_acquisto }}
+                            {% if form.prezzo_acquisto.errors %}
+                            <div class="invalid-feedback d-block">{{ form.prezzo_acquisto.errors.0 }}</div>
+                            {% endif %}
                         </div>
                         
                         <div class="col-md-6 mb-2">
                             <label for="{{ form.prezzo_acquisto_scm.id_for_label }}" class="form-label">{{ form.prezzo_acquisto_scm.label }}</label>
                             {{ form.prezzo_acquisto_scm }}
+                            {% if form.prezzo_acquisto_scm.errors %}
+                            <div class="invalid-feedback d-block">{{ form.prezzo_acquisto_scm.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -291,8 +368,8 @@
             <div class="card-body py-2">
                 <h6 class="mb-2 fw-bold">Campi Obbligatori</h6>
                 <ul class="small mb-2">
-                    <li>Codice Interno (univoco)</li>
                     <li>Descrizione</li>
+                    <li>Categoria</li>
                     <li>Unità di Misura</li>
                 </ul>
                 
@@ -300,9 +377,9 @@
                 
                 <h6 class="mb-2 fw-bold">Suggerimenti</h6>
                 <ul class="small mb-2" style="font-size: 0.8rem;">
-                    <li>Codici univoci e riconoscibili</li>
+                    <li>Il codice articolo viene assegnato automaticamente</li>
                     <li>Descrizioni chiare e dettagliate</li>
-                    <li>Categoria opzionale (assegnabile dopo)</li>
+                    <li>Seleziona la categoria prima di salvare l'articolo</li>
                     <li><strong>SCM:</strong> Seleziona prima il modello, poi la matricola</li>
                 </ul>
                 
@@ -324,6 +401,59 @@
 </form>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const riepilogoErrori = document.getElementById('riepilogo-errori-form');
+    if (!riepilogoErrori) {
+        return;
+    }
+
+    const feedbackConErrori = document.querySelectorAll('.invalid-feedback.d-block');
+    const sezioneClassificazione = document.getElementById('sezione-classificazione');
+    const titoloClassificazione = document.getElementById('titolo-classificazione');
+    const avvisoClassificazione = document.getElementById('avviso-errore-classificazione');
+    const macroCategoria = document.getElementById('{{ form.macrocategoria.id_for_label }}');
+    const categoriaLivello2 = document.getElementById('{{ form.categoria_livello2.id_for_label }}');
+    const sottoCategoria = document.getElementById('{{ form.sottocategoria.id_for_label }}');
+    let primoCampoInErrore = null;
+
+    feedbackConErrori.forEach(function(feedback) {
+        const campo = feedback.previousElementSibling;
+        if (!campo) {
+            return;
+        }
+
+        if (campo.matches('input, select, textarea')) {
+            campo.classList.add('is-invalid');
+            if (!primoCampoInErrore) {
+                primoCampoInErrore = campo;
+            }
+        }
+    });
+
+    riepilogoErrori.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
+
+    if (primoCampoInErrore) {
+        primoCampoInErrore.focus({ preventScroll: true });
+    }
+
+    const erroreCategoria = [macroCategoria, categoriaLivello2, sottoCategoria].some(function(campo) {
+        return campo && campo.classList.contains('is-invalid');
+    });
+
+    if (erroreCategoria && sezioneClassificazione) {
+        sezioneClassificazione.classList.add('in-errore');
+        if (titoloClassificazione) {
+            titoloClassificazione.classList.add('in-errore');
+        }
+        if (avvisoClassificazione) {
+            avvisoClassificazione.style.display = 'block';
+        }
+    }
+});
+
 // CATEGORIE A CASCATA
 document.addEventListener('DOMContentLoaded', function() {
     const macroSelect = document.getElementById('{{ form.macrocategoria.id_for_label }}');

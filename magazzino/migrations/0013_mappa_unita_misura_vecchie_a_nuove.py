@@ -3,6 +3,19 @@
 from django.db import migrations
 
 
+def _trova_colonna_unita_misura(schema_editor):
+    with schema_editor.connection.cursor() as cursor:
+        descrizione = schema_editor.connection.introspection.get_table_description(cursor, 'pezzi_ricambio')
+
+    colonne = {col.name for col in descrizione}
+
+    for nome_colonna in ('id_unita_misura', 'idUnitaMisura'):
+        if nome_colonna in colonne:
+            return nome_colonna
+
+    return None
+
+
 def mappa_vecchie_unita_a_nuove(apps, schema_editor):
     """
     Mappa i vecchi ID unita_misura ai nuovi ID tbUnitaMisura:
@@ -15,6 +28,10 @@ def mappa_vecchie_unita_a_nuove(apps, schema_editor):
     6 (Coppia) → 13
     7 (Conf) → 14
     """
+    nome_colonna = _trova_colonna_unita_misura(schema_editor)
+    if not nome_colonna:
+        return
+
     # Uso SQL diretto perché Django ORM non riconosce il db_column nella migration
     with schema_editor.connection.cursor() as cursor:
         mapping = [
@@ -29,13 +46,17 @@ def mappa_vecchie_unita_a_nuove(apps, schema_editor):
         
         for vecchio_id, nuovo_id in mapping:
             cursor.execute(
-                "UPDATE pezzi_ricambio SET idUnitaMisura = %s WHERE idUnitaMisura = %s",
+                f"UPDATE pezzi_ricambio SET {nome_colonna} = %s WHERE {nome_colonna} = %s",
                 [nuovo_id, vecchio_id]
             )
 
 
 def reverse_mapping(apps, schema_editor):
     """Reverse mapping per rollback"""
+    nome_colonna = _trova_colonna_unita_misura(schema_editor)
+    if not nome_colonna:
+        return
+
     with schema_editor.connection.cursor() as cursor:
         mapping = [
             (9, 1),   # Pz
@@ -49,7 +70,7 @@ def reverse_mapping(apps, schema_editor):
         
         for nuovo_id, vecchio_id in mapping:
             cursor.execute(
-                "UPDATE pezzi_ricambio SET idUnitaMisura = %s WHERE idUnitaMisura = %s",
+                f"UPDATE pezzi_ricambio SET {nome_colonna} = %s WHERE {nome_colonna} = %s",
                 [vecchio_id, nuovo_id]
             )
 

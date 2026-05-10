@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, F, Sum, Count
+from django.db.models.functions import Trim
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.http import JsonResponse, FileResponse, HttpResponse, Http404
@@ -110,11 +111,62 @@ class DashboardView(CanViewMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        layout_richiesto = self.request.GET.get('layout')
+        chiave_layout_dashboard = 'dashboard_layout_preferito'
+        if layout_richiesto in ['additiva', 'riorganizzata']:
+            self.request.session[chiave_layout_dashboard] = layout_richiesto
+
+        layout_corrente = self.request.session.get(chiave_layout_dashboard, 'additiva')
+        context['usa_layout_riorganizzato'] = layout_corrente == 'riorganizzata'
+        context['dashboard_layout_corrente'] = layout_corrente
+
+        articoli_attivi = PezzoRicambio.objects.filter(stato_attivo=True)
         
         # Statistiche generali
-        context['total_articoli'] = PezzoRicambio.objects.filter(stato_attivo=True).count()
+        context['total_articoli'] = articoli_attivi.count()
         context['total_fornitori'] = Fornitore.objects.filter(stato_attivo=True).count()
         context['total_categorie'] = Categoria.objects.filter(stato_attivo=True).count()
+
+        # Statistiche articoli richieste in dashboard
+        context['articoli_con_foto'] = articoli_attivi.filter(
+            immagine__isnull=False
+        ).exclude(
+            immagine=''
+        ).count()
+        context['articoli_con_codice_scm'] = articoli_attivi.filter(
+            codice_scm__isnull=False
+        ).annotate(
+            codice_scm_pulito=Trim('codice_scm')
+        ).exclude(
+            codice_scm_pulito=''
+        ).count()
+        context['articoli_con_codice_fornitore'] = articoli_attivi.filter(
+            codice_fornitore__isnull=False
+        ).annotate(
+            codice_fornitore_pulito=Trim('codice_fornitore')
+        ).exclude(
+            codice_fornitore_pulito=''
+        ).count()
+        context['articoli_non_attivi'] = PezzoRicambio.objects.filter(stato_attivo=False).count()
+
+        totale_articoli = context['total_articoli']
+
+        def calcola_percentuale(parziale, totale):
+            if totale <= 0:
+                return 0
+            return round((parziale / totale) * 100, 1)
+
+        context['copertura_foto_pct'] = calcola_percentuale(context['articoli_con_foto'], totale_articoli)
+        context['copertura_codice_scm_pct'] = calcola_percentuale(context['articoli_con_codice_scm'], totale_articoli)
+        context['copertura_codice_fornitore_pct'] = calcola_percentuale(context['articoli_con_codice_fornitore'], totale_articoli)
+        context['indice_completezza_articoli_pct'] = round(
+            (
+                context['copertura_foto_pct']
+                + context['copertura_codice_scm_pct']
+                + context['copertura_codice_fornitore_pct']
+            ) / 3,
+            1
+        )
         
         # Giacenze
         giacenze_total = Giacenza.objects.aggregate(
@@ -124,8 +176,7 @@ class DashboardView(CanViewMixin, TemplateView):
         context['giacenze'] = giacenze_total
         
         # Articoli sotto soglia
-        articoli_sotto_soglia = PezzoRicambio.objects.filter(
-            stato_attivo=True,
+        articoli_sotto_soglia = articoli_attivi.filter(
             giacenza__quantita_disponibile__lt=F('giacenza_minima')
         ).count()
         context['articoli_sotto_soglia'] = articoli_sotto_soglia
@@ -640,8 +691,22 @@ class PezzoRicambioCreateView(CanEditMixin, CreateView):
                 f'✅ Articolo creato con successo! +1 punto (aggiungi un\'immagine per +2 punti)'
             )
         
-        logger.info(f"✨ Articolo creato: {form.cleaned_data['codice_interno']} da {self.request.user.username} (+{punti} punti)")
+        logger.info(f"✨ Articolo creato: {articolo.codice_interno} da {self.request.user.username} (+{punti} punti)")
         return response
+
+    def form_invalid(self, form):
+        if form.errors.get('macrocategoria'):
+            messages.error(
+                self.request,
+                _('Salvataggio non completato: seleziona una categoria valida prima di creare l\'articolo.')
+            )
+        else:
+            messages.error(
+                self.request,
+                _('Salvataggio non completato: verifica i campi evidenziati nel form e riprova.')
+            )
+        logger.warning(f"Form invalida in creazione articolo: {form.errors}")
+        return super().form_invalid(form)
 
 
 class PezzoRicambioUpdateView(CanEditMixin, UpdateView):
@@ -682,7 +747,7 @@ class PezzoRicambioUpdateView(CanEditMixin, UpdateView):
             logger.info(f"🖼️ Immagine aggiunta a {self.object.codice_interno} da {self.request.user.username} (+2 punti)")
         else:
             messages.success(self.request, _('Articolo aggiornato con successo!'))
-            logger.info(f"Articolo aggiornato: {form.cleaned_data['codice_interno']}")
+            logger.info(f"Articolo aggiornato: {self.object.codice_interno}")
         
         return response
     

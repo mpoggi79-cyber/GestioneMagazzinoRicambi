@@ -5,14 +5,207 @@
 
 {% block content %}
 
-<h1 class="page-title">
-    <i class="fas fa-chart-line"></i> Dashboard
-</h1>
+<style>
+    .dashboard-hero {
+        background: linear-gradient(120deg, #f4f9ff 0%, #ecfff8 100%);
+        border: 1px solid #dbe9f6;
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+        margin-bottom: 1rem;
+    }
 
-<!-- GRID STATISTICHE -->
+    .layout-switch .btn {
+        min-width: 130px;
+    }
+
+    .kpi-card {
+        border-top-width: 4px;
+        border-top-style: solid;
+        box-shadow: 0 8px 18px rgba(18, 63, 108, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        animation: kpiReveal 0.45s ease;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 28px rgba(18, 63, 108, 0.14);
+    }
+
+    .qualita-card {
+        border: none;
+        box-shadow: 0 12px 22px rgba(10, 49, 86, 0.1);
+        background: radial-gradient(circle at top right, #edf8ff 0%, #f8fbff 40%, #ffffff 100%);
+    }
+
+    .qualita-score {
+        font-size: 2.2rem;
+        font-weight: 700;
+        line-height: 1;
+        color: #114a7a;
+    }
+
+    .metrica-progress {
+        height: 0.7rem;
+        border-radius: 999px;
+        background-color: #e8eff7;
+    }
+
+    .metrica-progress .progress-bar {
+        border-radius: 999px;
+    }
+
+    @keyframes kpiReveal {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="dashboard-hero d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <h1 class="page-title mb-0">
+        <i class="fas fa-chart-line"></i> Dashboard
+    </h1>
+    <div class="d-flex align-items-center gap-2">
+        <small class="text-muted fw-semibold">Layout vista indicatori</small>
+        <div class="btn-group btn-group-sm layout-switch" role="group" aria-label="Selettore layout dashboard">
+            <a
+                href="?layout=additiva"
+                class="btn {% if dashboard_layout_corrente == 'additiva' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-plus-square"></i> Additiva
+            </a>
+            <a
+                href="?layout=riorganizzata"
+                class="btn {% if dashboard_layout_corrente == 'riorganizzata' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-th-large"></i> Riorganizzata
+            </a>
+        </div>
+    </div>
+</div>
+
+<p class="text-muted small mb-3">
+    Gli indicatori mostrano un riepilogo rapido dei dati principali: situazione generale del magazzino e completezza delle anagrafiche articoli.
+</p>
+
+{% if usa_layout_riorganizzato %}
+<!-- VARIANTE B - GRID RIORGANIZZATA -->
+<div class="row mb-2">
+    <div class="col-12">
+        <h5 class="text-muted mb-3"><i class="fas fa-layer-group"></i> Riepilogo Generale</h5>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-center h-100 kpi-card" style="border-top-color: #3498db;">
+            <div class="card-body">
+                <i class="fas fa-cube" style="font-size: 2.5rem; color: #3498db;"></i>
+                <h6 class="card-title text-muted mt-3">Articoli Totali</h6>
+                <h2 class="text-primary">{{ total_articoli }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-center h-100 kpi-card" style="border-top-color: #2ecc71;">
+            <div class="card-body">
+                <i class="fas fa-truck" style="font-size: 2.5rem; color: #2ecc71;"></i>
+                <h6 class="card-title text-muted mt-3">Fornitori Attivi</h6>
+                <h2 class="text-success">{{ total_fornitori }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-center h-100 kpi-card" style="border-top-color: #f39c12;">
+            <div class="card-body">
+                <i class="fas fa-folder" style="font-size: 2.5rem; color: #f39c12;"></i>
+                <h6 class="card-title text-muted mt-3">Categorie</h6>
+                <h2 class="text-warning">{{ total_categorie }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-center h-100 kpi-card" style="border-top-color: #e74c3c;">
+            <div class="card-body">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; color: #e74c3c;"></i>
+                <h6 class="card-title text-muted mt-3">Sotto Soglia</h6>
+                <h2 class="text-danger">{{ articoli_sotto_soglia }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-2">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h5 class="text-muted mb-3"><i class="fas fa-boxes"></i> Indicatori Articoli</h5>
+        <small class="text-muted">Scelta salvata per la tua sessione</small>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+        <div class="card text-center h-100 kpi-card" style="border-top-color: #0d6efd;">
+            <div class="card-body">
+                <i class="fas fa-cubes" style="font-size: 2rem; color: #0d6efd;"></i>
+                <h6 class="card-title text-muted mt-3">Articoli Attivi</h6>
+                <h3 class="text-primary mb-0">{{ total_articoli }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+        <div class="card text-center h-100 kpi-card" style="border-top-color: #20c997;">
+            <div class="card-body">
+                <i class="fas fa-image" style="font-size: 2rem; color: #20c997;"></i>
+                <h6 class="card-title text-muted mt-3">Con Foto</h6>
+                <h3 class="text-success mb-0">{{ articoli_con_foto }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+        <div class="card text-center h-100 kpi-card" style="border-top-color: #146c94;">
+            <div class="card-body">
+                <i class="fas fa-industry" style="font-size: 2rem; color: #146c94;"></i>
+                <h6 class="card-title text-muted mt-3">Con Codice SCM</h6>
+                <h3 class="mb-0" style="color: #146c94;">{{ articoli_con_codice_scm }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-lg-4 col-md-6 mb-3">
+        <div class="card text-center h-100 kpi-card" style="border-top-color: #fd7e14;">
+            <div class="card-body">
+                <i class="fas fa-barcode" style="font-size: 2rem; color: #fd7e14;"></i>
+                <h6 class="card-title text-muted mt-3">Con Codice Fornitore</h6>
+                <h3 class="mb-0" style="color: #fd7e14;">{{ articoli_con_codice_fornitore }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-lg-8 col-md-12 mb-3">
+        <div class="card text-center h-100 kpi-card" style="border-top-color: #dc3545;">
+            <div class="card-body">
+                <i class="fas fa-toggle-off" style="font-size: 2rem; color: #dc3545;"></i>
+                <h6 class="card-title text-muted mt-3">Articoli Non Attivi</h6>
+                <h3 class="text-danger mb-0">{{ articoli_non_attivi }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- VARIANTE A - SOLO AGGIUNTA -->
 <div class="row mb-4">
     <div class="col-md-3 mb-3">
-        <div class="card text-center" style="border-top-color: #3498db;">
+        <div class="card text-center kpi-card" style="border-top-color: #3498db;">
             <div class="card-body">
                 <i class="fas fa-cube" style="font-size: 2.5rem; color: #3498db;"></i>
                 <h6 class="card-title text-muted mt-3">Articoli Totali</h6>
@@ -22,7 +215,7 @@
     </div>
     
     <div class="col-md-3 mb-3">
-        <div class="card text-center" style="border-top-color: #2ecc71;">
+        <div class="card text-center kpi-card" style="border-top-color: #2ecc71;">
             <div class="card-body">
                 <i class="fas fa-truck" style="font-size: 2.5rem; color: #2ecc71;"></i>
                 <h6 class="card-title text-muted mt-3">Fornitori Attivi</h6>
@@ -32,7 +225,7 @@
     </div>
     
     <div class="col-md-3 mb-3">
-        <div class="card text-center" style="border-top-color: #f39c12;">
+        <div class="card text-center kpi-card" style="border-top-color: #f39c12;">
             <div class="card-body">
                 <i class="fas fa-folder" style="font-size: 2.5rem; color: #f39c12;"></i>
                 <h6 class="card-title text-muted mt-3">Categorie</h6>
@@ -42,11 +235,123 @@
     </div>
     
     <div class="col-md-3 mb-3">
-        <div class="card text-center" style="border-top-color: #e74c3c;">
+        <div class="card text-center kpi-card" style="border-top-color: #e74c3c;">
             <div class="card-body">
                 <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; color: #e74c3c;"></i>
                 <h6 class="card-title text-muted mt-3">Sotto Soglia</h6>
                 <h2 class="text-danger">{{ articoli_sotto_soglia }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-boxes"></i> Statistiche Articoli</span>
+        <small class="text-muted">Scelta salvata per la tua sessione</small>
+    </div>
+    <div class="card-body pb-2">
+        <div class="row">
+            <div class="col-lg-2 col-md-6 mb-3">
+                <div class="card text-center h-100 kpi-card" style="border-top-color: #0d6efd;">
+                    <div class="card-body">
+                        <i class="fas fa-cubes" style="font-size: 2rem; color: #0d6efd;"></i>
+                        <h6 class="card-title text-muted mt-3">Articoli Attivi</h6>
+                        <h3 class="text-primary mb-0">{{ total_articoli }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-6 mb-3">
+                <div class="card text-center h-100 kpi-card" style="border-top-color: #20c997;">
+                    <div class="card-body">
+                        <i class="fas fa-image" style="font-size: 2rem; color: #20c997;"></i>
+                        <h6 class="card-title text-muted mt-3">Con Foto</h6>
+                        <h3 class="text-success mb-0">{{ articoli_con_foto }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-6 mb-3">
+                <div class="card text-center h-100 kpi-card" style="border-top-color: #146c94;">
+                    <div class="card-body">
+                        <i class="fas fa-industry" style="font-size: 2rem; color: #146c94;"></i>
+                        <h6 class="card-title text-muted mt-3">Con Codice SCM</h6>
+                        <h3 class="mb-0" style="color: #146c94;">{{ articoli_con_codice_scm }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-6 mb-3">
+                <div class="card text-center h-100 kpi-card" style="border-top-color: #fd7e14;">
+                    <div class="card-body">
+                        <i class="fas fa-barcode" style="font-size: 2rem; color: #fd7e14;"></i>
+                        <h6 class="card-title text-muted mt-3">Con Codice Fornitore</h6>
+                        <h3 class="mb-0" style="color: #fd7e14;">{{ articoli_con_codice_fornitore }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-12 mb-3">
+                <div class="card text-center h-100 kpi-card" style="border-top-color: #dc3545;">
+                    <div class="card-body">
+                        <i class="fas fa-toggle-off" style="font-size: 2rem; color: #dc3545;"></i>
+                        <h6 class="card-title text-muted mt-3">Articoli Non Attivi</h6>
+                        <h3 class="text-danger mb-0">{{ articoli_non_attivi }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card qualita-card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-lg-3 mb-3 mb-lg-0 text-center text-lg-start">
+                <small class="text-uppercase text-muted fw-semibold">Indice Completezza Articoli</small>
+                <div class="qualita-score">{{ indice_completezza_articoli_pct }}%</div>
+                {% if indice_completezza_articoli_pct >= 80 %}
+                    <span class="badge bg-success">Ottimo</span>
+                {% elif indice_completezza_articoli_pct >= 60 %}
+                    <span class="badge bg-warning text-dark">Buono</span>
+                {% else %}
+                    <span class="badge bg-danger">Da migliorare</span>
+                {% endif %}
+                <p class="small text-muted mb-0 mt-2">Misura la qualità anagrafica su foto e codifiche.</p>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="fw-semibold">Copertura Foto</span>
+                        <span>{{ copertura_foto_pct }}%</span>
+                    </div>
+                    <div class="progress metrica-progress">
+                        <div class="progress-bar bg-success" style="width: {{ copertura_foto_pct }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="fw-semibold">Copertura Codice SCM</span>
+                        <span>{{ copertura_codice_scm_pct }}%</span>
+                    </div>
+                    <div class="progress metrica-progress">
+                        <div class="progress-bar" style="background-color: #146c94; width: {{ copertura_codice_scm_pct }}%;"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="fw-semibold">Copertura Codice Fornitore</span>
+                        <span>{{ copertura_codice_fornitore_pct }}%</span>
+                    </div>
+                    <div class="progress metrica-progress">
+                        <div class="progress-bar" style="background-color: #fd7e14; width: {{ copertura_codice_fornitore_pct }}%;"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

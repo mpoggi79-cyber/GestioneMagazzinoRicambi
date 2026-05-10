@@ -449,6 +449,30 @@ Categoria.objects.filter(categoria_padre=None).delete()  # Solo root
 ## ⚠️ Gotcha Critici - AGGIORNAMENTO v1.1
 
 1. **PyMySQL, non mysqlclient**: Config DB usa PyMySQL; query potrebbero differire leggermente da MySQL nativo
+
+---
+
+## 🧠 Memoria Sviluppo Recente - 10/05/2026
+
+Questa sezione consolida le decisioni operative emerse durante lo sviluppo recente.
+
+### Decisioni applicate
+
+1. Dashboard aggiornata con indicatori articoli aggiuntivi e doppio layout (additivo/riorganizzato).
+2. Preferenza layout dashboard resa persistente in sessione utente.
+3. Frontend utente allineato a terminologia italiana chiara (no sigle non spiegate lato UI).
+4. Form creazione articolo rinforzato con:
+  - feedback esplicito in caso di submit non valido,
+  - riepilogo errori visibile,
+  - focus/scroll al primo errore,
+  - evidenziazione sezione classificazione in caso di errore categoria.
+
+### Regola workspace
+
+La memoria tecnica non viene scritta come testo narrativo nei file di configurazione workspace (`.vscode/*`).
+Le note operative restano nei manuali e nel documento centrale:
+
+- [MEMORIA_TECNICA_SVILUPPO.md](MEMORIA_TECNICA_SVILUPPO.md)
 2. **Auto-timestamp**: `auto_now_add=True` crea, `auto_now=True` aggiorna — non impostare manualmente mai
 3. **Vincoli Categoria**: PROTECT in FK previene cancellazione accidentale; **sempre** gestire `ProtectedError` in view Delete
 4. **Accesso basato ruolo**: **Sempre** verificare via `CanEditMixin`/`CanViewMixin`, non fidarsi mai di controlli client-side

@@ -67,6 +67,84 @@ python manage.py runserver
 
 ---
 
+## 🏗️ DECISIONI ARCHITETTURALI CRITICHE
+
+### 1️⃣ **PyMySQL, Non mysqlclient**
+- **Scelta**: Driver pure Python (nessuna dipendenza C)
+- **Motivo**: Compatibilità XAMPP cross-platform Windows/Linux
+- **Implicazione**: Alcune query edge-case potrebbero differire da MySQL nativo
+- **Riferimento**: [AGENTS.md - Architettura](AGENTS.md#-perché-pymysql-e-non-mysqlclient)
+
+### 2️⃣ **Signal-Based per Giacenza Updates**
+- **Scelta**: MovimentoMagazzino append-only (audit trail); Giacenza aggiornata via signal
+- **Motivo**: Traccia storica immutabile + automazione consistente
+- **Invariante Critica**: `Giacenza.disponibile = stock_totale - SCARICO + CARICO`
+- **Implicazione**: **NUNCA** modificare Giacenza direttamente; sempre via MovimentoMagazzino
+- **Riferimento**: [AGENTS.md - Signal-Based](AGENTS.md#-perché-signalbased-per-giacenza-updates)
+
+### 3️⃣ **Class-Based View con Mixin**
+- **Scelta**: Utilizzo CBV + custom mixin (CanViewMixin, CanEditMixin)
+- **Motivo**: Riusabilità autorizzazione, riduzione errori sicurezza
+- **Implicazione**: Sempre ereditare dai mixin giusti; non implementare auth in view
+- **Riferimento**: [AGENTS.md - Perché CBV](AGENTS.md#-perché-cbv-con-mixin-e-non-fbv)
+
+### 4️⃣ **Categorie Gerarchiche con Self-FK + PROTECT**
+- **Scelta**: Categoria.categoria_padre con PROTECT su DELETE
+- **Motivo**: Prevenire accidentale orphaning + logica anti-loop (max 10 livelli)
+- **Implicazione**: Cancellazioni falliscono se categoria ha sottocategorie → gestire ProtectedError
+- **Riferimento**: [AGENTS.md - Gerarchia Categorie](AGENTS.md#-gerarchia-categorie-self-referencing-fk-con-protect)
+
+---
+
+## 🧲 AUTOMAZIONE DATI - COME FUNZIONANO I SIGNAL
+
+### Pattern Movimento di Stock (Critico)
+```
+1. Crea MovimentoMagazzino (tipo: CARICO/SCARICO/RETTIFICA/RESO)
+2. Model.save() → memorizza movimento (IMMUTABILE) + timestamp + operatore
+3. Signal @receiver(post_save) → aggiorna Giacenza.disponibile AUTOMATICAMENTE
+4. View restituisce success_message con saldo nuovo
+```
+**⚠️ Regola**: **NUNCA** creare/aggiornare Giacenza direttamente. Sempre via MovimentoMagazzino.
+
+### Pattern Caricamento Immagini (Automatico)
+```
+1. User carica PNG/JPEG in PezzoRicambio.immagine (form field)
+2. Signal @receiver(pre_save) elabora automaticamente:
+   - Immagine principale → ridimensiona 800x800px (JPEG 90%)
+   - Thumbnail → genera 300x300px (JPEG 85%)
+   - PNG/RGBA → converte RGB con sfondo bianco
+3. File salvati in media/articoli/YYYY/MM/DD/
+4. Signal @receiver(post_delete) pulisce file quando articolo eliminato
+```
+**⚠️ Regola**: Non caricare mai immagini raw nel DB. Il signal gestisce tutto.
+
+### Pattern Autorizzazione (Permission Gates)
+```
+1. Request entra in View CBV che eredita CanViewMixin/CanEditMixin
+2. Mixin.test_func() verifica LoginRequiredMixin + profilo.può_modificare_dati()
+3. Se non autorizzato → messages.error() + redirect dashboard
+4. Se autorizzato → proceed a get_context_data() / form_valid()
+```
+**⚠️ Regola**: Sempre usare mixin. Non bypassare mai i controlli di autorizzazione.
+
+---
+
+## ⚠️ GOTCHA CRITICI - AVOID THESE MISTAKES
+
+| Errore | Causa | Soluzione | Severità |
+|--------|-------|----------|----------|
+| **Giacenza aggiornata manualmente** | Codice bypassa signal system | Sempre usa MovimentoMagazzino | 🔴 CRITICA |
+| **ProtectedError su categoria DELETE** | FK con PROTECT previene cancellazione | Elimina sottocategorie prima | 🟡 MEDIA |
+| **N+1 query in loop** | Template richiama `.all()` in ciclo | Usa `select_related()`/`prefetch_related()` | 🟡 MEDIA |
+| **Immagine non elaborata** | Signal pre_save non triggerato | Verifica signal.py è registrato in apps.py | 🟡 MEDIA |
+| **Accesso negato su view autorizzata** | Mixin mancante o ruolo sbagliato | Verifica CanEditMixin e ruolo ProfiloUtente | 🟡 MEDIA |
+| **CSRF token mancante** | Form POST senza {% csrf_token %} | Aggiungi token in tutti i template POST | 🟠 BASSA |
+
+**Riferimento completo**: [AGENTS.md - Gotcha Critici](AGENTS.md#-gotcha-critici---aggiornamento-v11)
+
+---
+
 ## 📦 SETUP PASSO-PASSO
 
 ### Prerequisites
@@ -590,14 +668,85 @@ mysql -u root GMR
 
 ## 🆘 TROUBLESHOOTING
 
+### Errori Database
+
 | Problema | Causa | Soluzione |
 |----------|-------|----------|
 | "Connessione database rifiutata" | MySQL non in esecuzione | Avviare XAMPP → START su MySQL |
-| "Porta 8000 già in uso" | Un altro processo usa la porta 8000 | Eseguire su porta diversa: `manage.py runserver 8001` |
+| "Tabella non esiste" dopo git pull | Migrazioni non applicate | `python manage.py migrate` |
+| "Foreign key constraint fails" | FK con PROTECT previene delete | Eliminare dipendenze prima o usare CASCADE |
+| "Table doesn't exist" | Database non creato | `mysql -u root < database_creation.sql` |
+
+### Errori Django
+
+| Problema | Causa | Soluzione |
+|----------|-------|----------|
+| "Porta 8000 già in use" | Altro processo occupa porta | `python manage.py runserver 8001` |
 | "ModuleNotFoundError" | Dipendenza mancante | `pip install -r requirements.txt` |
-| "TemplateDoesNotExist" | File template mancante | Verificare che i template esistano in templates/ |
-| "Permission Denied su CRUD" | Ruolo utente non permette operazione | Controllare ProfiloUtente.ruolo nel panel admin |
-| "Login fallisce con password corretta" | Dati test non caricati | Eseguire `python manage.py populate_db` |
+| "TemplateDoesNotExist" | File template mancante | Verificare path in templates/ |
+| "Permission Denied su CRUD" | Ruolo utente insufficiente | Verificare ProfiloUtente.ruolo in admin |
+| "Login fallisce con password corretta" | Dati test non caricati | `python manage.py populate_db` |
+
+### Errori Permessi Comuni
+
+```python
+# ❌ Errore: ProtectedError quando elimini categoria con sottocategorie
+# Soluzione: Eliminare ricorsivamente oppure usare cleanup script
+Categoria.objects.filter(categoria_padre=None).delete()  # Solo root
+
+# ❌ Errore: "Non hai i permessi" ma sei admin
+# Soluzione: Verifica ProfiloUtente.ruolo in shell
+>>> admin = User.objects.get(username='admin')
+>>> admin.profilo.ruolo  # Deve essere 'ADMIN'
+>>> admin.profilo.può_modificare_dati()  # Deve tornare True
+```
+
+### Debug Django Shell
+
+```bash
+# Ispezionare modelli in tempo reale
+python manage.py shell
+>>> from magazzino.models import *
+>>> c = Categoria.objects.first()
+>>> c.livello  # Verifica gerarchia
+>>> c.sottocategorie.all()  # Query figli
+>>> m = MovimentoMagazzino.objects.last()
+>>> m.pezzo_ricambio.giacenza.disponibile  # Navigare relazioni
+```
+
+### Pattern di Integrazione Cross-Component
+
+**Flusso Movimento di Stock (Critico)**:
+```
+1. Crea MovimentoMagazzino (tipo=CARICO/SCARICO/RETTIFICA/RESO)
+2. Model.save() memorizza movimento (immutabile) + timestamp + operatore
+3. Signal @receiver(post_save) aggiorna Giacenza.disponibile automaticamente
+4. View restituisce success_message con saldo nuovo
+```
+→ **Mai** creare/aggiornare Giacenza direttamente; sempre via MovimentoMagazzino
+
+**Flusso Caricamento Articolo (Immagini)**:
+```
+1. User carica PNG/JPEG in PezzoRicambio.immagine (form field)
+2. Signal @receiver(pre_save) processa:
+   - Immagine principale → ridimensiona 800x800px JPEG 90%
+   - Thumbnail → genera 300x300px JPEG 85%
+   - PNG/RGBA → converte RGB con sfondo bianco
+3. File salvati in media/articoli/YYYY/MM/DD/
+4. Signal @receiver(post_delete) pulisce file quando articolo cancellato
+```
+→ **Non** salvare mai immagini raw nel DB; il signal gestisce tutto
+
+**Flusso Backup Database (3 Metodi)**:
+```
+Metodo 1 (Web UI): /backup/ → BackupListView → click "Ripristina" → BackupRestoreView
+Metodo 2 (CLI): python manage.py restore_backup → scegli backup da lista interattiva
+Metodo 3 (PowerShell): .\restore_db_emergency.ps1 → script standalone XAMPP
+
+BackupManager traccia: backup_dir, retention_days (30), mysql_bin_path
+File backup: backups/backup_gmr_YYYYMMDD_HHMMSS.sql.gz (auto-cleanup vecchi)
+```
+→ **Preferisci metodo 1 o 2**; PowerShell solo emergenza (Windows-only)
 
 ---
 
@@ -771,13 +920,106 @@ I backup includono:
 | **GESTIONE_UTENTI.md** | Guida completa al sistema utenti | Admin, Support Staff |
 | **MANUALE_AMMINISTRATORE.md** | Procedure amministratore avanzate | System Admin |
 | **BACKUP_RECOVERY_GUIDE.md** | **Guida backup & recovery 3 metodi** | **System Admin, DBA** |
-| **.github/copilot-instructions.md** | Guida per AI agents nello sviluppo | AI/Copilot |
+| **MEMORIA_TECNICA_SVILUPPO.md** | **Memory centrale sviluppo recente** | **Developer, AI Agents** |
+| **AGENTS.md** | **Patterns architettura per AI agents** | **Copilot/AI Development** |
 
 **Nota**: START_HERE.md, QUICK_START.md, PROJECT_STATUS.md sono stati consolidati in questo README.
 
 ---
 
-## 🤝 Come Contribuire
+## 🔧 CONVENZIONI SPECIFICHE PROGETTO
+
+### Naming Modelli & Database
+- **Nomi italiani**: i nomi dei campi sono in italiano (es. `giacenza_minima`, `codice_scm`, `operatore`)
+- **Colonne PK**: Sempre `id_<model_minuscolo>` (es. `id_categoria`, `id_pezzo`)
+- **Riferimenti FK**: Usare `db_column` per matching naming legacy (es. `id_categoria_padre`)
+- **Campi timestamp**: `creato_il` (auto_now_add), `modificato_il` (auto_now) - naming standard
+- **Modelli clienti**: Nomi tabella legacy (es. `TbAppellativo`, `TbCategoriaIVA`) con campi legacy (`idAppellativo`, `idCategoriaIVA`)
+
+### Naming View & URL
+- `<Model>ListView` per pagine lista/ricerca
+- `<Model>CreateView` per form di creazione
+- `<Model>DetailView` per visualizzazione singolo oggetto (dettaglio read-only + link modifica)
+- `<Model>UpdateView` per form di modifica
+- `<Model>DeleteView` con template di conferma
+- **Dashboard views**: Usare `TemplateView` con logica aggregata (es. `DashboardView`)
+- **URL routes**: kebab-case italiano (es. `/categorie/`, `/articoli/`)
+
+### Validazione Form
+- Usare metodi `clean_<fieldname>()` per validazione specifica campo
+- Usare `clean()` per validazione cross-field (es. min ≤ max)
+- Widget personalizzati: `MatricolaSelectWidget` aggiunge data attributes per interop JS
+- Crispy-forms: sempre usare `{% load crispy_forms_tags %}` + `{{ form|crispy }}`
+
+### Struttura Template
+- Tutti ereditano da `base.html` (navbar, sidebar, footer)
+- Usare crispy forms: `{% load crispy_forms_tags %}`
+- Font Awesome 6.4 per icone (es. `<i class="fas fa-plus"></i>`)
+- Bootstrap 5.3 (CDN) per componenti responsive
+
+### Signals & Automazione Dati
+- **MovimentoMagazzino** → **Giacenza**: Signal `post_save` aggiorna stock disponibile/impegnata/prenotata
+- **PezzoRicambio**: Signal `pre_save` processa immagini
+- **CRITICO**: Non aggiornare mai manualmente Giacenza; creare sempre MovimentoMagazzino
+- Campi `auto_now_add`: creato_il (timestamp creazione) - NON modificare manualmente
+- Campi `auto_now`: modificato_il, ultimo_accesso (timestamp aggiornamento automatico)
+
+### Middleware & Sicurezza
+- `NoCacheMiddleware` disabilita caching per utenti autenticati (prevenire perdite info su PC condivisi)
+- Protezione CSRF abilitata; tutti i form usano `{% csrf_token %}`
+- Hashing Argon2 per password (argon2-cffi)
+
+**Riferimento completo**: [AGENTS.md - Convenzioni Specifiche Progetto](AGENTS.md#-convenzioni-specifiche-progetto)
+
+---
+
+## � RIFERIMENTO RAPIDO: COMANDI AI-AGENT
+
+```bash
+# SETUP INIZIALE (eseguire una volta)
+mysql -u root < database_creation.sql     # Crea DB da schema
+python manage.py migrate                   # Applica migrazioni Django
+python manage.py populate_db               # Carica dati test (8 cat, 5 fornitori, 19 articoli)
+python manage.py import_tbappellativo      # Importa 7 record appellativi
+python manage.py import_tbcategoriaiva     # Importa 7 record categorie IVA
+python manage.py import_tbcategorietariffe # Importa 21 record categorie tariffe
+python manage.py import_tbtipopagamento    # Importa 23 record tipi pagamento
+python manage.py import_tbmodalitapagamento # Importa 8 record modalità pagamento
+
+# SVILUPPO QUOTIDIANO
+python manage.py runserver                 # Avvia server porta 8000
+python manage.py shell                     # Django shell per debug modelli
+python manage.py test                      # Esegui test suite
+
+# TROUBLESHOOTING
+python test_db_connection.py               # Verifica connessione MySQL
+python manage.py migrate --plan            # Visualizza migrazioni pendenti
+python manage.py showmigrations             # Lista migrazioni applicate
+
+# BACKUP & RECOVERY
+python manage.py create_backup              # Crea backup compresso
+python manage.py restore_backup             # Ripristina da backup (interattivo)
+.\restore_db_emergency.ps1                 # Script PowerShell emergenza
+```
+
+### Checklista AI Agent: Decisioni Comuni
+
+| Domanda | Risposta | Riferimento |
+|---------|----------|-------------|
+| Devo permettere edit a questo campo? | Controlla `CanEditMixin` in view CRUD e `può_modificare_dati()` in form | [magazzino/views.py](magazzino/views.py#L50-L61) |
+| Come aggiunge stock correttamente? | **Sempre** crea `MovimentoMagazzino`; **mai** modificare `Giacenza` direttamente | [magazzino/models.py](magazzino/models.py#L669-L750) |
+| Dove vanno le immagini? | `media/articoli/` auto-gestito da signals; non toccare manualmente | [magazzino/signals.py](magazzino/signals.py) |
+| Categoria padre può avere loop? | **NO** - `save()` verifica max 10 livelli di profondità | [magazzino/models.py](magazzino/models.py#L83-L95) |
+| Quale DB driver usiamo? | **PyMySQL** (non mysqlclient) - può differire da MySQL standard | [requirements.txt](requirements.txt) |
+| Come gestisco validazione cross-field? | Usa `clean()` nel form, non nel modello | [magazzino/forms.py](magazzino/forms.py) |
+| Aggiungo una nuova app? | **NO** - tutto in `accounts` + `magazzino`. Creare modello + view + form in queste | [config/settings.py](config/settings.py#L37-L45) |
+| Come testo in locale? | `populate_db` carica dati test; accedi con admin / admin | [README.md](#-avvio-rapido-3-comandi) |
+| Come gestisco backup database? | **3 metodi**: Web UI (/backup/), management command, script PowerShell emergenza | [BACKUP_RECOVERY_GUIDE.md](BACKUP_RECOVERY_GUIDE.md) |
+| Come accedo tabelle clienti? | **Interfaccia web**: /gestione-tabelle/ (solo ADMIN/GESTORE) | [magazzino/views.py](magazzino/views.py#L2009-L2100) |
+
+---
+
+## �🤝 Come Contribuire
 
 Questo è un progetto Django per la gestione di magazzino ricambi. Se desideri contribuire al miglioramento del progetto, segui le linee guida di seguito:
 
@@ -845,6 +1087,20 @@ python manage.py makemigrations
 # Verifica prima di commit
 python manage.py migrate --plan
 ```
+
+---
+
+## 🧠 Memoria Tecnica Sviluppo
+
+Per mantenere coerenza tra sviluppo, manuali e operativita quotidiana, la memoria tecnica centralizzata e' disponibile in:
+
+- **[MEMORIA_TECNICA_SVILUPPO.md](MEMORIA_TECNICA_SVILUPPO.md)** - Decisioni operative recenti & timeline interventi
+
+Sintesi ultimo aggiornamento (10/05/2026):
+- dashboard con nuovi indicatori articoli,
+- doppio layout dashboard con scelta persistente per sessione,
+- miglioramenti UX/validazione su form "Aggiungi Nuovo Articolo",
+- terminologia frontend allineata in italiano lato utente.
 
 #### 5️⃣ **Documentazione**
 - Aggiungi docstring alle funzioni complesse

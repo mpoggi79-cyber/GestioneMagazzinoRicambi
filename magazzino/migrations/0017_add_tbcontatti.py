@@ -4,6 +4,58 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def _show_tables(schema_editor):
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute('SHOW TABLES')
+        return {row[0] for row in cursor.fetchall()}
+
+
+def _get_columns(schema_editor, table_name):
+    with schema_editor.connection.cursor() as cursor:
+        descrizione = schema_editor.connection.introspection.get_table_description(cursor, table_name)
+    return {col.name for col in descrizione}
+
+
+def _get_fk_names(schema_editor, table_name, column_name):
+    with schema_editor.connection.cursor() as cursor:
+        vincoli = schema_editor.connection.introspection.get_constraints(cursor, table_name)
+    return [
+        nome for nome, meta in vincoli.items()
+        if meta.get('foreign_key') and column_name in meta.get('columns', [])
+    ]
+
+
+def allinea_unita_misura_schema(apps, schema_editor):
+    tables = _show_tables(schema_editor)
+
+    if 'pezzi_ricambio' in tables:
+        colonne_pezzi = _get_columns(schema_editor, 'pezzi_ricambio')
+
+        with schema_editor.connection.cursor() as cursor:
+            if 'id_tb_unita_misura' in colonne_pezzi:
+                for fk_name in _get_fk_names(schema_editor, 'pezzi_ricambio', 'id_tb_unita_misura'):
+                    cursor.execute(f"ALTER TABLE pezzi_ricambio DROP FOREIGN KEY {fk_name}")
+                cursor.execute("ALTER TABLE pezzi_ricambio DROP COLUMN id_tb_unita_misura")
+                colonne_pezzi.remove('id_tb_unita_misura')
+
+            if 'id_unita_misura' in colonne_pezzi and 'idUnitaMisura' not in colonne_pezzi:
+                for fk_name in _get_fk_names(schema_editor, 'pezzi_ricambio', 'id_unita_misura'):
+                    cursor.execute(f"ALTER TABLE pezzi_ricambio DROP FOREIGN KEY {fk_name}")
+                cursor.execute(
+                    "ALTER TABLE pezzi_ricambio "
+                    "CHANGE COLUMN id_unita_misura idUnitaMisura INT(11) NULL"
+                )
+
+    if 'unita_misura' in tables:
+        with schema_editor.connection.cursor() as cursor:
+            cursor.execute('DROP TABLE unita_misura')
+
+    tables = _show_tables(schema_editor)
+    if 'tbUnitaMisura' in tables and 'tbunitamisura' not in tables:
+        with schema_editor.connection.cursor() as cursor:
+            cursor.execute('RENAME TABLE tbUnitaMisura TO tbunitamisura')
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -35,83 +87,90 @@ class Migration(migrations.Migration):
                 'ordering': ['cognome', 'nome'],
             },
         ),
-        migrations.RemoveField(
-            model_name='pezzoricambio',
-            name='tb_unita_misura',
-        ),
-        migrations.AlterModelOptions(
-            name='unitamisura',
-            options={'ordering': ['denominazione'], 'verbose_name': 'Unità di Misura', 'verbose_name_plural': 'Unità di Misura'},
-        ),
-        migrations.RemoveIndex(
-            model_name='unitamisura',
-            name='unita_misur_codice_c664fe_idx',
-        ),
-        migrations.RenameIndex(
-            model_name='unitamisura',
-            new_name='tbunitamisu_stato_a_712fde_idx',
-            old_name='unita_misur_stato_a_caea71_idx',
-        ),
-        migrations.RemoveField(
-            model_name='unitamisura',
-            name='codice',
-        ),
-        migrations.RemoveField(
-            model_name='unitamisura',
-            name='descrizione',
-        ),
-        migrations.RemoveField(
-            model_name='unitamisura',
-            name='id_unita',
-        ),
-        migrations.AddField(
-            model_name='unitamisura',
-            name='creato_il',
-            field=models.DateTimeField(auto_now_add=True, db_column='creato_il', null=True),
-        ),
-        migrations.AddField(
-            model_name='unitamisura',
-            name='denominazione',
-            field=models.CharField(default='N/A', help_text='Nome breve unità (es. Ore, gg, km, Pz)', max_length=50, verbose_name='Denominazione'),
-        ),
-        migrations.AddField(
-            model_name='unitamisura',
-            name='denominazione_stampa',
-            field=models.CharField(blank=True, help_text='Descrizione completa per stampe (es. "per Ora o frazione")', max_length=100, null=True, verbose_name='Denominazione Stampa'),
-        ),
-        migrations.AddField(
-            model_name='unitamisura',
-            name='id_unita_misura',
-            field=models.AutoField(db_column='idUnitaMisura', primary_key=True, serialize=False),
-        ),
-        migrations.AddField(
-            model_name='unitamisura',
-            name='modificato_il',
-            field=models.DateTimeField(auto_now=True, db_column='modificato_il', null=True),
-        ),
-        migrations.AlterField(
-            model_name='pezzoricambio',
-            name='unita_misura',
-            field=models.ForeignKey(db_column='idUnitaMisura', default=1, on_delete=django.db.models.deletion.PROTECT, related_name='pezzi_ricambio', to='magazzino.unitamisura', verbose_name='Unità di Misura'),
-            preserve_default=False,
-        ),
-        migrations.AddIndex(
-            model_name='unitamisura',
-            index=models.Index(fields=['denominazione'], name='tbunitamisu_denomin_ffee78_idx'),
-        ),
-        migrations.AlterModelTable(
-            name='tbmodalitapagamento',
-            table='tbmodalitapagamento',
-        ),
-        migrations.AlterModelTable(
-            name='tbtipopagamento',
-            table='tbtipopagamento',
-        ),
-        migrations.AlterModelTable(
-            name='unitamisura',
-            table='tbunitamisura',
-        ),
-        migrations.DeleteModel(
-            name='TbUnitaMisura',
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RunPython(allinea_unita_misura_schema, migrations.RunPython.noop),
+            ],
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='pezzoricambio',
+                    name='tb_unita_misura',
+                ),
+                migrations.AlterModelOptions(
+                    name='unitamisura',
+                    options={'ordering': ['denominazione'], 'verbose_name': 'Unità di Misura', 'verbose_name_plural': 'Unità di Misura'},
+                ),
+                migrations.RemoveIndex(
+                    model_name='unitamisura',
+                    name='unita_misur_codice_c664fe_idx',
+                ),
+                migrations.RenameIndex(
+                    model_name='unitamisura',
+                    new_name='tbunitamisu_stato_a_712fde_idx',
+                    old_name='unita_misur_stato_a_caea71_idx',
+                ),
+                migrations.RemoveField(
+                    model_name='unitamisura',
+                    name='codice',
+                ),
+                migrations.RemoveField(
+                    model_name='unitamisura',
+                    name='descrizione',
+                ),
+                migrations.RemoveField(
+                    model_name='unitamisura',
+                    name='id_unita',
+                ),
+                migrations.AddField(
+                    model_name='unitamisura',
+                    name='creato_il',
+                    field=models.DateTimeField(auto_now_add=True, db_column='creato_il', null=True),
+                ),
+                migrations.AddField(
+                    model_name='unitamisura',
+                    name='denominazione',
+                    field=models.CharField(default='N/A', help_text='Nome breve unità (es. Ore, gg, km, Pz)', max_length=50, verbose_name='Denominazione'),
+                ),
+                migrations.AddField(
+                    model_name='unitamisura',
+                    name='denominazione_stampa',
+                    field=models.CharField(blank=True, help_text='Descrizione completa per stampe (es. "per Ora o frazione")', max_length=100, null=True, verbose_name='Denominazione Stampa'),
+                ),
+                migrations.AddField(
+                    model_name='unitamisura',
+                    name='id_unita_misura',
+                    field=models.AutoField(db_column='idUnitaMisura', primary_key=True, serialize=False),
+                ),
+                migrations.AddField(
+                    model_name='unitamisura',
+                    name='modificato_il',
+                    field=models.DateTimeField(auto_now=True, db_column='modificato_il', null=True),
+                ),
+                migrations.AlterField(
+                    model_name='pezzoricambio',
+                    name='unita_misura',
+                    field=models.ForeignKey(db_column='idUnitaMisura', default=1, on_delete=django.db.models.deletion.PROTECT, related_name='pezzi_ricambio', to='magazzino.unitamisura', verbose_name='Unità di Misura'),
+                    preserve_default=False,
+                ),
+                migrations.AddIndex(
+                    model_name='unitamisura',
+                    index=models.Index(fields=['denominazione'], name='tbunitamisu_denomin_ffee78_idx'),
+                ),
+                migrations.AlterModelTable(
+                    name='tbmodalitapagamento',
+                    table='tbmodalitapagamento',
+                ),
+                migrations.AlterModelTable(
+                    name='tbtipopagamento',
+                    table='tbtipopagamento',
+                ),
+                migrations.AlterModelTable(
+                    name='unitamisura',
+                    table='tbunitamisura',
+                ),
+                migrations.DeleteModel(
+                    name='TbUnitaMisura',
+                ),
+            ],
         ),
     ]

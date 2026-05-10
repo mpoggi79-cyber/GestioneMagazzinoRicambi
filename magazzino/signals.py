@@ -1,6 +1,7 @@
 """
 Signals per l'elaborazione automatica delle immagini degli articoli.
 Gestisce:
+- Auto-assegnazione codice interno univoco (ART-XXXXX) ai nuovi articoli
 - Auto-ridimensionamento immagine principale (max 800x800px)
 - Generazione automatica thumbnail (300x300px con crop centrato)
 - Conversione in formato JPEG ottimizzato
@@ -11,12 +12,44 @@ import os
 from io import BytesIO
 from PIL import Image, ImageOps
 from django.core.files.base import ContentFile
-from django.db.models.signals import pre_save, post_delete
+from django.db.models.signals import pre_save, post_save, post_delete
+from django.db import transaction
 from django.dispatch import receiver
 from .models import PezzoRicambio
+from .codici import genera_codice_articolo, genera_placeholder_codice_articolo
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+@receiver(pre_save, sender=PezzoRicambio)
+def assegna_codice_interno(sender, instance, **kwargs):
+    """
+    Signal pre-save: assegna un placeholder tecnico ai nuovi articoli senza codice.
+    Il codice finale viene poi normalizzato in post-save usando l'id reale assegnato dal DB.
+    """
+    if instance.codice_interno:
+        return  # Già ha un codice, non modificare
+
+    instance.codice_interno = genera_placeholder_codice_articolo()
+    logger.info(f"[CODICE_SIGNAL] Assegnato placeholder tecnico: {instance.codice_interno}")
+
+
+@receiver(post_save, sender=PezzoRicambio)
+def normalizza_codice_interno(sender, instance, created, **kwargs):
+    """
+    Signal post-save: normalizza il codice articolo sul formato canonico ART-XXXXX
+    usando l'id reale del record, appena disponibile.
+    """
+    codice_finale = genera_codice_articolo(instance.id_articolo)
+
+    if instance.codice_interno == codice_finale:
+        return
+
+    with transaction.atomic():
+        PezzoRicambio.objects.filter(pk=instance.pk).update(codice_interno=codice_finale)
+        instance.codice_interno = codice_finale
+        logger.info(f"[CODICE_SIGNAL] Codice normalizzato: {instance.codice_interno}")
 
 
 def process_image(image_file, max_size, quality=90, crop=False):

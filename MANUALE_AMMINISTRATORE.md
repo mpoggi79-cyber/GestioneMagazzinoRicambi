@@ -650,6 +650,30 @@ articoli = PezzoRicambio.objects.select_related('categoria', 'fornitore').all()
 # Usa prefetch_related per ManyToMany/reverse FK
 articoli = PezzoRicambio.objects.prefetch_related('giacenza_set').all()
 
+```
+
+---
+
+## 🧠 Memoria Tecnica Sviluppo (Agg. 10/05/2026)
+
+Aggiornamenti operativi rilevanti per amministratore:
+
+1. Dashboard
+- Nuovi indicatori articoli aggiunti.
+- Due layout disponibili con preferenza salvata per sessione.
+
+2. Qualita UX lato inserimento articolo
+- In caso di errore form, l'interfaccia ora mostra:
+    - riepilogo errori in alto,
+    - focus sul primo campo non valido,
+    - evidenziazione sezione classificazione se errore categoria.
+
+3. Terminologia frontend
+- Terminologia resa piu chiara in italiano lato utente.
+
+Riferimento completo memoria tecnica:
+- [MEMORIA_TECNICA_SVILUPPO.md](MEMORIA_TECNICA_SVILUPPO.md)
+
 # Limita fields se non servono tutti
 articoli = PezzoRicambio.objects.only('codice_interno', 'descrizione')
 ```

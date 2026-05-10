@@ -440,12 +440,12 @@ class PezzoRicambio(models.Model):
         null=True,
         validators=[
             RegexValidator(
-                regex=r'^\d{10}[A-Z]$',
-                message=_('Il Codice SCM deve essere formato da 10 cifre seguite da 1 lettera maiuscola (es. 1234567890A)')
+                regex=r'^[A-Z0-9]{11}$',
+                message=_('Il Codice SCM deve contenere esattamente 11 caratteri alfanumerici (es. 07L0320061B)')
             )
         ],
         verbose_name=_('Codice SCM'),
-        help_text=_('Codice SCM univoco: 10 cifre + 1 lettera maiuscola (es. 1234567890A)')
+        help_text=_('Codice SCM univoco: 11 caratteri alfanumerici (es. 07L0320061B)')
     )
     descrizione_scm = models.CharField(
         max_length=200,

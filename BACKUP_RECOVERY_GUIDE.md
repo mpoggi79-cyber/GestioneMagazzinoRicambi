@@ -276,6 +276,20 @@ $DB_NAME = "gmr"                   # ← Nome database (da settings.py)
 
 ### Errore: "MySQL non trovato"
 ```powershell
+
+```
+
+---
+
+## 🧠 Memoria Tecnica Sviluppo (Agg. 10/05/2026)
+
+Allineamento documentale:
+
+1. Nessuna modifica funzionale al sistema backup/ripristino in questo ciclo.
+2. Aggiornata memoria tecnica centrale per tracciabilita globale dello sviluppo.
+
+Riferimento:
+- [MEMORIA_TECNICA_SVILUPPO.md](MEMORIA_TECNICA_SVILUPPO.md)
 [ERROR] MySQL non trovato in: C:\xampp\mysql\bin
 ```
 **Soluzione**: Modifica `$MYSQL_BIN` nello script `restore_db_emergency.ps1`

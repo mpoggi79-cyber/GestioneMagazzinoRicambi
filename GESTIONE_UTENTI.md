@@ -288,6 +288,19 @@ I log sono disponibili in:
 
 1. **Login** con le tue credenziali
 2. Clicca sul tuo nome in alto a destra
+
+---
+
+## 🧠 Memoria Tecnica Sviluppo (Agg. 10/05/2026)
+
+Nota di allineamento:
+
+1. Nessuna modifica ai ruoli o alle autorizzazioni utenti.
+2. Migliorata l'esperienza operativa nel form articolo (messaggi errore piu chiari).
+3. Dashboard migliorata con indicatori aggiuntivi e layout selezionabile.
+
+Per il dettaglio tecnico completo:
+- [MEMORIA_TECNICA_SVILUPPO.md](MEMORIA_TECNICA_SVILUPPO.md)
 3. Seleziona **"Cambia Password"**
 4. Inserisci:
    - Password attuale
