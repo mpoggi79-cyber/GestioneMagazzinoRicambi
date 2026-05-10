@@ -7,6 +7,56 @@
 {% block content %}
 
 <style>
+    .meta-articolo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .badge-meta-articolo {
+        border: 1px solid #d7dee7;
+        border-radius: 999px;
+        background: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        padding: 0.2rem 0.65rem;
+    }
+
+    .gruppo-form-articolo {
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    }
+
+    .gruppo-form-articolo:first-of-type {
+        margin-top: 0;
+    }
+
+    .titolo-gruppo-articolo {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 0.9rem;
+        color: #0d6efd;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .titolo-gruppo-articolo small {
+        color: #6c757d;
+        font-size: 0.8rem;
+        font-weight: 500;
+        letter-spacing: normal;
+        text-transform: none;
+    }
+
     .sezione-classificazione {
         border: 1px solid transparent;
         border-radius: 8px;
@@ -28,7 +78,7 @@
 <h1 class="page-title">
     <i class="fas fa-cube"></i> 
     {% if form.instance.id_articolo %}
-        Modifica Articolo: {{ form.instance.codice_interno }}
+        Modifica Articolo
     {% else %}
         Aggiungi Nuovo Articolo
     {% endif %}
@@ -68,220 +118,219 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                     {% endif %}
-                    
-                    <!-- CODICI -->
-                    <h6 class="mb-2 mt-2 fw-bold text-primary">Codici Identificativi</h6>
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.codice_interno.id_for_label }}" class="form-label">
-                                {{ form.codice_interno.label }}
-                            </label>
-                            {{ form.codice_interno }}
-                            <small class="text-muted d-block mt-1">
-                                {% if form.instance.id_articolo %}
-                                    Codice assegnato automaticamente dal sistema e non modificabile.
-                                {% else %}
-                                    Verrà assegnato automaticamente al salvataggio del nuovo articolo.
+
+                    <div class="meta-articolo">
+                        <span class="text-uppercase small fw-semibold">Identificativo</span>
+                        <span class="badge-meta-articolo">
+                            {% if form.instance.id_articolo %}
+                                {{ form.instance.codice_interno }}
+                            {% else %}
+                                Assegnato automaticamente al salvataggio
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="gruppo-form-articolo">
+                        <div class="titolo-gruppo-articolo">
+                            <i class="fas fa-microchip"></i>
+                            <span>Dati SCM</span>
+                            <small>Codici e riferimenti macchina SCM</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-4 col-md-6 mb-2">
+                                <label for="{{ form.codice_scm.id_for_label }}" class="form-label">{{ form.codice_scm.label }}</label>
+                                {{ form.codice_scm }}
+                                {% if form.codice_scm.help_text %}
+                                <small class="text-muted d-block mt-1">{{ form.codice_scm.help_text }}</small>
                                 {% endif %}
-                            </small>
-                            {% if form.codice_interno.errors %}
-                            <div class="invalid-feedback d-block">{{ form.codice_interno.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.codice_fornitore.id_for_label }}" class="form-label">{{ form.codice_fornitore.label }}</label>
-                            {{ form.codice_fornitore }}
-                            {% if form.codice_fornitore.errors %}
-                            <div class="invalid-feedback d-block">{{ form.codice_fornitore.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- SEZIONE SCM -->
-                    <h6 class="mb-2 mt-3 fw-bold text-primary">Dati SCM</h6>
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.codice_scm.id_for_label }}" class="form-label">{{ form.codice_scm.label }}</label>
-                            {{ form.codice_scm }}
-                            {% if form.codice_scm.help_text %}
-                            <small class="text-muted d-block mt-1">{{ form.codice_scm.help_text }}</small>
-                            {% endif %}
-                            {% if form.codice_scm.errors %}
-                            <div class="invalid-feedback d-block">{{ form.codice_scm.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.descrizione_scm.id_for_label }}" class="form-label">{{ form.descrizione_scm.label }}</label>
-                            {{ form.descrizione_scm }}
-                            {% if form.descrizione_scm.errors %}
-                            <div class="invalid-feedback d-block">{{ form.descrizione_scm.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.modello_macchina_scm.id_for_label }}" class="form-label">{{ form.modello_macchina_scm.label }}</label>
-                            {{ form.modello_macchina_scm }}
-                            {% if form.modello_macchina_scm.errors %}
-                            <div class="invalid-feedback d-block">{{ form.modello_macchina_scm.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.matricola_macchina_scm.id_for_label }}" class="form-label">{{ form.matricola_macchina_scm.label }}</label>
-                            {{ form.matricola_macchina_scm }}
-                            {% if form.matricola_macchina_scm.errors %}
-                            <div class="invalid-feedback d-block">{{ form.matricola_macchina_scm.errors.0 }}</div>
-                            {% endif %}
+                                {% if form.codice_scm.errors %}
+                                <div class="invalid-feedback d-block">{{ form.codice_scm.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-2">
+                                <label for="{{ form.descrizione_scm.id_for_label }}" class="form-label">{{ form.descrizione_scm.label }}</label>
+                                {{ form.descrizione_scm }}
+                                {% if form.descrizione_scm.errors %}
+                                <div class="invalid-feedback d-block">{{ form.descrizione_scm.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-2">
+                                <label for="{{ form.prezzo_acquisto_scm.id_for_label }}" class="form-label">{{ form.prezzo_acquisto_scm.label }}</label>
+                                {{ form.prezzo_acquisto_scm }}
+                                {% if form.prezzo_acquisto_scm.errors %}
+                                <div class="invalid-feedback d-block">{{ form.prezzo_acquisto_scm.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-2">
+                                <label for="{{ form.modello_macchina_scm.id_for_label }}" class="form-label">{{ form.modello_macchina_scm.label }}</label>
+                                {{ form.modello_macchina_scm }}
+                                {% if form.modello_macchina_scm.errors %}
+                                <div class="invalid-feedback d-block">{{ form.modello_macchina_scm.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-2">
+                                <label for="{{ form.matricola_macchina_scm.id_for_label }}" class="form-label">{{ form.matricola_macchina_scm.label }}</label>
+                                {{ form.matricola_macchina_scm }}
+                                {% if form.matricola_macchina_scm.errors %}
+                                <div class="invalid-feedback d-block">{{ form.matricola_macchina_scm.errors.0 }}</div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
 
-                    <!-- DESCRIZIONE -->
-                    <h6 class="mb-2 mt-3 fw-bold text-primary">Descrizione</h6>
-                    <div class="mb-2">
-                        <label for="{{ form.descrizione.id_for_label }}" class="form-label">
-                            {{ form.descrizione.label }}
-                            <span class="text-danger">*</span>
-                        </label>
-                        {{ form.descrizione }}
-                        {% if form.descrizione.errors %}
-                        <div class="invalid-feedback d-block">{{ form.descrizione.errors.0 }}</div>
-                        {% endif %}
-                    </div>
+                    <div class="gruppo-form-articolo">
+                        <div class="titolo-gruppo-articolo">
+                            <i class="fas fa-truck-loading"></i>
+                            <span>Dati Fornitore</span>
+                            <small>Riferimenti commerciali e prezzo principale</small>
+                        </div>
 
-                    <!-- CATEGORIA, FORNITORE E UNITÀ MISURA -->
-                    <div id="sezione-classificazione" class="sezione-classificazione">
-                    <h6 id="titolo-classificazione" class="mb-2 mt-3 fw-bold text-primary titolo-classificazione">Classificazione</h6>
-                    <div id="avviso-errore-classificazione" class="alert alert-danger py-2 mb-2" style="display:none;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        Sezione classificazione incompleta: controlla la categoria selezionata.
-                    </div>
-
-                    <!-- CATEGORIA GERARCHICA (3 livelli) -->
-                    <div class="row">
-                        <div class="col-md-4 mb-2">
-                            <label for="{{ form.macrocategoria.id_for_label }}" class="form-label">
-                                {{ form.macrocategoria.label }}
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.macrocategoria }}
-                            {% if form.macrocategoria.errors %}
-                            <div class="invalid-feedback d-block">{{ form.macrocategoria.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="col-md-4 mb-2">
-                            <label for="{{ form.categoria_livello2.id_for_label }}" class="form-label">
-                                {{ form.categoria_livello2.label }}
-                            </label>
-                            {{ form.categoria_livello2 }}
-                            {% if form.categoria_livello2.errors %}
-                            <div class="invalid-feedback d-block">{{ form.categoria_livello2.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="col-md-4 mb-2">
-                            <label for="{{ form.sottocategoria.id_for_label }}" class="form-label">
-                                {{ form.sottocategoria.label }}
-                            </label>
-                            {{ form.sottocategoria }}
-                            {% if form.sottocategoria.errors %}
-                            <div class="invalid-feedback d-block">{{ form.sottocategoria.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <small class="text-muted mb-2 d-block">
-                        <i class="fas fa-info-circle"></i> 
-                        La categoria è obbligatoria. Seleziona almeno un livello prima del salvataggio.
-                    </small>
-                    
-                    <!-- Breadcrumb categoria selezionata -->
-                    <div class="alert alert-info py-2 mb-2" id="categoria-breadcrumb" style="display:none; font-size: 0.9rem;">
-                        <strong><i class="fas fa-sitemap"></i> Categoria:</strong> 
-                        <span id="breadcrumb-text"></span>
-                    </div>
-                    
-                    <!-- Campo categoria nascosto (valorizzato da JS) -->
-                    {{ form.categoria }}
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.fornitore.id_for_label }}" class="form-label">{{ form.fornitore.label }}</label>
-                            {{ form.fornitore }}
-                            {% if form.fornitore.errors %}
-                            <div class="invalid-feedback d-block">{{ form.fornitore.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.unita_misura.id_for_label }}" class="form-label">
-                                {{ form.unita_misura.label }}
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.unita_misura }}
-                            {% if form.unita_misura.errors %}
-                            <div class="invalid-feedback d-block">{{ form.unita_misura.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    </div>
-
-                    <!-- GIACENZE E PREZZI -->
-                    <h6 class="mb-2 mt-3 fw-bold text-primary">Giacenze e Prezzi</h6>
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.giacenza_minima.id_for_label }}" class="form-label">{{ form.giacenza_minima.label }}</label>
-                            {{ form.giacenza_minima }}
-                            {% if form.giacenza_minima.errors %}
-                            <div class="invalid-feedback d-block">{{ form.giacenza_minima.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.giacenza_massima.id_for_label }}" class="form-label">{{ form.giacenza_massima.label }}</label>
-                            {{ form.giacenza_massima }}
-                            {% if form.giacenza_massima.errors %}
-                            <div class="invalid-feedback d-block">{{ form.giacenza_massima.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.prezzo_acquisto.id_for_label }}" class="form-label">{{ form.prezzo_acquisto.label }}</label>
-                            {{ form.prezzo_acquisto }}
-                            {% if form.prezzo_acquisto.errors %}
-                            <div class="invalid-feedback d-block">{{ form.prezzo_acquisto.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="col-md-6 mb-2">
-                            <label for="{{ form.prezzo_acquisto_scm.id_for_label }}" class="form-label">{{ form.prezzo_acquisto_scm.label }}</label>
-                            {{ form.prezzo_acquisto_scm }}
-                            {% if form.prezzo_acquisto_scm.errors %}
-                            <div class="invalid-feedback d-block">{{ form.prezzo_acquisto_scm.errors.0 }}</div>
-                            {% endif %}
+                        <div class="row">
+                            <div class="col-lg-4 col-md-6 mb-2">
+                                <label for="{{ form.fornitore.id_for_label }}" class="form-label">{{ form.fornitore.label }}</label>
+                                {{ form.fornitore }}
+                                {% if form.fornitore.help_text %}
+                                <small class="text-muted d-block mt-1">{{ form.fornitore.help_text }}</small>
+                                {% endif %}
+                                {% if form.fornitore.errors %}
+                                <div class="invalid-feedback d-block">{{ form.fornitore.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-2">
+                                <label for="{{ form.codice_fornitore.id_for_label }}" class="form-label">{{ form.codice_fornitore.label }}</label>
+                                {{ form.codice_fornitore }}
+                                {% if form.codice_fornitore.errors %}
+                                <div class="invalid-feedback d-block">{{ form.codice_fornitore.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-2">
+                                <label for="{{ form.prezzo_acquisto.id_for_label }}" class="form-label">{{ form.prezzo_acquisto.label }}</label>
+                                {{ form.prezzo_acquisto }}
+                                {% if form.prezzo_acquisto.errors %}
+                                <div class="invalid-feedback d-block">{{ form.prezzo_acquisto.errors.0 }}</div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
 
-                    <!-- STATO DISPONIBILITÀ E ATTIVO -->
-                    <h6 class="mb-2 mt-3 fw-bold text-primary">Stato</h6>
-                    <div class="row">
-                        <div class="col-md-8 mb-2">
-                            <label for="{{ form.stato_disponibilita.id_for_label }}" class="form-label">{{ form.stato_disponibilita.label }}</label>
-                            {{ form.stato_disponibilita }}
-                            {% if form.stato_disponibilita.errors %}
-                            <div class="invalid-feedback d-block">{{ form.stato_disponibilita.errors.0 }}</div>
-                            {% endif %}
+                    <div class="gruppo-form-articolo">
+                        <div class="titolo-gruppo-articolo">
+                            <i class="fas fa-box-open"></i>
+                            <span>Dati Articolo</span>
+                            <small>Anagrafica, classificazione e soglie operative</small>
                         </div>
-                        <div class="col-md-4 mb-2 d-flex align-items-end">
-                            <div class="form-check">
-                                {{ form.stato_attivo }}
-                                <label class="form-check-label" for="{{ form.stato_attivo.id_for_label }}">
-                                    {{ form.stato_attivo.label }}
+
+                        <div class="row align-items-start">
+                            <div class="col-md-8 mb-2">
+                                <label for="{{ form.descrizione.id_for_label }}" class="form-label">
+                                    {{ form.descrizione.label }}
+                                    <span class="text-danger">*</span>
                                 </label>
+                                {{ form.descrizione }}
+                                {% if form.descrizione.errors %}
+                                <div class="invalid-feedback d-block">{{ form.descrizione.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-4 mb-2">
+                                <label for="{{ form.unita_misura.id_for_label }}" class="form-label">
+                                    {{ form.unita_misura.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.unita_misura }}
+                                {% if form.unita_misura.errors %}
+                                <div class="invalid-feedback d-block">{{ form.unita_misura.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div id="sezione-classificazione" class="sezione-classificazione">
+                        <h6 id="titolo-classificazione" class="mb-2 mt-3 fw-bold text-primary titolo-classificazione">Classificazione articolo</h6>
+                        <div id="avviso-errore-classificazione" class="alert alert-danger py-2 mb-2" style="display:none;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Sezione classificazione incompleta: controlla la categoria selezionata.
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <label for="{{ form.macrocategoria.id_for_label }}" class="form-label">
+                                    {{ form.macrocategoria.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.macrocategoria }}
+                                {% if form.macrocategoria.errors %}
+                                <div class="invalid-feedback d-block">{{ form.macrocategoria.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-4 mb-2">
+                                <label for="{{ form.categoria_livello2.id_for_label }}" class="form-label">
+                                    {{ form.categoria_livello2.label }}
+                                </label>
+                                {{ form.categoria_livello2 }}
+                                {% if form.categoria_livello2.errors %}
+                                <div class="invalid-feedback d-block">{{ form.categoria_livello2.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-4 mb-2">
+                                <label for="{{ form.sottocategoria.id_for_label }}" class="form-label">
+                                    {{ form.sottocategoria.label }}
+                                </label>
+                                {{ form.sottocategoria }}
+                                {% if form.sottocategoria.errors %}
+                                <div class="invalid-feedback d-block">{{ form.sottocategoria.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <small class="text-muted mb-2 d-block">
+                            <i class="fas fa-info-circle"></i>
+                            La categoria è obbligatoria. Seleziona almeno un livello prima del salvataggio.
+                        </small>
+
+                        <div class="alert alert-info py-2 mb-2" id="categoria-breadcrumb" style="display:none; font-size: 0.9rem;">
+                            <strong><i class="fas fa-sitemap"></i> Categoria:</strong>
+                            <span id="breadcrumb-text"></span>
+                        </div>
+
+                        {{ form.categoria }}
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-6 mb-2">
+                                <label for="{{ form.giacenza_minima.id_for_label }}" class="form-label">{{ form.giacenza_minima.label }}</label>
+                                {{ form.giacenza_minima }}
+                                {% if form.giacenza_minima.errors %}
+                                <div class="invalid-feedback d-block">{{ form.giacenza_minima.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-2">
+                                <label for="{{ form.giacenza_massima.id_for_label }}" class="form-label">{{ form.giacenza_massima.label }}</label>
+                                {{ form.giacenza_massima }}
+                                {% if form.giacenza_massima.errors %}
+                                <div class="invalid-feedback d-block">{{ form.giacenza_massima.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-2">
+                                <label for="{{ form.stato_disponibilita.id_for_label }}" class="form-label">{{ form.stato_disponibilita.label }}</label>
+                                {{ form.stato_disponibilita }}
+                                {% if form.stato_disponibilita.errors %}
+                                <div class="invalid-feedback d-block">{{ form.stato_disponibilita.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-2 d-flex align-items-end">
+                                <div class="form-check">
+                                    {{ form.stato_attivo }}
+                                    <label class="form-check-label" for="{{ form.stato_attivo.id_for_label }}">
+                                        {{ form.stato_attivo.label }}
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -375,12 +424,20 @@
                 
                 <hr class="my-2">
                 
-                <h6 class="mb-2 fw-bold">Suggerimenti</h6>
+                <h6 class="mb-2 fw-bold">Struttura del form</h6>
                 <ul class="small mb-2" style="font-size: 0.8rem;">
-                    <li>Il codice articolo viene assegnato automaticamente</li>
-                    <li>Descrizioni chiare e dettagliate</li>
-                    <li>Seleziona la categoria prima di salvare l'articolo</li>
-                    <li><strong>SCM:</strong> Seleziona prima il modello, poi la matricola</li>
+                    <li><strong>SCM:</strong> usa questo gruppo per codice SCM, macchina e prezzo SCM</li>
+                    <li><strong>Fornitore:</strong> raccoglie anagrafica fornitore, codice fornitore e prezzo principale</li>
+                    <li><strong>Articolo:</strong> completa descrizione, unità di misura, categoria, soglie e stato</li>
+                </ul>
+
+                <hr class="my-2">
+
+                <h6 class="mb-2 fw-bold">Suggerimenti rapidi</h6>
+                <ul class="small mb-2" style="font-size: 0.8rem;">
+                    <li>Il codice articolo viene assegnato automaticamente dal sistema</li>
+                    <li>Compila prima descrizione e unità di misura, poi chiudi la classificazione</li>
+                    <li><strong>SCM:</strong> seleziona prima il modello, poi la matricola</li>
                 </ul>
                 
                 <hr class="my-2">

@@ -1,7 +1,7 @@
 # Istruzioni AI Copilot per Gestione Magazzino Ricambi
 
 **Progetto**: Sistema di gestione magazzino Django 5.2 ("Gestione Magazzino Ricambi Goose")  
-**Status**: ✅ v1.1.1 PIANO 1 STABILIZZAZIONE COMPLETATO | Database: MySQL 10.4 | Modelli: 16 | View: 47+ | Template: 40+ | **10 tabelle gestibili** | **Audit Logging** | **20 Test** | Python: 3.10+ | PyMySQL 1.1.2
+**Status**: ✅ v1.1.2 UNIFORMAZIONE UX COMPLETATA | Database: MySQL 10.4 | Modelli: 16 | View: 47+ | Template: 40+ | **10 tabelle gestibili** | **Audit Logging** | **20 Test** | **Breadcrumb Categoria** | Python: 3.10+ | PyMySQL 1.1.2
 
 ---
 
@@ -514,7 +514,7 @@ Categoria.objects.filter(categoria_padre=None).delete()  # Solo root
 
 ---
 
-## 🧠 Memoria Sviluppo Recente - PIANO 1 (10/05/2026)
+## 🧠 Memoria Sviluppo Recente - PIANO 1 (11/05/2026)
 
 Questa sezione consolida le decisioni operative emerse durante lo sviluppo recente.
 
@@ -586,12 +586,46 @@ logger.info(f"[AUDIT_TABELLE] utente={user.username} tabella={nome_tabella} mode
 
 **Totale Test Suite**: 20 test (aggiunta 3 nuovi)
 
+### Uniformazione Vista Dettaglio Articolo (v1.1.2 - 11/05/2026)
+
+**Problema**: Pagina dettaglio articolo `/articoli/<id>/` aveva ordine sezioni diverso da pagina modifica `/articoli/<id>/update/`, causando cognitive load e incoerenza UX.
+
+**Soluzione Implementata**:
+1. ✅ Riordinamento gruppi: Articolo → SCM → Fornitore diventato SCM → Fornitore → Articolo
+2. ✅ Uniformazione titoli: `Codici e Dati SCM` → `Dati SCM` (coerente con form)
+3. ✅ Allineamento campi: Spostato `Prezzo Acquisto SCM` e `Codice Fornitore` nei gruppi corretti
+4. ✅ Aggiunta breadcrumb categoria: `articolo.categoria.get_breadcrumb()` per visualizzare gerarchia (Es: Meccanica > Motore > Filtri)
+
+**File Modificato**: 
+- [templates/magazzino/pezzoricambio_detail.html](templates/magazzino/pezzoricambio_detail.html) — Riordinamento HTML gruppi + breadcrumb categoria
+
+**Metodo Modello Riutilizzato** (nessuna duplicazione):
+- `Categoria.get_breadcrumb()` in [magazzino/models.py#L120](magazzino/models.py#L120)
+
+**Pattern Implementativo**:
+- Template-based HTML riarrange (nessun cambio logica Django)
+- Uso di metodo modello esistente per breadcrumb (coerenza con codebase)
+- Test template: nessun errore Django rilevato ✅
+
+**Test Suite**: 
+- ⏳ DA VERIFICARE: Test visuale su browser (http://127.0.0.1:8000/articoli/30/)
+- ⏳ DA VERIFICARE: Breadcrumb visibile e coerente su categorie gerarchiche
+- ⏳ DA VERIFICARE: Responsive mobile < 768px (col-lg breakpoint)
+
+**Implicazioni per AI Agent**:
+- **Dettaglio Articolo**: Sempre visualizza breadcrumb categoria per orientamento gerarchico
+- **Template Pattern**: Riuso di metodi modello per evitare logica duplicata
+- **UX Consistency**: Mantenere ordine sezioni allineato tra dettaglio e modifica
+
+**Stato**: ✅ Implementato v1.1.2 | ⏳ In attesa verifica visuale
+
 ### Regola Workspace - Memoria Tecnica Centralizzata
 La memoria tecnica non viene scritta come testo narrativo nei file workspace (`.vscode/*`).
 Le note restano consolidate in:
 - Questo file AGENTS.md (sezione "Memoria Sviluppo Recente")
 - MEMORIA_TECNICA_SVILUPPO.md (timeline operativa centrale)
 - `/memories/repo/version_history.md` (storia versioni)
+- `/memories/session/` (decisioni implementazione corrente)
 2. **Auto-timestamp**: `auto_now_add=True` crea, `auto_now=True` aggiorna — non impostare manualmente mai
 3. **Vincoli Categoria**: PROTECT in FK previene cancellazione accidentale; **sempre** gestire `ProtectedError` in view Delete
 4. **Accesso basato ruolo**: **Sempre** verificare via `CanEditMixin`/`CanViewMixin`, non fidarsi mai di controlli client-side

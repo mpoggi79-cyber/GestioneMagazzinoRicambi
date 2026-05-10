@@ -1,7 +1,7 @@
 # 🏭 Gestione Magazzino Ricambi Goose By Matteo
 
-**Status**: ✅ v1.1.1 PIANO 1 STABILIZZAZIONE COMPLETATO | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
-**Completamento**: 47 view totali | 16 modelli | 40+ template | 4 ruoli | **10 tabelle gestibili** | **Sistema Backup** | **Audit Logging** | **20 Test**
+**Status**: ✅ v1.1.2 UNIFORMAZIONE UX COMPLETATA | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
+**Completamento**: 47 view totali | 16 modelli | 40+ template | 4 ruoli | **10 tabelle gestibili** | **Sistema Backup** | **Audit Logging** | **20 Test** | **Uniformazione Dettagli Articolo**
 
 ---
 
@@ -9,23 +9,23 @@
 
 1. [Avvio Rapido](#-avvio-rapido-3-comandi)
 2. [Stato Applicazione](#-stato-applicazione)
-3. [Setup Passo-Passo](#-setup-passo-passo)
-4. [Modelli Dati](#-modelli-dati-16-totali)
-5. [View & URL](#-view--url-22-class-based-view)
-6. [Permessi](#-permessi-basati-su-ruolo)
-7. [Template](#-template-22-totali)
-8. [Gestione Tabelle](#%EF%B8%8F-sistema-gestione-tabelle-clienti)
-9. [Audit Logging](#-audit-logging-per-modifiche-tabelle)
-10. [Sicurezza](#-implementazione-sicurezza)
-11. [Dati Test](#-dati-di-test-populate_dbpy)
-12. [Comandi Utili](#%EF%B8%8F-comandi-utili)
-13. [Troubleshooting](#-troubleshooting)
-14. [Struttura Progetto](#-struttura-progetto)
-15. [Backup & Recovery](#-backup--recovery)
-16. [Ultime Modifiche Piano 1](#-ultime-modifiche---piano-1-stabilizzazione-v111)
-17. [Come Contribuire](#-come-contribuire)
-18. [Licenza](#-licenza)
-19. [Supporto](#-supporto)
+3. [Ultime Modifiche v1.1.2](#-ultime-modifiche-v112---uniformazione-ux-dettaglio-articolo)
+4. [Setup Passo-Passo](#-setup-passo-passo)
+5. [Decisioni Architetturali](#-decisioni-architetturali-critiche)
+6. [Modelli Dati](#-modelli-dati-16-totali)
+7. [View & URL](#-view--url-22-class-based-view)
+8. [Permessi](#-permessi-basati-su-ruolo)
+9. [Uniformazione UX Articoli](#-uniformazione-ux-articoli)
+10. [Gestione Tabelle](#%EF%B8%8F-sistema-gestione-tabelle-clienti)
+11. [Audit Logging](#-audit-logging-per-modifiche-tabelle)
+12. [Sicurezza](#-implementazione-sicurezza)
+13. [Dati Test](#-dati-di-test-populate_dbpy)
+14. [Comandi Utili](#%EF%B8%8F-comandi-utili)
+15. [Troubleshooting](#-troubleshooting)
+16. [Struttura Progetto](#-struttura-progetto)
+17. [Backup & Recovery](#-backup--recovery)
+18. [Come Contribuire](#-come-contribuire)
+19. [Licenza](#-licenza)
 
 ---
 
@@ -59,6 +59,7 @@ python manage.py runserver
 | **Sistema Gestione Tabelle** | ✅ **IMPLEMENTATO** | **Interfaccia web per visualizzare + modificare tabelle clienti (ADMIN/GESTORE)** |
 | **Modifica Record Tabelle** | ✅ **PIANO 1** | **View generica ModificaRecordTabellaView con whitelist + validazione permessi** |
 | **Audit Logging Tabelle** | ✅ **PIANO 1** | **Logger strutturato con marker [AUDIT_TABELLE] e diff campi + file logs/django.log** |
+| **Uniformazione Dettagli Articolo** | ✅ **v1.1.2** | **Riordinamento gruppi + breadcrumb gerarchia categoria** |
 | **Sistema Backup Database** | ✅ **COMPLETATO** | **3 metodi ripristino: Web, Management Command, PowerShell emergenza** |
 | **Autenticazione** | ✅ Funzionante | Login/logout, 4 ruoli, ProfiloUtente, LogAccesso |
 | **Permessi** | ✅ Implementati | CanEditMixin, CanViewMixin, controlli basati su ruolo |
@@ -67,6 +68,51 @@ python manage.py runserver
 | **Suite Test** | ✅ **20 VERDI** | **Inclusi 3 test gestione tabelle (modifica, permessi, visibilità)** |
 | **Sicurezza** | ✅ Implementata | Protezione CSRF, hashing Argon2, session security, CSS compatibile |
 | **Deploy** | ✅ Pronto | Pronto per produzione con Gunicorn + Nginx |
+
+---
+
+## 📌 ULTIME MODIFICHE v1.1.2 - UNIFORMAZIONE UX DETTAGLIO ARTICOLO
+
+### 🎯 Sintesi
+Uniformazione della pagina dettaglio articolo `/articoli/<id>/` con la struttura organizzativa della pagina modifica articolo, garantendo coerenza informativa e UX consistente.
+
+### 🔄 Modifiche Applicate
+
+#### 1. **Riordinamento Gruppi Sezioni**
+**Prima (v1.1.1)**: Informazioni Articolo → Codici SCM → Fornitore → Giacenza → Movimenti  
+**Adesso (v1.1.2)**: **Dati SCM → Dati Fornitore → Dati Articolo** → Giacenza → Movimenti
+
+**Motivazione**: Allineamento con ordine logico della pagina modifica articolo per ridurre cognitive load dell'utente.
+
+#### 2. **Uniformazione Titoli Sezioni**
+- `Codici e Dati SCM` → `Dati SCM` (coerente con form)
+- `Fornitore Principale` → `Dati Fornitore` (naming coerente)
+- Aggiunta etichetta `Dati Articolo` per raggruppare anagrafica e soglie
+
+#### 3. **Riordino Campi nei Gruppi**
+- **Dati SCM**: Aggiunto `Prezzo Acquisto SCM` (era assente nel dettaglio) ✓
+- **Dati Fornitore**: Spostati `Codice Fornitore` e `Prezzo Acquisto Fornitore` (coerenza con form) ✓
+- **Dati Articolo**: Mantiene anagrafica, unità, giacenze, stati e metadati temporali
+
+#### 4. **Aggiunta Breadcrumb Categoria**
+Nel gruppo Dati Articolo, sotto il campo Categoria, visualizzazione gerarchia:
+```django
+{{ articolo.categoria.get_breadcrumb }}  {# Es: Meccanica > Motore > Filtri #}
+```
+**Vantaggio**: Facilita comprensione della classificazione gerarchica senza navigare in menu.
+
+### 📊 Impatto UX
+- ✅ **Coerenza**: Ordine sezioni identico tra dettaglio e modifica
+- ✅ **Completezza**: Tutti i campi del form visibili nel dettaglio
+- ✅ **Navigabilità**: Breadcrumb categoria migliora orientamento nella gerarchia
+- ✅ **Naming**: Titoli uniformi riducono confusione cognitiva
+
+### 🧪 Test & Verifica
+- ✅ Template sintattico corretto (nessun errore Django)
+- ✅ Breadcrumb utilizza metodo modello `get_breadcrumb()` (nessuna duplicazione logica)
+- ⏳ **DA VERIFICARE**: Test visuale su http://127.0.0.1:8000/articoli/30/ (browser)
+
+**Riferimento**: [File modificato](templates/magazzino/pezzoricambio_detail.html)
 
 ---
 
@@ -133,6 +179,43 @@ python manage.py runserver
 
 ---
 
+## 🌳 UNIFORMAZIONE UX ARTICOLI
+
+### Pagina Dettaglio Articolo (`/articoli/<id>/`)
+
+#### Ordine Sezioni (v1.1.2)
+1. **Dati SCM** — Codici e riferimenti macchina
+   - Codice SCM, Descrizione SCM, Prezzo Acquisto SCM (✓ nuovo in v1.1.2)
+   - Modello Macchina, Matricola Macchina
+
+2. **Dati Fornitore** — Riferimenti commerciali
+   - Fornitore Principale (link), Città, Telefono
+   - Codice Fornitore (✓ spostato in v1.1.2), Prezzo Acquisto Fornitore (✓ spostato in v1.1.2)
+
+3. **Dati Articolo** — Anagrafica e soglie operative
+   - Codice Interno, Descrizione
+   - Categoria + **Breadcrumb gerarchia** (✓ nuovo in v1.1.2) — Es: Meccanica > Motore > Filtri
+   - Unità Misura, Giacenza Min/Max
+   - Disponibilità (badge), Stato (badge)
+   - Creato il, Modificato il
+
+4. **Giacenza** (Sidebar) — Livelli stock
+   - Quantità Disponibile, Impegnata, Prenotata, Libera
+   - Timestamp ultimo aggiornamento
+
+5. **Ultimi Movimenti** (Bottom) — Audit trail
+   - Tabella: Data, Tipo, Quantità, Operatore, Documento
+
+#### Allineamento con Pagina Modifica (`/articoli/<id>/update/`)
+Ordine sezioni identico tra dettaglio e form per coerenza UX e riduzione cognitive load.
+
+**Pattern Implementativo**:
+- Template-based HTML riarrange (nessun cambio logica Django)
+- Uso di metodo modello `Categoria.get_breadcrumb()` per breadcrumb (coerenza con codebase)
+- Test template: nessun errore Django rilevato ✅
+
+---
+
 ## ⚠️ GOTCHA CRITICI - AVOID THESE MISTAKES
 
 | Errore | Causa | Soluzione | Severità |
@@ -142,6 +225,7 @@ python manage.py runserver
 | **N+1 query in loop** | Template richiama `.all()` in ciclo | Usa `select_related()`/`prefetch_related()` | 🟡 MEDIA |
 | **Immagine non elaborata** | Signal pre_save non triggerato | Verifica signal.py è registrato in apps.py | 🟡 MEDIA |
 | **Accesso negato su view autorizzata** | Mixin mancante o ruolo sbagliato | Verifica CanEditMixin e ruolo ProfiloUtente | 🟡 MEDIA |
+| **Breadcrumb categoria non visibile** | categoria_padre è null (radice) | Verificare che get_breadcrumb() torni valore | 🟠 BASSA |
 | **CSRF token mancante** | Form POST senza {% csrf_token %} | Aggiungi token in tutti i template POST | 🟠 BASSA |
 
 **Riferimento completo**: [AGENTS.md - Gotcha Critici](AGENTS.md#-gotcha-critici---aggiornamento-v11)

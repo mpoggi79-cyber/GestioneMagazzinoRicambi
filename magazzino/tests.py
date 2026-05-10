@@ -5,7 +5,7 @@ from django.urls import reverse
 from accounts.models import RuoloUtente
 from .codici import genera_codice_articolo
 from .forms import PezzoRicambioForm
-from .models import Categoria, PezzoRicambio, TbAppellativo, UnitaMisura
+from .models import Categoria, Fornitore, MatricolaMacchinaSCM, ModelloMacchinaSCM, PezzoRicambio, TbAppellativo, UnitaMisura
 
 
 class CodiceArticoloAutomaticoTests(TestCase):
@@ -137,6 +137,47 @@ class CodiceArticoloAutomaticoTests(TestCase):
 
 		self.assertFalse(form.is_valid())
 		self.assertIn('codice_scm', form.errors)
+
+
+class LayoutModificaArticoloTests(TestCase):
+	def setUp(self):
+		self.utente_admin = User.objects.create_user(username='admin_articolo', password='PasswordSicura123!')
+		self.utente_admin.profilo.ruolo = RuoloUtente.ADMIN
+		self.utente_admin.profilo.save()
+
+		self.categoria = Categoria.objects.create(nome_categoria='Categoria Layout')
+		self.unita_misura = UnitaMisura.objects.create(denominazione='PZ LAYOUT')
+		self.fornitore = Fornitore.objects.create(ragione_sociale='Fornitore Layout')
+		self.modello_scm = ModelloMacchinaSCM.objects.create(nome_modello='Scm Test 100')
+		self.matricola_scm = MatricolaMacchinaSCM.objects.create(
+			modello=self.modello_scm,
+			matricola_macchina='MATR-LAYOUT-001',
+		)
+		self.articolo = PezzoRicambio.objects.create(
+			descrizione='Articolo layout',
+			categoria=self.categoria,
+			unita_misura=self.unita_misura,
+			fornitore=self.fornitore,
+			modello_macchina_scm=self.modello_scm,
+			matricola_macchina_scm=self.matricola_scm,
+			codice_scm='07L0320061B',
+			codice_fornitore='FORN-001',
+		)
+
+	def test_pagina_modifica_articolo_mostra_tre_gruppi_e_meta_identificativo(self):
+		self.client.force_login(self.utente_admin)
+		response = self.client.get(reverse('magazzino:articolo_update', kwargs={'pk': self.articolo.pk}))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Identificativo')
+		self.assertContains(response, self.articolo.codice_interno)
+		self.assertContains(response, 'Modifica Articolo')
+		self.assertContains(response, 'Dati SCM')
+		self.assertContains(response, 'Dati Fornitore')
+		self.assertContains(response, 'Dati Articolo')
+		self.assertContains(response, 'Classificazione articolo')
+		self.assertNotContains(response, f'Modifica Articolo: {self.articolo.codice_interno}', html=False)
+		self.assertNotContains(response, 'name="codice_interno"', html=False)
 
 
 class GestioneTabelleRecordTests(TestCase):
