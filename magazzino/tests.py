@@ -1,8 +1,11 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
+from django.urls import reverse
 
+from accounts.models import RuoloUtente
 from .codici import genera_codice_articolo
 from .forms import PezzoRicambioForm
-from .models import Categoria, PezzoRicambio, UnitaMisura
+from .models import Categoria, PezzoRicambio, TbAppellativo, UnitaMisura
 
 
 class CodiceArticoloAutomaticoTests(TestCase):
@@ -134,3 +137,71 @@ class CodiceArticoloAutomaticoTests(TestCase):
 
 		self.assertFalse(form.is_valid())
 		self.assertIn('codice_scm', form.errors)
+
+
+class GestioneTabelleRecordTests(TestCase):
+	def setUp(self):
+		self.utente_admin = User.objects.create_user(username='admin_tabella', password='PasswordSicura123!')
+		self.utente_admin.profilo.ruolo = RuoloUtente.ADMIN
+		self.utente_admin.profilo.save()
+
+		self.utente_operatore = User.objects.create_user(username='operatore_tabella', password='PasswordSicura123!')
+		self.utente_operatore.profilo.ruolo = RuoloUtente.OPERATORE
+		self.utente_operatore.profilo.save()
+
+		self.record_appellativo = TbAppellativo.objects.create(descrizione='Sig.')
+		self.unita_attiva = UnitaMisura.objects.create(denominazione='PZ TEST', stato_attivo=True)
+		self.unita_inattiva = UnitaMisura.objects.create(denominazione='KM TEST OFF', stato_attivo=False)
+
+	def test_lista_tabella_contiene_link_modifica_record(self):
+		self.client.force_login(self.utente_admin)
+		response = self.client.get(reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbappellativo'}))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(
+			response,
+			reverse(
+				'magazzino:modifica_record_tabella',
+				kwargs={'nome_tabella': 'tbappellativo', 'pk': self.record_appellativo.pk},
+			),
+		)
+
+	def test_admin_puo_modificare_record_tabella(self):
+		self.client.force_login(self.utente_admin)
+		url = reverse(
+			'magazzino:modifica_record_tabella',
+			kwargs={'nome_tabella': 'tbappellativo', 'pk': self.record_appellativo.pk},
+		)
+
+		with self.assertLogs('magazzino.views', level='INFO') as logs_catturati:
+			response = self.client.post(url, {'descrizione': 'Dott.'}, follow=True)
+
+		self.record_appellativo.refresh_from_db()
+		self.assertEqual(self.record_appellativo.descrizione, 'Dott.')
+		self.assertTrue(any('[AUDIT_TABELLE]' in messaggio for messaggio in logs_catturati.output))
+		self.assertTrue(any('tabella=tbappellativo' in messaggio for messaggio in logs_catturati.output))
+		self.assertRedirects(
+			response,
+			reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbappellativo'}),
+		)
+
+	def test_operatore_senza_permessi_non_accede_a_modifica_record_tabella(self):
+		self.client.force_login(self.utente_operatore)
+		url = reverse(
+			'magazzino:modifica_record_tabella',
+			kwargs={'nome_tabella': 'tbappellativo', 'pk': self.record_appellativo.pk},
+		)
+
+		response = self.client.get(url)
+
+		self.assertEqual(response.status_code, 302)
+		self.assertEqual(response.url, reverse('magazzino:dashboard'))
+
+	def test_tbunitamisura_mostra_inattivi_di_default(self):
+		self.client.force_login(self.utente_admin)
+		response = self.client.get(reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': 'tbunitamisura'}))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, self.unita_attiva.denominazione)
+		self.assertContains(response, self.unita_inattiva.denominazione)
+		self.assertContains(response, 'Mostra solo attivi')

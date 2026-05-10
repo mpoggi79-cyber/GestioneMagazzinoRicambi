@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sessione Terminata - Gestione Magazzino Ricambi</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background: linear-gradient(140deg, #0f4c5c 0%, #2c7da0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+
+        .logout-card {
+            width: min(520px, 92vw);
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        .logout-icon {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: #e8f3f7;
+            color: #0f4c5c;
+            font-size: 1.8rem;
+        }
+
+        h1 {
+            color: #0f4c5c;
+            font-size: 1.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            color: #3a3a3a;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .btn-ok {
+            border: none;
+            border-radius: 10px;
+            padding: 0.8rem 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: linear-gradient(140deg, #0f4c5c 0%, #1e6f8b 100%);
+            min-width: 180px;
+        }
+
+        .btn-ok:hover {
+            background: linear-gradient(140deg, #0b3a46 0%, #17576d 100%);
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <section class="logout-card" aria-labelledby="titolo-logout">
+        <div class="logout-icon" aria-hidden="true">
+            <i class="fas fa-check"></i>
+        </div>
+
+        <h1 id="titolo-logout">Grazie e Arrivederci</h1>
+        <p>
+            La sessione e' stata terminata correttamente.<br>
+            Premi OK per tornare alla pagina di accesso pulita.
+        </p>
+
+        <form method="post" action="{% url 'accounts:logout_conferma' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ok">OK</button>
+        </form>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

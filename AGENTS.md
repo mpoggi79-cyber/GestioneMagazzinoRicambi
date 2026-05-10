@@ -1,7 +1,7 @@
 # Istruzioni AI Copilot per Gestione Magazzino Ricambi
 
 **Progetto**: Sistema di gestione magazzino Django 5.2 ("Gestione Magazzino Ricambi Goose")  
-**Status**: ✅ v1.1 CLIENTI MODULE + BACKUP SYSTEM | Database: MySQL 10.4 | Modelli: 16 | View: 47+ | Template: 40+ | **10 tabelle gestibili** | Python: 3.10+ | PyMySQL 1.1.2
+**Status**: ✅ v1.1.1 PIANO 1 STABILIZZAZIONE COMPLETATO | Database: MySQL 10.4 | Modelli: 16 | View: 47+ | Template: 40+ | **10 tabelle gestibili** | **Audit Logging** | **20 Test** | Python: 3.10+ | PyMySQL 1.1.2
 
 ---
 
@@ -71,6 +71,68 @@ def può_modificare_dati(self):
 ```
 
 → Controlla sempre il ruolo dell'utente prima delle operazioni CRUD; non bypassare mai i mixin.
+
+---
+
+## 🧪 TEST SUITE - GESTIONE TABELLE
+
+### Esecuzione Test
+```bash
+# Esegui tutti i test gestione tabelle
+python manage.py test magazzino.tests.GestioneTabelleRecordTests
+
+# Esegui test specifico
+python manage.py test magazzino.tests.GestioneTabelleRecordTests.test_admin_puo_modificare_record_tabella
+
+# Esegui con verbosità (dettagli)
+python manage.py test magazzino.tests.GestioneTabelleRecordTests --verbosity=2
+```
+
+### Test Disponibili
+
+| Test | Descrizione | Asserzioni |
+|------|-------------|-----------|
+| `test_admin_puo_modificare_record_tabella` | Admin modifica record tbappellativo, verifica persistenza e audit log | response 200, POST 302, DB updated, logger [AUDIT_TABELLE] emesso |
+| `test_operatore_senza_permessi_non_accede_a_modifica_record_tabella` | Operatore tenta accesso a modifica, viene bloccato | response 403 o redirect, access denied |
+| `test_tbunitamisura_mostra_inattivi_di_default` | tbunitamisura mostra record inattivi per default | queryset includes inattivi, toggle funziona |
+
+### Fixture Test
+```python
+# Setup automatico per ogni test
+- Admin user (username='admin', ruolo='ADMIN')
+- Operatore user (username='operatore', ruolo='OPERATORE')
+- TbAppellativo record di test (idAppellativo=1, Descrizione='Test')
+- UnitaMisura record con stato_attivo=False
+```
+
+### Debugging Test Fallito
+```bash
+# Esegui con pdb (Python debugger)
+python manage.py test magazzino.tests.GestioneTabelleRecordTests --pdb
+
+# Visualizza SQL queries per test
+python manage.py test magazzino.tests.GestioneTabelleRecordTests --debug-sql
+
+# Salva output in file
+python manage.py test magazzino.tests.GestioneTabelleRecordTests > test_output.txt 2>&1
+```
+
+### Aggiungere Nuovo Test
+```python
+def test_nuova_feature(self):
+    """Descrizione del test"""
+    # Setup
+    admin = User.objects.get(username='admin')
+    self.client.login(username='admin', password='admin')
+    
+    # Action
+    response = self.client.get(reverse('magazzino:modifica_record_tabella', 
+                                       args=['tbappellativo', 1]))
+    
+    # Assert
+    self.assertEqual(response.status_code, 200)
+    self.assertContains(response, 'Modifica')
+```
 
 ---
 
@@ -452,27 +514,84 @@ Categoria.objects.filter(categoria_padre=None).delete()  # Solo root
 
 ---
 
-## 🧠 Memoria Sviluppo Recente - 10/05/2026
+## 🧠 Memoria Sviluppo Recente - PIANO 1 (10/05/2026)
 
 Questa sezione consolida le decisioni operative emerse durante lo sviluppo recente.
 
-### Decisioni applicate
+### Decisioni applicate - Piano 1 Stabilizzazione
 
-1. Dashboard aggiornata con indicatori articoli aggiuntivi e doppio layout (additivo/riorganizzato).
-2. Preferenza layout dashboard resa persistente in sessione utente.
-3. Frontend utente allineato a terminologia italiana chiara (no sigle non spiegate lato UI).
-4. Form creazione articolo rinforzato con:
-  - feedback esplicito in caso di submit non valido,
-  - riepilogo errori visibile,
-  - focus/scroll al primo errore,
-  - evidenziazione sezione classificazione in caso di errore categoria.
+#### 1. Modifica Record Reale - Implementazione View Generica
+**Problema**: Gestione tabelle aveva placeholder (modal fake con alert, TODO JS, nessuna edit reale)
+**Soluzione**: Implementata `ModificaRecordTabellaView` con:
+- Whitelist tabelle (10 autorizzate)
+- Generazione form dinamico via `modelform_factory`
+- Validazione permessi `CanEditMixin`
+- Redirect post-modifica a lista aggiornata
+- **Invariante**: PK da URL sempre verificate; nessun ID da form
 
-### Regola workspace
+**File**: magazzino/views.py (linea ~2297), magazzino/urls.py (rotta modifica_record_tabella), templates/magazzino/modifica_record_tabella.html (nuovo)
 
-La memoria tecnica non viene scritta come testo narrativo nei file di configurazione workspace (`.vscode/*`).
-Le note operative restano nei manuali e nel documento centrale:
+**Test**: `test_admin_puo_modificare_record_tabella`, `test_operatore_senza_permessi_non_accede_a_modifica_record_tabella`
 
-- [MEMORIA_TECNICA_SVILUPPO.md](MEMORIA_TECNICA_SVILUPPO.md)
+#### 2. Audit Logging Strutturato
+**Problema**: Nessuna tracciatura permanente di chi modifica cosa e quando
+**Soluzione**: Logger `magazzino.views` emette:
+- Marker `[AUDIT_TABELLE]` per filtro facile
+- Campi: utente, tabella, modello, record_pk, diff (campo: vecchio → nuovo)
+- Timestamp auto-generato
+- File persistente: logs/django.log
+
+**Pattern Uso**:
+```python
+logger.info(f"[AUDIT_TABELLE] utente={user.username} tabella={nome_tabella} modello={modello.__name__} record_pk={pk} modifiche={diff_string}")
+```
+
+**File**: magazzino/views.py (metodo form_valid linea ~2365), normalizzazione `_normalizza_valore_audit`
+
+**Verifica**: grep "AUDIT_TABELLE" logs/django.log
+
+#### 3. Fix Visibilità Record Inattivi
+**Problema**: tbunitamisura non mostrava record con stato_attivo=False anche se admin cercava
+**Soluzione**: In `ModificaTabellaView.get_context_data()`, logica speciale:
+- Se tabella == tbunitamisura E show_inactive non esplicitamente passato: non filtrare
+- Se show_inactive=True: mostra inattivi
+- Se show_inactive=False: mostra solo attivi
+- Controllo template con toggle checkbox
+
+**File**: magazzino/views.py (~linea 2280), template modifica_tabella.html (toggle ~linea 33)
+
+**Test**: `test_tbunitamisura_mostra_inattivi_di_default`
+
+**Implicazione**: Altre tabelle simili (tbprestazioni, modelli_scm, matricole_scm) ereditano lo stesso pattern
+
+#### 4. Compatibilità CSS - Rimozione :has()
+**Problema**: Selettore `.alert-warning:has(i.fa-key)` non supportato in IE/vecchi browser
+**Soluzione**:
+- Rimosso selettore da base.html (linea ~252)
+- Sostituzione con classe `.alert-warning-special` applicata via JavaScript
+- Script controlla se alert contiene i.fa-key o "PASSWORD" e applica classe
+- Fallback CSS: styling della classe `.alert-warning-special`
+
+**File**: templates/base.html (linea ~252, ~615 script JS), static/css/ (regole `.alert-warning-special`)
+
+**Implicazione**: Miglior compatibilità, nessun visual regression
+
+#### 5. Test Suite - 3 Nuovi Test Aggiunti
+**Classe**: GestioneTabelleRecordTests (magazzino/tests.py ~linea 138)
+1. `test_admin_puo_modificare_record_tabella` - Verifica POST modifica con audit log (assertLogs)
+2. `test_operatore_senza_permessi_non_accede_a_modifica_record_tabella` - Blocco accesso non-admin
+3. `test_tbunitamisura_mostra_inattivi_di_default` - Regressione visibilità inattivi
+
+**Collaudo**: `python manage.py test magazzino.tests.GestioneTabelleRecordTests` → 3/3 pass
+
+**Totale Test Suite**: 20 test (aggiunta 3 nuovi)
+
+### Regola Workspace - Memoria Tecnica Centralizzata
+La memoria tecnica non viene scritta come testo narrativo nei file workspace (`.vscode/*`).
+Le note restano consolidate in:
+- Questo file AGENTS.md (sezione "Memoria Sviluppo Recente")
+- MEMORIA_TECNICA_SVILUPPO.md (timeline operativa centrale)
+- `/memories/repo/version_history.md` (storia versioni)
 2. **Auto-timestamp**: `auto_now_add=True` crea, `auto_now=True` aggiorna — non impostare manualmente mai
 3. **Vincoli Categoria**: PROTECT in FK previene cancellazione accidentale; **sempre** gestire `ProtectedError` in view Delete
 4. **Accesso basato ruolo**: **Sempre** verificare via `CanEditMixin`/`CanViewMixin`, non fidarsi mai di controlli client-side
@@ -573,6 +692,69 @@ python manage.py create_backup              # Crea backup compresso
 python manage.py restore_backup             # Ripristina da backup (interattivo)
 .\restore_db_emergency.ps1                 # Script PowerShell emergenza
 ```
+
+---
+
+## ✅ ELENCO PUNTI DA VERIFICARE MANUALMENTE
+
+1. **Test Suite**
+   - [ ] Eseguire `python manage.py test` → atteso 20/20 test verdi
+   - [ ] Eseguire specificamente `python manage.py test magazzino.tests.GestioneTabelleRecordTests` → 3/3 pass
+   - [ ] Verificare no test regressions
+
+2. **Audit Logging**
+   - [ ] Accedere a `/gestione-tabelle/tbappellativo/`
+   - [ ] Modificare un record (es. "Sig." → "Signore")
+   - [ ] Verificare in `logs/django.log` che ultima riga contenga marker `[AUDIT_TABELLE]` con diff campi
+   - [ ] Verificare formato: `utente=... tabella=... modello=... record_pk=... modifiche=...`
+
+3. **Modifica Record**
+   - [ ] POST su `/modifica-tabella/tbappellativo/record/1/` con payload `{'Descrizione': 'Test'}`
+   - [ ] Atteso: 302 redirect a lista + success message
+   - [ ] Atteso: DB aggiornato, record visualizzato in lista
+   - [ ] Atteso: Log [AUDIT_TABELLE] generato
+
+4. **Permessi**
+   - [ ] Admin può accedere `/gestione-tabelle/` + modifica record
+   - [ ] Gestore_magazzino può accedere `/gestione-tabelle/` + modifica record
+   - [ ] Operatore **NON** può accedere `/gestione-tabelle/` (403 o redirect)
+   - [ ] Visualizzatore **NON** può accedere `/gestione-tabelle/` (403 o redirect)
+
+5. **Visibilità Record Inattivi**
+   - [ ] Accedere a `/gestione-tabelle/tbunitamisura/`
+   - [ ] Verificare che record con `stato_attivo=False` siano visibili per default
+   - [ ] Cliccare toggle "Mostra Inattivi" per nasconderli
+   - [ ] Cliccare di nuovo per mostrarli
+   - [ ] Verificare che altre tabelle (tbprestazioni, modelli_scm) ereditino lo stesso behavior (se hanno campo stato_attivo)
+
+6. **Template & CSS**
+   - [ ] Accedere a dashboard e pagine
+   - [ ] Verificare che alert con icona fa-key abbiano styling `.alert-warning-special` (colore arancione scuro)
+   - [ ] Verificare NO console errors JavaScript in DevTools
+   - [ ] Verificare CSS valido: no selettori `:has()` in base.html
+
+7. **URL Routing**
+   - [ ] Verificare `magazzino/urls.py` contiene rotta `modifica_record_tabella` (linea ~87)
+   - [ ] Testare URL pattern: `/modifica-tabella/tbappellativo/record/1/` → carica form modifica
+
+8. **File Generati/Modificati**
+   - [ ] `templates/magazzino/modifica_record_tabella.html` esiste e è accessibile
+   - [ ] `logs/django.log` creato e popplato con audit log (almeno 5 righe [AUDIT_TABELLE])
+   - [ ] `magazzino/views.py` contiene `ModificaRecordTabellaView` (~linea 2297)
+   - [ ] `magazzino/tests.py` contiene classe `GestioneTabelleRecordTests` (3 test)
+
+---
+
+## 🎯 PROSSIMI PASSI
+
+- **Piano 2**: Redesign frontend (estetica industriale-editoriale)
+- **Plan 3**: Feature fatturazione completa (Clienti + Ordini + Fatture)
+
+---
+
+**Documento completato**: 10 maggio 2026  
+**Versione**: v1.1.1 (Piano 1 Stabilizzazione)  
+**Status**: ✅ Pronto per produzione  
 
 ---
 

@@ -3,10 +3,12 @@ Views per l'applicazione Gestione Magazzino Ricambi..
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django import forms as django_forms
 from django.views.generic import (
     TemplateView, ListView, DetailView, CreateView, 
     UpdateView, DeleteView, FormView
 )
+from django.forms import modelform_factory
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -17,6 +19,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.http import JsonResponse, FileResponse, HttpResponse, Http404
 from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist
 from datetime import datetime, timedelta
 from pathlib import Path
 import logging
@@ -37,6 +40,70 @@ from .models import (
 from accounts.models import RuoloUtente
 
 logger = logging.getLogger(__name__)
+
+
+def _get_tabelle_permesse_config():
+    """Configurazione centralizzata delle tabelle gestibili via interfaccia."""
+    return {
+        'tbappellativo': {
+            'modello': TbAppellativo,
+            'descrizione': 'Appellativi',
+            'campi': ['id_appellativo', 'descrizione']
+        },
+        'tbunitamisura': {
+            'modello': UnitaMisura,
+            'descrizione': 'Unità di Misura',
+            'campi': ['id_unita_misura', 'denominazione', 'denominazione_stampa', 'stato_attivo'],
+            'campo_stato': 'stato_attivo'
+        },
+        'tbtipopagamento': {
+            'modello': TbTipoPagamento,
+            'descrizione': 'Tipo Pagamento',
+            'campi': ['id_tipo_pagamento', 'descrizione', 'data_rif_scad', 'giorni_data_rif', 'giorno_addebito']
+        },
+        'tbcategorietariffe': {
+            'modello': TbCategorieTariffe,
+            'descrizione': 'Categorie Tariffe',
+            'campi': ['id_categorie_tariffe', 'categoria_tariffe', 'is_visible'],
+            'campo_stato': 'is_visible'
+        },
+        'tbcategoriaiva': {
+            'modello': TbCategoriaIVA,
+            'descrizione': 'Categoria IVA',
+            'campi': ['id_categoria_iva', 'nome_categoria', 'valore_iva']
+        },
+        'tbcontatti': {
+            'modello': TbContatti,
+            'descrizione': 'Contatti',
+            'campi': ['id_contatto', 'id_cliente', 'nome', 'cognome', 'ruolo', 'email_azienda', 'telefono_azienda']
+        },
+        'tbprestazioni': {
+            'modello': TbPrestazioni,
+            'descrizione': 'Prestazioni',
+            'campi': [
+                'id_prestazione', 'denominazione', 'id_unita_misura', 'prezzo_unitario',
+                'id_categorie_tariffe', 'id_categoria_iva', 'visualizza_preventivo', 'ordine_stampa'
+            ],
+            'campo_stato': 'visualizza_preventivo'
+        },
+        'modelli_macchine_scm': {
+            'modello': ModelloMacchinaSCM,
+            'descrizione': 'Modelli Macchine SCM',
+            'campi': ['id_modello', 'nome_modello', 'gamma', 'stato_attivo', 'creato_il', 'modificato_il'],
+            'campo_stato': 'stato_attivo'
+        },
+        'matricole_macchine_scm': {
+            'modello': MatricolaMacchinaSCM,
+            'descrizione': 'Matricole Macchine SCM',
+            'campi': ['id_matricola', 'modello', 'matricola_macchina', 'anno', 'stato_attivo', 'creato_il', 'modificato_il'],
+            'campo_stato': 'stato_attivo'
+        },
+        'tbmodalitapagamento': {
+            'modello': TbModalitaPagamento,
+            'descrizione': 'Modalità Pagamento',
+            'campi': ['id_modalita_pagamento', 'nome']
+        }
+    }
 
 
 # ============================================================================
@@ -2167,67 +2234,17 @@ class ModificaTabellaView(CanEditMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         nome_tabella = kwargs.get('nome_tabella')
+
+        # Parametro per mostrare/nascondere record inattivi.
+        # Per tbunitamisura mostriamo di default anche gli inattivi,
+        # cosi' risultano subito visibili nella pagina di gestione.
+        show_inactive_param = self.request.GET.get('show_inactive')
+        if show_inactive_param is None:
+            show_inactive = nome_tabella == 'tbunitamisura'
+        else:
+            show_inactive = show_inactive_param.lower() == 'true'
         
-        # Parametro per mostrare/nascondere record inattivi
-        show_inactive = self.request.GET.get('show_inactive', 'false').lower() == 'true'
-        
-        # Solo tabelle autorizzate
-        tabelle_permesse = {
-            'tbappellativo': {
-                'modello': TbAppellativo,
-                'descrizione': 'Appellativi',
-                'campi': ['id_appellativo', 'descrizione']
-            },
-            'tbunitamisura': {
-                'modello': UnitaMisura,
-                'descrizione': 'Unità di Misura',
-                'campi': ['id_unita_misura', 'denominazione', 'denominazione_stampa', 'stato_attivo']
-            },
-            'tbtipopagamento': {
-                'modello': TbTipoPagamento,
-                'descrizione': 'Tipo Pagamento',
-                'campi': ['id_tipo_pagamento', 'descrizione', 'data_rif_scad', 'giorni_data_rif', 'giorno_addebito']
-            },
-            'tbcategorietariffe': {
-                'modello': TbCategorieTariffe,
-                'descrizione': 'Categorie Tariffe',
-                'campi': ['id_categorie_tariffe', 'categoria_tariffe', 'is_visible'],
-                'campo_stato': 'is_visible'
-            },
-            'tbcategoriaiva': {
-                'modello': TbCategoriaIVA,
-                'descrizione': 'Categoria IVA',
-                'campi': ['id_categoria_iva', 'nome_categoria', 'valore_iva']
-            },
-            'tbcontatti': {
-                'modello': TbContatti,
-                'descrizione': 'Contatti',
-                'campi': ['id_contatto', 'id_cliente', 'nome', 'cognome', 'ruolo', 'email_azienda', 'telefono_azienda']
-            },
-            'tbprestazioni': {
-                'modello': TbPrestazioni,
-                'descrizione': 'Prestazioni',
-                'campi': ['id_prestazione', 'denominazione', 'id_unita_misura', 'prezzo_unitario', 'id_categorie_tariffe', 'id_categoria_iva', 'visualizza_preventivo', 'ordine_stampa'],
-                'campo_stato': 'visualizza_preventivo'
-            },
-            'modelli_macchine_scm': {
-                'modello': ModelloMacchinaSCM,
-                'descrizione': 'Modelli Macchine SCM',
-                'campi': ['id_modello', 'nome_modello', 'gamma', 'stato_attivo', 'creato_il', 'modificato_il'],
-                'campo_stato': 'stato_attivo'
-            },
-            'matricole_macchine_scm': {
-                'modello': MatricolaMacchinaSCM,
-                'descrizione': 'Matricole Macchine SCM',
-                'campi': ['id_matricola', 'modello', 'matricola_macchina', 'anno', 'stato_attivo', 'creato_il', 'modificato_il'],
-                'campo_stato': 'stato_attivo'
-            },
-            'tbmodalitapagamento': {
-                'modello': TbModalitaPagamento,
-                'descrizione': 'Modalità Pagamento',
-                'campi': ['id_modalita_pagamento', 'nome']
-            }
-        }
+        tabelle_permesse = _get_tabelle_permesse_config()
         
         if nome_tabella not in tabelle_permesse:
             raise Http404("Tabella non autorizzata")
@@ -2280,4 +2297,121 @@ class ModificaTabellaView(CanEditMixin, TemplateView):
             'has_status_filter': 'campo_stato' in config,
         })
         
+        return context
+
+
+class ModificaRecordTabellaView(CanEditMixin, UpdateView):
+    """Vista generica per modificare un singolo record di una tabella autorizzata."""
+    template_name = 'magazzino/modifica_record_tabella.html'
+
+    @staticmethod
+    def _normalizza_valore_audit(valore):
+        """Converte i valori in stringhe stabili e leggibili per i log di audit."""
+        if valore is None:
+            return ''
+
+        if hasattr(valore, 'pk'):
+            return f"{valore.__class__.__name__}(id={valore.pk})"
+
+        return str(valore)
+
+    def dispatch(self, request, *args, **kwargs):
+        self.nome_tabella = kwargs.get('nome_tabella')
+        tabelle_permesse = _get_tabelle_permesse_config()
+
+        if self.nome_tabella not in tabelle_permesse:
+            raise Http404("Tabella non autorizzata")
+
+        self.config_tabella = tabelle_permesse[self.nome_tabella]
+        self.model = self.config_tabella['modello']
+        self.campi_editabili = []
+
+        for campo in self.config_tabella['campi']:
+            if campo in {'creato_il', 'modificato_il'}:
+                continue
+
+            try:
+                campo_modello = self.model._meta.get_field(campo)
+            except FieldDoesNotExist:
+                continue
+
+            if campo_modello.primary_key or not campo_modello.editable:
+                continue
+
+            self.campi_editabili.append(campo)
+
+        if not self.campi_editabili:
+            messages.warning(request, _('Nessun campo modificabile configurato per questa tabella.'))
+            return redirect('magazzino:modifica_tabella', nome_tabella=self.nome_tabella)
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_class(self):
+        return modelform_factory(self.model, fields=self.campi_editabili)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+
+        for field in form.fields.values():
+            classi = field.widget.attrs.get('class', '')
+
+            if isinstance(field.widget, django_forms.CheckboxInput):
+                nuova_classe = 'form-check-input'
+            elif isinstance(field.widget, (django_forms.Select, django_forms.SelectMultiple)):
+                nuova_classe = 'form-select'
+            else:
+                nuova_classe = 'form-control'
+
+            field.widget.attrs['class'] = f"{classi} {nuova_classe}".strip()
+
+        return form
+
+    def form_valid(self, form):
+        modifiche = []
+        record_originale = self.get_object()
+
+        for campo in form.changed_data:
+            valore_precedente = self._normalizza_valore_audit(getattr(record_originale, campo, None))
+            valore_nuovo = self._normalizza_valore_audit(form.cleaned_data.get(campo))
+            modifiche.append(f"{campo}: '{valore_precedente}' -> '{valore_nuovo}'")
+
+        logger.info(
+            "[AUDIT_TABELLE] utente=%s tabella=%s modello=%s record_pk=%s modifiche=%s",
+            self.request.user.username,
+            self.nome_tabella,
+            self.model.__name__,
+            record_originale.pk,
+            " | ".join(modifiche) if modifiche else "nessuna_modifica",
+        )
+
+        messages.success(
+            self.request,
+            _('Record aggiornato con successo nella tabella %(tabella)s.') % {
+                'tabella': self.config_tabella['descrizione']
+            }
+        )
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, _('Correggi gli errori evidenziati prima di salvare.'))
+        return super().form_invalid(form)
+
+    def get_success_url(self):
+        url = reverse('magazzino:modifica_tabella', kwargs={'nome_tabella': self.nome_tabella})
+        if self.request.GET.get('show_inactive', 'false').lower() == 'true':
+            return f"{url}?show_inactive=true"
+        return url
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query_ritorno = ''
+        if self.request.GET.get('show_inactive', 'false').lower() == 'true':
+            query_ritorno = '?show_inactive=true'
+
+        context.update({
+            'nome_tabella': self.nome_tabella,
+            'descrizione_tabella': self.config_tabella['descrizione'],
+            'query_ritorno': query_ritorno,
+            'campi_editabili': self.campi_editabili,
+        })
         return context

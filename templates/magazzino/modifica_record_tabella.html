@@ -1,0 +1,49 @@
+﻿{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Modifica Record {{ descrizione_tabella }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-xl-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-pen"></i>
+                        Modifica Record: {{ descrizione_tabella }}
+                    </h3>
+                    <a href="{% url 'magazzino:modifica_tabella' nome_tabella=nome_tabella %}{{ query_ritorno }}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Torna alla lista
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% for errore in form.non_field_errors %}
+                            <div>{{ errore }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {{ form|crispy }}
+
+                        <div class="d-flex gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salva modifiche
+                            </button>
+                            <a href="{% url 'magazzino:modifica_tabella' nome_tabella=nome_tabella %}{{ query_ritorno }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Annulla
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

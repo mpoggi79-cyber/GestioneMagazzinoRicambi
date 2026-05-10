@@ -1,6 +1,25 @@
 # 👨‍💼 MANUALE AMMINISTRATORE - GESTIONE MAGAZZINO RICAMBI
 
-**Versione**: 1.1 | **Data**: 23 Aprile 2026 | **Audience**: System Admin, IT Staff, Support
+**Versione**: 1.1.1 (Piano 1 Stabilizzazione) | **Data**: 11 Maggio 2026 | **Audience**: System Admin, IT Staff, Support
+
+---
+
+## 📌 NOTA AGGIORNAMENTO RECENTE (11/05/2026)
+
+**Status**: ✅ v1.1.1 PIANO 1 STABILIZZAZIONE COMPLETATO
+
+Questo manuale è allineato alle decisioni operative di Piano 1. Riferimenti:
+- [AGENTS.md - Memoria Sviluppo Recente](AGENTS.md#-memoria-sviluppo-recente---piano-1-10052026)
+- [MEMORIA_TECNICA_SVILUPPO.md](MEMORIA_TECNICA_SVILUPPO.md) - Timeline centrale
+
+**Cosa è cambiato**:
+1. ✅ Implementazione view generica modifica record (ModificaRecordTabellaView)
+2. ✅ Audit logging strutturato con marker [AUDIT_TABELLE]
+3. ✅ Fix visibilità record inattivi (tbunitamisura, tbprestazioni, modelli_scm)
+4. ✅ Compatibilità CSS cross-browser
+5. ✅ Test suite espansa a 20 test
+
+**Per gli Amministratori**: Nessun cambio nelle procedure di base. Tutte le operazioni rimangono invariate.
 
 ---
 

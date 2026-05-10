@@ -22,7 +22,7 @@ class LoginForm(AuthenticationForm):
             'class': 'form-control',
             'placeholder': _('Nome utente'),
             'autofocus': True,
-            'autocomplete': 'username',
+            'autocomplete': 'off',
         }),
         label=_('Nome utente'),
     )
@@ -31,7 +31,7 @@ class LoginForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': _('Password'),
-            'autocomplete': 'current-password',
+            'autocomplete': 'off',
         }),
         label=_('Password'),
     )

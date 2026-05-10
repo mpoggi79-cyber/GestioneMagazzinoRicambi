@@ -291,16 +291,30 @@ I log sono disponibili in:
 
 ---
 
-## 🧠 Memoria Tecnica Sviluppo (Agg. 10/05/2026)
+## 🧠 Memoria Tecnica Sviluppo (Agg. 11/05/2026 - Piano 1 Stabilizzazione)
 
-Nota di allineamento:
+### Allineamento Sviluppo Recente
 
-1. Nessuna modifica ai ruoli o alle autorizzazioni utenti.
-2. Migliorata l'esperienza operativa nel form articolo (messaggi errore piu chiari).
-3. Dashboard migliorata con indicatori aggiuntivi e layout selezionabile.
+**Status**: ✅ v1.1.1 PIANO 1 STABILIZZAZIONE COMPLETATO
 
-Per il dettaglio tecnico completo:
-- [MEMORIA_TECNICA_SVILUPPO.md](MEMORIA_TECNICA_SVILUPPO.md)
+Riferimenti tecnici centrali:
+- [MEMORIA_TECNICA_SVILUPPO.md](MEMORIA_TECNICA_SVILUPPO.md) - Timeline operativa
+- [AGENTS.md](AGENTS.md#-memoria-sviluppo-recente---piano-1-10052026) - Decisioni applicate
+
+**Decisioni critiche applicate**:
+1. ✅ Modifica record reale con view generica + whitelist tabelle
+2. ✅ Audit logging strutturato [AUDIT_TABELLE]
+3. ✅ Fix visibilità record inattivi (tbunitamisura e similar)
+4. ✅ Compatibilità CSS (rimosso `:has()`)
+5. ✅ Test suite: 20 test totali (3 nuovi)
+
+**Implicazioni per Gestione Utenti**:
+- Nessuna modifica ai ruoli o autorizzazioni utenti
+- Sistema permessi rimane invariato (CanEditMixin, CanViewMixin)
+- Audit logging integrato nei management di utenti
+
+### Procedura Cambio Password
+
 3. Seleziona **"Cambia Password"**
 4. Inserisci:
    - Password attuale
@@ -382,6 +396,7 @@ Per qualsiasi problema o domanda, controlla i log in `logs/django.log` o contatt
 
 ---
 
-**Ultima modifica:** 5 Dicembre 2025
-**Versione:** 1.0
+**Ultima modifica:** 11 Maggio 2026
+**Versione:** 1.1.1 (Piano 1 Stabilizzazione)
 **Sviluppatore:** Sistema GMR - Gestione Magazzino Ricambi
+**Status:** ✅ Pronto per produzione

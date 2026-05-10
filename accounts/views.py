@@ -13,7 +13,9 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponseForbidden
 from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
+from django.middleware.csrf import rotate_token
 from .models import ProfiloUtente, LogAccesso
 from .forms import LoginForm, RegisterForm, ProfileForm
 import logging
@@ -25,6 +27,7 @@ logger = logging.getLogger(__name__)
 # LOGIN VIEW - Accesso al sistema con logging
 # ============================================================================
 
+@method_decorator(never_cache, name='dispatch')
 class LoginView(DjangoLoginView):
     """View personalizzata per il login"""
     template_name = 'accounts/login.html'
@@ -47,6 +50,19 @@ class LoginView(DjangoLoginView):
         
         # Log del tentativo di accesso
         if request.user.is_authenticated:
+            # Pulisce eventuali messaggi rimasti in coda da sessioni precedenti.
+            for messaggio_residuo in messages.get_messages(request):
+                pass
+
+            nome_visualizzato = request.user.get_full_name().strip() or request.user.username
+
+            messages.success(
+                request,
+                _('Benvenuto, %(nome)s! Accesso effettuato con successo.') % {
+                    'nome': nome_visualizzato,
+                }
+            )
+
             # Accesso riuscito
             LogAccesso.objects.create(
                 user=request.user,
@@ -87,14 +103,37 @@ class LoginView(DjangoLoginView):
 # LOGOUT VIEW
 # ============================================================================
 
+@method_decorator(never_cache, name='dispatch')
 class LogoutView(LoginRequiredMixin, DjangoLogoutView):
     """View per il logout"""
-    next_page = 'accounts:login'
+    next_page = 'accounts:logout_completato'
     
     def dispatch(self, request, *args, **kwargs):
-        logger.info(f"🔐 Logout per utente: {request.user.username}")
-        messages.success(request, _('Logout effettuato con successo. Arrivederci!'))
+        logger.info(f"[LOGOUT] Logout per utente: {request.user.username}")
         return super().dispatch(request, *args, **kwargs)
+
+
+@method_decorator(never_cache, name='dispatch')
+class LogoutCompletatoView(TemplateView):
+    """Pagina informativa mostrata dopo il logout"""
+    template_name = 'accounts/logout_conferma.html'
+
+
+@never_cache
+@require_POST
+def logout_conferma_view(request):
+    """Conferma lettura pagina logout e reindirizza al login pulito"""
+    # Consuma eventuali messaggi residui per evitare visualizzazioni tardive.
+    storage_messaggi = messages.get_messages(request)
+    for _ in storage_messaggi:
+        pass
+
+    # Svuota la sessione in modo idempotente anche per utenti anonimi.
+    request.session.flush()
+    rotate_token(request)
+
+    url_login = f"{reverse_lazy('accounts:login')}?session_reset=1"
+    return redirect(url_login)
 
 
 # ============================================================================

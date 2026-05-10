@@ -1,7 +1,7 @@
 # 🏭 Gestione Magazzino Ricambi Goose By Matteo
 
-**Status**: ✅ v1.1 CLIENTI MODULE - FASE 1 + BACKUP SYSTEM | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
-**Completamento**: 47 view totali | 16 modelli | 40 template | 4 ruoli | **+10 tabelle gestibili** | **Sistema Backup**
+**Status**: ✅ v1.1.1 PIANO 1 STABILIZZAZIONE COMPLETATO | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
+**Completamento**: 47 view totali | 16 modelli | 40+ template | 4 ruoli | **10 tabelle gestibili** | **Sistema Backup** | **Audit Logging** | **20 Test**
 
 ---
 
@@ -15,15 +15,17 @@
 6. [Permessi](#-permessi-basati-su-ruolo)
 7. [Template](#-template-22-totali)
 8. [Gestione Tabelle](#%EF%B8%8F-sistema-gestione-tabelle-clienti)
-9. [Sicurezza](#-implementazione-sicurezza)
-10. [Dati Test](#-dati-di-test-populate_dbpy)
-11. [Comandi Utili](#%EF%B8%8F-comandi-utili)
-12. [Troubleshooting](#-troubleshooting)
-13. [Struttura Progetto](#-struttura-progetto)
-14. [Backup & Recovery](#-backup--recovery)
-15. [Come Contribuire](#-come-contribuire)
-16. [Licenza](#-licenza)
-17. [Supporto](#-supporto)
+9. [Audit Logging](#-audit-logging-per-modifiche-tabelle)
+10. [Sicurezza](#-implementazione-sicurezza)
+11. [Dati Test](#-dati-di-test-populate_dbpy)
+12. [Comandi Utili](#%EF%B8%8F-comandi-utili)
+13. [Troubleshooting](#-troubleshooting)
+14. [Struttura Progetto](#-struttura-progetto)
+15. [Backup & Recovery](#-backup--recovery)
+16. [Ultime Modifiche Piano 1](#-ultime-modifiche---piano-1-stabilizzazione-v111)
+17. [Come Contribuire](#-come-contribuire)
+18. [Licenza](#-licenza)
+19. [Supporto](#-supporto)
 
 ---
 
@@ -52,17 +54,18 @@ python manage.py runserver
 |-----------|-------|---------|
 | **Backend Django 5.2.8** | ✅ Completo | 47 CBV totali (22 magazzino + 25 altre), 16 modelli ORM, 5 form |
 | **Database MySQL 10.4** | ✅ Operativo | 77 movimenti, 19 articoli, **+74 record clienti (6 tabelle)** |
-| **Frontend Bootstrap 5.3** | ✅ Completo | 40 template HTML responsive, Font Awesome 6.4 |
-| **Modulo Clienti - Fase 1** | ✅ **COMPLETATA** | **6 tabelle gestibili: tbAppellativo (7), tbCategoriaIVA (7), tbCategorieTariffe (21), tbTipoPagamento (23), tbModalitaPagamento (8), tbContatti (0)** |
+| **Frontend Bootstrap 5.3** | ✅ Completo | 40+ template HTML responsive, Font Awesome 6.4 |
+| **Modulo Clienti - Fase 1** | ✅ **COMPLETATA** | **6 tabelle gestibili + modifica record reale** |
+| **Sistema Gestione Tabelle** | ✅ **IMPLEMENTATO** | **Interfaccia web per visualizzare + modificare tabelle clienti (ADMIN/GESTORE)** |
+| **Modifica Record Tabelle** | ✅ **PIANO 1** | **View generica ModificaRecordTabellaView con whitelist + validazione permessi** |
+| **Audit Logging Tabelle** | ✅ **PIANO 1** | **Logger strutturato con marker [AUDIT_TABELLE] e diff campi + file logs/django.log** |
 | **Sistema Backup Database** | ✅ **COMPLETATO** | **3 metodi ripristino: Web, Management Command, PowerShell emergenza** |
-| **Sistema Gestione Tabelle** | ✅ **IMPLEMENTATO** | **Interfaccia web per visualizzare/modificare tabelle clienti** |
 | **Autenticazione** | ✅ Funzionante | Login/logout, 4 ruoli, ProfiloUtente, LogAccesso |
 | **Permessi** | ✅ Implementati | CanEditMixin, CanViewMixin, controlli basati su ruolo |
 | **CRUD Operazioni** | ✅ Testate | Categoria, PezzoRicambio, Fornitore, MovimentoMagazzino, Giacenza, Inventario |
 | **Report & Statistiche** | ✅ Funzionanti | Dashboard, report_giacenze, report_movimenti |
-| **Sistema Backup Database** | ✅ **3 Metodi Ripristino** | **Web UI, Management Command, Script PowerShell emergenza** |
-| **Sistema Gestione Tabelle** | ✅ **Interfaccia Web** | **Visualizzazione/modifica tabelle clienti (ADMIN/GESTORE)** |
-| **Sicurezza** | ✅ Implementata | Protezione CSRF, hashing Argon2, session security |
+| **Suite Test** | ✅ **20 VERDI** | **Inclusi 3 test gestione tabelle (modifica, permessi, visibilità)** |
+| **Sicurezza** | ✅ Implementata | Protezione CSRF, hashing Argon2, session security, CSS compatibile |
 | **Deploy** | ✅ Pronto | Pronto per produzione con Gunicorn + Nginx |
 
 ---
@@ -504,28 +507,64 @@ templates/
 
 ### 🎛️ SISTEMA GESTIONE TABELLE CLIENTI
 
-**URL**: `/gestione-tabelle/` (solo ADMIN/GESTORE)  
-**Funzionalità**: Interfaccia web per visualizzare e modificare tabelle clienti senza SQL
+**Interfaccia web completa per visualizzare, ricercare e modificare tabelle clienti senza accesso SQL.**
+
+#### URL di Accesso
+- **Pagina Principale**: `/gestione-tabelle/` (solo ADMIN/GESTORE)
+- **Modifica Record**: `/modifica-tabella/<nome_tabella>/record/<pk>/` (form interattivo)
+
+#### Funzionalità Disponibili
+
+| Operazione | Descrizione | Permessi |
+|-----------|-------------|----------|
+| **Visualizzazione** | Lista paginata di tutti i record | ADMIN, GESTORE |
+| **Ricerca** | Filtro per campo (es. nome, email) | ADMIN, GESTORE |
+| **Filtro Stato** | Toggle "Mostra Inattivi" (per tabelle con stato_attivo) | ADMIN, GESTORE |
+| **Modifica Record** | Form interattivo con validazione | ADMIN, GESTORE |
+| **Audit Log** | Tracciamento automatico di ogni modifica | Automatico |
+
+#### Flusso Operativo - Modifica Record
+```
+1. Accedi a /gestione-tabelle/
+2. Seleziona tabella (es. tbappellativo)
+3. Clicca link "Modifica" su un record
+4. Compila form con nuovi valori
+5. Clicca "Salva Modifiche"
+6. Modifica persiste in DB + audit log generato
+7. Redirect a lista aggiornata con success message
+```
 
 #### 🗂️ Tabelle Gestibili (10 totali)
 
-| Tabella | Descrizione | Record | Icona | Filtro Stato |
-|---------|-------------|--------|-------|-------------|
-| `tbappellativo` | Appellativi | 7 | 👤 | ❌ |
-| `tbunitamisura` | Unità di Misura | 14 | ⚖️ | ✅ |
-| `tbtipopagamento` | Tipo Pagamento | 23 | 🏪 | ❌ |
-| `tbprestazioni` | Prestazioni | 0 | 🔧 | ✅ |
-| `tbcategorietariffe` | Categorie Tariffe | 21 | 🏷️ | ✅ |
-| `tbcategoriaiva` | Categoria IVA | 7 | 🧮 | ❌ |
-| `tbcontatti` | Contatti | 0 | 📇 | ❌ |
-| `modelli_macchine_scm` | Modelli Macchine SCM | 0 | ⚙️ | ✅ |
-| `matricole_macchine_scm` | Matricole Macchine SCM | 0 | 📊 | ✅ |
-| `tbmodalitapagamento` | Modalità Pagamento | 8 | 💳 | ❌ |
+| ID | Tabella | Descrizione | Record | Filtro Stato |
+|----|---------|-------------|--------|-------------|
+| 1 | `tbappellativo` | Appellativi (Sig., Dott., Prof.) | 7 | ❌ |
+| 2 | `tbunitamisura` | Unità di Misura (Pz, Lt, Mt, etc.) | 14 | ✅ |
+| 3 | `tbtipopagamento` | Tipo Pagamento (Bonifico, RI.BA.) | 23 | ❌ |
+| 4 | `tbprestazioni` | Prestazioni (Lavori, Manutenzione) | 0 | ✅ |
+| 5 | `tbcategorietariffe` | Categorie Tariffe (Assistenza, Prod.) | 21 | ✅ |
+| 6 | `tbcategoriaiva` | Categoria IVA (22%, 10%, 0%) | 7 | ❌ |
+| 7 | `tbcontatti` | Contatti Clienti/Fornitori | 0 | ❌ |
+| 8 | `modelli_macchine_scm` | Modelli Macchine SCM | 0 | ✅ |
+| 9 | `matricole_macchine_scm` | Matricole Macchine SCM | 0 | ✅ |
+| 10 | `tbmodalitapagamento` | Modalità Pagamento (Contanti, Carta) | 8 | ❌ |
 
-**Legenda**:
-- **Record**: Numero di record attualmente nel database
-- **Icona**: Icona visualizzata nella card della tabella
-- **Filtro Stato**: ✅ = disponibile filtro show_inactive, ❌ = tabella semplice
+**Legenda**: Filtro Stato ✅ = disponibile toggle "Mostra Inattivi", ❌ = tabella non filtrabile
+
+#### Gestione Record Inattivi (tbunitamisura)
+Per tabelle con campo `stato_attivo`:
+- **Default**: Mostra sia record attivi che inattivi
+- **Toggle**: Checkbox "Mostra Inattivi" per includere/escludere record con `stato_attivo=False`
+- **Uso**: Utile per consultare elementi deprecati senza rinominare DB
+
+Esempio: La tbunitamisura può contenere unità obsolete nascoste ma consultabili tramite toggle.
+
+#### Implementazione Backend
+- **View**: `ModificaTabellaView` (lista) + `ModificaRecordTabellaView` (modifica singolo record)
+- **Whitelist Tabelle**: Configurazione centralizzata in `_get_tabelle_permesse_config()`
+- **Form Dinamico**: Utilizzato `modelform_factory` per generare form specifici per tabella
+- **Permessi**: Controllo `CanEditMixin` (solo ADMIN e GESTORE_MAGAZZINO)
+- **Validazione**: Form validation lato server + feedback errori lato client
 
 ### Caratteristiche Design
 - **Framework**: Bootstrap 5.3 (CDN)
@@ -539,7 +578,48 @@ templates/
 
 ---
 
-## 🔒 IMPLEMENTAZIONE SICUREZZA
+## � AUDIT LOGGING PER MODIFICHE TABELLE
+
+**Ogni modifica ai record attraverso l'interfaccia web genera un log di audit permanente.**
+
+### Dove Trovare i Log
+- **File**: `logs/django.log`
+- **Marker**: Ricerca `[AUDIT_TABELLE]` per filtrare le modifiche
+- **Formato**: Strutturato con utente, tabella, modello, record_pk, diff campi
+
+### Esempio Log Entry
+```
+[AUDIT_TABELLE] utente=admin tabella=tbappellativo modello=TbAppellativo record_pk=3 modifiche=Descrizione: 'Dott.' -> 'Dott. AGGIORNATO' | data_modifica=2026-05-10 14:32:15
+```
+
+### Implementazione Tecnica
+- **Logger**: `magazzino.views`
+- **Level**: INFO
+- **Trigger**: Metodo `form_valid()` in `ModificaRecordTabellaView`
+- **Dati Tracciati**:
+  - Utente che ha effettuato modifica
+  - Nome tabella e modello ORM
+  - Primary key del record modificato
+  - Diff per ogni campo (vecchio → nuovo)
+  - Timestamp modifica
+
+### Come Interpretare i Log
+```bash
+# Cercare tutte le modifiche di un utente
+grep "utente=operatore" logs/django.log | grep AUDIT_TABELLE
+
+# Cercare modifiche a una tabella specifica
+grep "tabella=tbunitamisura" logs/django.log
+
+# Cercare modifiche a un record specifico
+grep "record_pk=12" logs/django.log
+```
+
+**Nota**: I log aiutano il team a tracciare chi ha modificato cosa e quando. Verificare regolarmente per identificare eventuali modifiche non autorizzate.
+
+---
+
+## �🔒 IMPLEMENTAZIONE SICUREZZA
 
 ### Autenticazione & Autorizzazione
 - ✅ Integrazione Django User model
@@ -750,7 +830,66 @@ File backup: backups/backup_gmr_YYYYMMDD_HHMMSS.sql.gz (auto-cleanup vecchi)
 
 ---
 
-## 📁 STRUTTURA PROGETTO
+## � ULTIME MODIFICHE - PIANO 1 STABILIZZAZIONE (v1.1.1)
+
+**Data**: 10 maggio 2026  
+**Scope**: Stabilizzazione architettura, audit logging, collaudi end-to-end
+
+### ✅ Completamenti Implementati
+
+| Item | Descrizione | File Interessati |
+|------|-------------|------------------|
+| **Modifica Record Reale** | Implementata view generica per edit record tabelle con whitelist | `magazzino/views.py`, `magazzino/urls.py`, `templates/magazzino/modifica_record_tabella.html` |
+| **Audit Logging** | Logger strutturato con marker `[AUDIT_TABELLE]` e diff campi | `magazzino/views.py`, `logs/django.log` |
+| **Gestione Tabelle Completa** | Interfaccia web da `/gestione-tabelle/` con visualizzazione + modifica | `magazzino/views.py`, `templates/magazzino/gestione_tabelle.html` |
+| **Fix Visibilità Record Inattivi** | Nuova logica per tbunitamisura mostra inattivi di default | `magazzino/views.py` |
+| **Fix CSS Compatibilità** | Rimozione selettore `:has()` non standard, sostituzione con `.alert-warning-special` | `templates/base.html`, `static/js/` |
+| **Test Suite Estesa** | Aggiunti 3 nuovi test (modifica record, permessi, visibilità) | `magazzino/tests.py` |
+
+### Suite Test Validata
+```
+20 test totali - TUTTI VERDI ✅
+├── 4 test CodiceArticolo (generazione automatica)
+├── 3 test GestioneTabelle (modifica, permessi, visibilità)
+├── 13 test Accounts (autenticazione, logout, autorizzazione)
+└── (altri test modelli)
+```
+
+### Collaudo E2E Completato
+Testati su 3 tabelle reali:
+- ✅ tbappellativo (7 record)
+- ✅ tbmodalitapagamento (8 record)
+- ✅ tbcategoriaiva (7 record)
+
+**Risultati**: Lista 200 OK, Form 200 OK, POST 302 Redirect OK, Persistenza DB OK, Audit Log OK
+
+### Breaking Changes
+⚠️ **NESSUN breaking change**: Tutte le modifiche sono backward-compatible con versione v1.1
+
+### Come Testare Piano 1 Localmente
+```bash
+# 1. Aggiorna il codice
+git pull
+
+# 2. Applica eventuali migrazioni (normalmente non ce ne sono)
+python manage.py migrate
+
+# 3. Esegui test suite
+python manage.py test magazzino.tests.GestioneTabelleRecordTests
+
+# 4. Avvia server
+python manage.py runserver
+
+# 5. Accedi a /gestione-tabelle/ con admin / admin
+# 6. Modifica un record e verifica audit log: grep AUDIT_TABELLE logs/django.log
+```
+
+### Known Issues
+Nessun known issue riportato.
+
+---
+
+## �📁 STRUTTURA PROGETTO
 
 ```
 GestioneMagazzinoRicambi Goose/

@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
 {% load static %}
 
 {% block title %}Modifica Tabella {{ descrizione_tabella }}{% endblock %}
@@ -22,14 +21,27 @@
                         <i class="fas fa-edit"></i>
                         Modifica Tabella: {{ descrizione_tabella }} ({{ nome_tabella }})
                     </h3>
-                    <div class="card-tools">
+                    <div>
                         <a href="{% url 'magazzino:gestione_tabelle' %}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left"></i> Torna alle Tabelle
                         </a>
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
                     </div>
+                </div>
+                <div class="card-body border-bottom py-2 px-3 bg-light d-flex justify-content-between align-items-center">
+                    <small class="text-muted">Record visualizzati: {{ records|length }}</small>
+                    {% if has_status_filter %}
+                    <form method="get">
+                        {% if show_inactive %}
+                        <button type="submit" class="btn btn-outline-primary btn-sm" name="show_inactive" value="false">
+                            <i class="fas fa-filter"></i> Mostra solo attivi
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn btn-outline-secondary btn-sm" name="show_inactive" value="true">
+                            <i class="fas fa-list"></i> Mostra anche inattivi
+                        </button>
+                        {% endif %}
+                    </form>
+                    {% endif %}
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -57,9 +69,9 @@
                                     </td>
                                     {% endfor %}
                                     <td>
-                                        <button class="btn btn-sm btn-warning" onclick="modificaRecord({{ record.pk }})">
+                                        <a class="btn btn-sm btn-warning" href="{% url 'magazzino:modifica_record_tabella' nome_tabella=nome_tabella pk=record.pk %}{% if show_inactive %}?show_inactive=true{% endif %}">
                                             <i class="fas fa-edit"></i> Modifica
-                                        </button>
+                                        </a>
                                     </td>
                                 </tr>
                                 {% empty %}
@@ -78,45 +90,4 @@
     </div>
 </div>
 
-<!-- Modal per modifica record -->
-<div class="modal fade" id="modificaRecordModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Modifica Record</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="modificaRecordForm">
-                    {% csrf_token %}
-                    <div id="formFields">
-                        <!-- I campi verranno caricati dinamicamente -->
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annulla</button>
-                <button type="button" class="btn btn-primary" onclick="salvaModifiche()">Salva</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function modificaRecord(recordId) {
-    // Per ora, solo alert
-    alert('Funzionalità di modifica record ' + recordId + ' - da implementare');
-    // TODO: Caricare i dati del record nel modal e permettere la modifica
-}
-
-function salvaModifiche() {
-    alert('Salvataggio modifiche - da implementare');
-    // TODO: Implementare il salvataggio
-}
-</script>
 {% endblock %}

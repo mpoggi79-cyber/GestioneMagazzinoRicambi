@@ -456,6 +456,9 @@ class PezzoRicambioForm(forms.ModelForm):
                 'placeholder': '0.00',
             })
             self.fields[field].required = False
+
+        self.fields['prezzo_acquisto'].label = _('Prezzo di acquisto Fornitore')
+        self.fields['prezzo_acquisto_scm'].label = _('Prezzo di acquisto SCM')
         
         # Stato disponibilità
         self.fields['stato_disponibilita'].widget.attrs.update({

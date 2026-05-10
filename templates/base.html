@@ -249,8 +249,7 @@
         }
         
         /* Alert speciale per password */
-        .alert-warning:has(i.fa-key),
-        .alert-warning:contains("PASSWORD") {
+        .alert-warning-special {
             background: linear-gradient(135deg, #fff3cd 0%, #ffe5a0 100%);
             border: 3px solid #ff9800;
             font-weight: bold;
@@ -610,6 +609,16 @@
         // Aggiorna l'orologio ogni secondo
         updateClock();
         setInterval(updateClock, 1000);
+
+        // Applica stile avanzato agli alert warning legati a password.
+        document.querySelectorAll('.alert-warning').forEach(function (alertElement) {
+            const contieneIconaChiave = alertElement.querySelector('i.fa-key') !== null;
+            const testoAlert = (alertElement.textContent || '').toUpperCase();
+
+            if (contieneIconaChiave || testoAlert.includes('PASSWORD')) {
+                alertElement.classList.add('alert-warning-special');
+            }
+        });
     </script>
     
     {% block extra_js %}{% endblock %}

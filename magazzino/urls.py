@@ -85,4 +85,5 @@ urlpatterns = [
     # GESTIONE TABELLE DATABASE
     path('gestione-tabelle/', views.GestioneTabelleView.as_view(), name='gestione_tabelle'),
     path('modifica-tabella/<str:nome_tabella>/', views.ModificaTabellaView.as_view(), name='modifica_tabella'),
+    path('modifica-tabella/<str:nome_tabella>/record/<int:pk>/', views.ModificaRecordTabellaView.as_view(), name='modifica_record_tabella'),
 ]
