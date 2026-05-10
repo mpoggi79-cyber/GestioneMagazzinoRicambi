@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.http import JsonResponse, FileResponse, HttpResponse, Http404
 from django.conf import settings
 from datetime import datetime, timedelta
+from pathlib import Path
 import logging
 import secrets
 import string
@@ -1529,7 +1530,7 @@ class UtenteCreateView(CanEditMixin, CreateView):
         
         logger.info(f"Utente {user.username} creato da {self.request.user.username}")
         
-        return redirect(self.success_url)
+        return redirect(self.success_url or 'magazzino:dashboard')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1605,7 +1606,7 @@ class UtenteDeleteView(CanEditMixin, DeleteView):
         # Non permettere di disattivare se stesso
         if self.object == request.user:
             messages.error(request, "Non puoi disattivare il tuo stesso account!")
-            return redirect(self.success_url)
+            return redirect(self.success_url or 'magazzino:dashboard')
         
         # Disattiva l'utente
         self.object.is_active = False
@@ -1620,7 +1621,7 @@ class UtenteDeleteView(CanEditMixin, DeleteView):
             f"Utente {self.object.username} disattivato da {request.user.username}"
         )
         
-        return redirect(self.success_url)
+        return redirect(self.success_url or 'magazzino:dashboard')
 
 
 class UtenteResetPasswordView(CanEditMixin, DetailView):
@@ -1727,7 +1728,8 @@ class BackupCreateView(CanEditMixin, TemplateView):
         
         if success:
             messages.success(request, f"✅ {message}")
-            logger.info(f"Backup creato da {request.user.username}: {filepath.name}")
+            filepath_name = filepath.name if filepath else 'backup'
+            logger.info(f"Backup creato da {request.user.username}: {filepath_name}")
         else:
             messages.error(request, f"❌ {message}")
             logger.error(f"Errore creazione backup da {request.user.username}: {message}")
@@ -1748,12 +1750,12 @@ class BackupDownloadView(CanEditMixin, TemplateView):
             return False
     
     def get(self, request, *args, **kwargs):
-        filename = kwargs.get('filename')
+        filename = kwargs.get('filename', '')
         
         from .backup_manager import BackupManager
         backup_mgr = BackupManager()
         
-        backup_path = backup_mgr.backup_dir / filename
+        backup_path = Path(str(backup_mgr.backup_dir or '.')) / str(filename)
         
         # Verifica esistenza e validità
         if not backup_path.exists():

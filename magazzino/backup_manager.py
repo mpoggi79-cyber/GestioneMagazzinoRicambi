@@ -23,10 +23,10 @@ class BackupManager:
         
         # Carica configurazioni dal database o usa default
         self.backup_dir = Path(
-            Configurazione.get_value('backup_dir', str(settings.BASE_DIR / 'backups'))
+            str(Configurazione.get_value('backup_dir', str(settings.BASE_DIR / 'backups')))
         )
-        self.retention_days = Configurazione.get_value('backup_retention_days', 30)
-        self.mysql_bin_path = Configurazione.get_value('mysql_bin_path', r'C:\xampp\mysql\bin')
+        self.retention_days = int(Configurazione.get_value('backup_retention_days', 30))  # type: ignore
+        self.mysql_bin_path = str(Configurazione.get_value('mysql_bin_path', r'C:\xampp\mysql\bin'))  # type: ignore
         
         # Crea directory backup se non esiste
         self.backup_dir.mkdir(parents=True, exist_ok=True)
@@ -55,7 +55,7 @@ class BackupManager:
             logger.info(f"Creazione backup: {backup_filename}")
             
             # Percorso mysqldump dal database o settings
-            mysqldump_exe = os.path.join(self.mysql_bin_path, 'mysqldump.exe')
+            mysqldump_exe = os.path.join(str(self.mysql_bin_path), 'mysqldump.exe')
             
             # Comando mysqldump con flag completi per backup affidabile
             cmd = [
@@ -204,7 +204,7 @@ class BackupManager:
             tuple: (count: int, message: str)
         """
         try:
-            cutoff_date = datetime.now() - timedelta(days=self.retention_days)
+            cutoff_date = datetime.now() - timedelta(days=int(self.retention_days))  # type: ignore
             removed_count = 0
             
             for backup in self.list_backups():
@@ -241,13 +241,13 @@ class BackupManager:
             logger.warning(f"[WARNING] RESTORE backup: {filename}")
             
             # Percorso mysql dal database o settings
-            mysql_exe = os.path.join(self.mysql_bin_path, 'mysql.exe')
+            mysql_exe = os.path.join(str(self.mysql_bin_path), 'mysql.exe')
             
             # Decomprimi temporaneamente
             sql_path = backup_path.with_suffix('')
-            with gzip.open(backup_path, 'rb') as f_in:
+            with gzip.open(backup_path, 'rb') as f_in:  # type: ignore
                 with open(sql_path, 'wb') as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+                    shutil.copyfileobj(f_in, f_out)  # type: ignore
             
             # Comando mysql restore
             cmd = [

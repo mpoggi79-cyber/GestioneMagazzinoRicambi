@@ -18,7 +18,7 @@ django.setup()
 
 from django.apps import apps
 from magazzino.models import (
-    Categoria, tbunitamisura, Fornitore, PezzoRicambio, 
+    Categoria, UnitaMisura, Fornitore, PezzoRicambio, 
     Giacenza, MovimentoMagazzino, Inventario, DettaglioInventario,
     ModelloMacchinaSCM, MatricolaMacchinaSCM
 )
@@ -120,7 +120,7 @@ def main():
         ('DettaglioInventario', DettaglioInventario),
         ('ModelloMacchinaSCM', ModelloMacchinaSCM),
         ('MatricolaMacchinaSCM', MatricolaMacchinaSCM),
-    ]
+    ]  # type: ignore
     
     # Esporta ogni modello
     for name, model in models_to_export:
