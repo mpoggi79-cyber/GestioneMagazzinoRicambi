@@ -454,6 +454,16 @@ class PezzoRicambio(models.Model):
         verbose_name=_('Descrizione Codice SCM'),
         help_text=_('Descrizione del codice SCM')
     )
+    codice_sostitutivo = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='sostituisce',
+        db_column='id_articolo_sostitutivo',
+        verbose_name=_('Codice Sostitutivo'),
+        help_text=_('Articolo che ha sostituito questo codice')
+    )
     modello_scm_old = models.CharField(
         max_length=100,
         blank=True,
@@ -545,7 +555,37 @@ class PezzoRicambio(models.Model):
         blank=True,
         null=True,
         verbose_name=_('Prezzo Acquisto SCM'),
+        help_text=_('Prezzo netto riservato a noi, IVA esclusa'),
         validators=[MinValueValidator(0)]
+    )
+    prezzo_listino_scm = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name=_('Prezzo Listino SCM (cliente)'),
+        help_text=_('Prezzo di listino al cliente finale, IVA esclusa'),
+        validators=[MinValueValidator(0)]
+    )
+    disponibilita_scm = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_('Disponibilità Magazzino SCM'),
+        help_text=_('Quantità disponibile a magazzino SCM al momento dell\'ultimo rilevamento'),
+        validators=[MinValueValidator(0)]
+    )
+    stato_disponibilita_scm = models.CharField(
+        max_length=30,
+        blank=True,
+        default='',
+        verbose_name=_('Stato Disponibilità SCM'),
+        help_text=_('Dicitura del portale SCM (es. "Disponibile", "In arrivo")')
+    )
+    dati_scm_aggiornati_il = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name=_('Dati SCM rilevati il'),
+        help_text=_('Data e ora dell\'ultimo rilevamento di prezzi e disponibilità dal portale SCM')
     )
     stato_disponibilita = models.CharField(
         max_length=4,
@@ -598,6 +638,64 @@ class PezzoRicambio(models.Model):
         if giacenza:
             return giacenza.quantita_disponibile < self.giacenza_minima
         return True
+
+
+class StoricoDatiSCM(models.Model):
+    """Rilevazioni storiche di prezzi e disponibilità di un articolo dal portale SCM (append-only)"""
+
+    id_storico_scm = models.AutoField(primary_key=True, db_column='id_storico_scm')
+    articolo = models.ForeignKey(
+        PezzoRicambio,
+        on_delete=models.CASCADE,
+        related_name='storico_scm',
+        db_column='id_articolo',
+        verbose_name=_('Articolo')
+    )
+    rilevato_il = models.DateTimeField(verbose_name=_('Rilevato il'))
+    prezzo_listino = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name=_('Prezzo Listino (cliente)')
+    )
+    prezzo_acquisto = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name=_('Prezzo Acquisto (a noi)')
+    )
+    disponibilita = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_('Disponibilità SCM')
+    )
+    stato_disponibilita = models.CharField(
+        max_length=30,
+        blank=True,
+        default='',
+        verbose_name=_('Stato Disponibilità SCM')
+    )
+    operatore =  models.CharField(
+        max_length=150,
+        blank=True,
+        default='',
+        verbose_name=_('Operatore')
+    )
+    creato_il = models.DateTimeField(auto_now_add=True, db_column='creato_il')
+
+    class Meta:
+        db_table = 'storico_dati_scm'
+        ordering = ['-rilevato_il', '-id_storico_scm']
+        indexes = [
+            models.Index(fields=['articolo', 'rilevato_il']),
+        ]
+        verbose_name = _('Storico Dati SCM')
+        verbose_name_plural = _('Storico Dati SCM')
+
+    def __str__(self):
+        return f"{self.articolo.codice_interno} - {self.rilevato_il:%d/%m/%Y %H:%M}"
 
 
 # ============================================================================
@@ -1128,7 +1226,7 @@ class TbAppellativo(models.Model):
     )
     
     class Meta:
-        db_table = 'tbAppellativo'
+        db_table = 'tbappellativo'
         ordering = ['id_appellativo']
         verbose_name = _('Appellativo')
         verbose_name_plural = _('Appellativi')
@@ -1159,7 +1257,7 @@ class TbCategoriaIVA(models.Model):
     )
     
     class Meta:
-        db_table = 'tbCategoriaIVA'
+        db_table = 'tbcategoriaiva'
         ordering = ['nome_categoria']
         verbose_name = _('Categoria IVA')
         verbose_name_plural = _('Categorie IVA')
@@ -1295,7 +1393,7 @@ class TbCategorieTariffe(models.Model):
     )
     
     class Meta:
-        db_table = 'tbCategorieTariffe'
+        db_table = 'tbcategorietariffe'
         ordering = ['categoria_tariffe']
         verbose_name = _('Categoria Tariffa')
         verbose_name_plural = _('Categorie Tariffe')
@@ -1430,7 +1528,7 @@ class TbPrestazioni(models.Model):
     )
 
     class Meta:
-        db_table = 'tbPrestazioni'
+        db_table = 'tbprestazioni'
         ordering = ['ordine_stampa', 'denominazione']
         verbose_name = _('Prestazione')
         verbose_name_plural = _('Prestazioni')

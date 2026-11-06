@@ -1,9 +1,41 @@
 # Istruzioni AI Copilot per Gestione Magazzino Ricambi
 
 **Progetto**: Sistema di gestione magazzino Django 5.2 ("Gestione Magazzino Ricambi Goose")  
-**Status**: ✅ v1.1.2 UNIFORMAZIONE UX COMPLETATA | Database: MySQL 10.4 | Modelli: 16 | View: 47+ | Template: 40+ | **10 tabelle gestibili** | **Audit Logging** | **20 Test** | **Breadcrumb Categoria** | Python: 3.10+ | PyMySQL 1.1.2
+**Status**: ✅ v1.2.0 IMPORTAZIONE DAL PORTALE SCM | Database: MySQL 10.4 | Modelli: 17 | View: 49 | Template: 40+ | **10 tabelle gestibili** | **Audit Logging** | **37 Test** | **Storico prezzi SCM** | Python: 3.10+ | PyMySQL 1.1.2 | Playwright 1.64.1
 
 ---
+
+## 📌 Introduzione
+
+La mia azienda offre assistenza tecnica per macchine a controllo numerico per la lavorazione del legno: installazione e manutenzione (ordinaria e straordinaria) di macchine nuove e usate, riparazioni e fornitura di ricambi originali. Operiamo come centro service ufficiale monomarca per SCM Group Spa. Non vendiamo macchine: il nostro lavoro si concentra esclusivamente sui ricambi e sull'assistenza tecnica, anche per rivenditori che ci chiamano a rimettere in servizio e installare macchine usate ritirate e rivendute.
+
+Per preparare preventivi rapidamente, voglio costruire un archivio ampio e affidabile di ricambi, con codici, descrizioni, foto e informazioni di compatibilità. Alcuni articoli sono ricambi originali SCM (codici proprietari non reperibili altrove), altri sono componenti commerciali acquistabili da più fornitori. Il costruttore vende tramite un portale internet con sconto riservato; il fornitore di riferimento è sempre SCM Group Spa, ma per alcuni articoli altri fornitori hanno prezzi migliori. Il sistema deve quindi gestire **più prezzi per fornitori diversi** per lo stesso articolo e aiutarmi a capire dove conviene acquistare.
+
+La tendenza è non fare magazzino reale: circa il 99% dei ricambi viene acquistato solo dopo la richiesta del cliente. Tengo comunque in casa alcuni articoli, perché acquistati in precedenza, molto richiesti oppure recuperati usati (smontati) da macchine vecchie e ancora preziosi per riparare macchine datate.
+
+Il lavoro più oneroso è l'inserimento dei prodotti. Oggi accedo al portale ricambi SCM, cerco il codice ricavato dal libro ricambi, inserisco i dati nel database a mano uno a uno e salvo la foto in una cartella associandola al record. Voglio automatizzare: fornire un elenco di codici e far sì che il sistema recuperi dal portale SCM le informazioni e le foto e le inserisca nel database. **Stato (v1.2.0)**: implementato il recupero di **un codice alla volta** dal form articolo (pulsante "Recupera da SCM", vedi sezione "Importazione dati dal Portale SCM"); l'import massivo da elenco di codici è la fase successiva.
+
+Dopo aver impostato il magazzino mi occuperò della gestione clienti: tariffe categorizzate e personalizzate, rapportini tecnici, storico interventi e consuntivi dei lavori effettuati.
+
+### Macchine, matricole e compatibilità dei ricambi
+
+- Ogni macchina SCM ha una **matricola univoca**; le macchine sono raggruppate per **modello**.
+- Un articolo può essere montato su macchine di **modelli diversi**: la relazione articolo ↔ modello è molti-a-molti.
+- Frequente domanda dei clienti: *"il codice SCM che mi hai dato è montabile sulla mia matricola?"*. La compatibilità va quindi verificabile a livello di **singola matricola**, non solo di modello.
+- Sullo stesso modello un ricambio può essere stato **sostituito nel tempo** da un altro con codice SCM diverso. Distinguere **compatibilità** (l'articolo si monta su quella macchina) da **sostituzione tra codici** (un codice ne rimpiazza un altro, non sempre in modo intercambiabile su ogni macchina).
+- **Modello e matricola non sono obbligatori**: un articolo può non avere alcuna macchina associata (valore **N/A**). Non rendere mai obbligatori questi campi in modelli, form o import.
+- **Implicazione per AI**: `PezzoRicambio` oggi ha una sola FK `modello_macchina_scm` e una sola FK `matricola_macchina_scm`; non bastano a rappresentare questi casi. Eventuali evoluzioni vanno modellate con relazioni dedicate (compatibilità articolo-modello/matricola e sostituzioni tra articoli), non con nuovi campi sull'articolo.
+
+### Ricerca e filtri degli articoli (evoluzione richiesta)
+
+- **Stato attuale**: `PezzoRicambioListView` in [magazzino/views.py](magazzino/views.py) cerca solo in `codice_interno`, `descrizione` e `codice_fornitore`; filtra per categoria (incluse sottocategorie) e per stato.
+- **Ricerca testuale**: va migliorata la ricerca per codice o descrizione e deve includere anche il **codice SCM** (`codice_scm`), oltre a codice interno, codice fornitore e descrizione.
+- **Filtri**: oltre al filtro per categoria, aggiungere il filtro per **modello macchina** e per **matricola**. Poiché modello e matricola sono facoltativi (N/A), il filtro deve gestire correttamente gli articoli privi di associazione.
+- **Implicazione per AI**: se la compatibilità diventa molti-a-molti, i filtri per modello/matricola devono basarsi sulla nuova relazione e non solo sulle FK attuali di `PezzoRicambio`.
+
+---
+
+Queste istruzioni sono destinate agli agenti AI che supportano lo sviluppo e la manutenzione del sistema di gestione magazzino ricambi.
 
 ## � Lingua e Localizzazione
 
@@ -158,7 +190,10 @@ def test_nuova_feature(self):
 - **Invariante critica**: Ogni MovimentoMagazzino DEVE aggiornare Giacenza associata via signal
 
 ### ModelloMacchinaSCM & MatricolaMacchinaSCM
-- Relazione 1:Many per associare articoli a specifiche macchine SCM
+- Ogni macchina ha una **matricola SCM univoca**; le matricole sono raggruppate per modello (ModelloMacchinaSCM 1:Many MatricolaMacchinaSCM)
+- **Stato attuale**: `PezzoRicambio` ha una sola FK facoltativa a modello e una a matricola (`null=True`, valore N/A ammesso)
+- **Obiettivo**: un articolo può essere montato su più modelli e matricole (molti-a-molti) e va verificabile la compatibilità con una specifica matricola; modello e matricola restano facoltativi
+- **Sostituzioni**: sullo stesso modello un codice può essere rimpiazzato da un altro. Implementato in modo semplice con `PezzoRicambio.codice_sostitutivo` (FK a se stesso, facoltativa, `related_name='sostituisce'`): "A è sostituito da B"; nel dettaglio di A un link porta a B e viceversa. Il form blocca auto-riferimento e cicli. Eventuali eccezioni per matricola o sostituzioni multiple richiederanno una relazione dedicata.
 - MatricolaMacchinaSCM usa widget personalizzato `MatricolaSelectWidget` con data-attributes per JS interop
 - Importabili via management command per integrazioni esterne
 
@@ -180,13 +215,17 @@ def test_nuova_feature(self):
 Categoria ──┬─→ Categoria (self FK, PROTECT) [Gerarchia]
             └─→ PezzoRicambio
                     ├─ Giacenza (1:1) ←── MovimentoMagazzino
-                    ├─ Fornitore (FK)
+                    ├─ StoricoDatiSCM (1:Many, CASCADE, related_name='storico_scm') [rilevazioni prezzi/disponibilità dal portale SCM, append-only]
+                    ├─ PezzoRicambio (FK facoltativa codice_sostitutivo: A sostituito da B)
+                    ├─ Fornitore (FK, oggi singolo; obiettivo: più offerte/prezzi per fornitore)
                     ├─ tbunitamisura (FK)
-                    └─ MatricolaMacchinaSCM (Many)
+                    ├─ ModelloMacchinaSCM (FK facoltativa, oggi singola)
+                    └─ MatricolaMacchinaSCM (FK facoltativa, oggi singola)
 
-ModelloMacchinaSCM ─→ MatricolaMacchinaSCM (1:Many)
-                            ↓
-                       PezzoRicambio
+ModelloMacchinaSCM ─→ MatricolaMacchinaSCM (1:Many, matricola univoca)
+
+Obiettivo (non ancora implementato):
+PezzoRicambio ↔ ModelloMacchinaSCM / MatricolaMacchinaSCM (molti-a-molti, facoltativi)
 
 Inventario ──→ DettaglioInventario ──→ PezzoRicambio
     (Stato: NON_INIZIATO, IN_CORSO, COMPLETATO)
@@ -239,16 +278,16 @@ TbModalitaPagamento (8 record)
 ```
 
 **Conteggio modelli**:
-- **Magazzino app**: Categoria, PezzoRicambio, Giacenza, Fornitore, tbunitamisura, MovimentoMagazzino, Inventario, DettaglioInventario, ModelloMacchinaSCM, MatricolaMacchinaSCM, Configurazione (11 totali)
+- **Magazzino app**: Categoria, PezzoRicambio, StoricoDatiSCM, Giacenza, Fornitore, tbunitamisura, MovimentoMagazzino, Inventario, DettaglioInventario, ModelloMacchinaSCM, MatricolaMacchinaSCM, Configurazione (12 totali)
 - **Clienti app**: TbAppellativo, TbCategoriaIVA, TbContatti, TbCategorieTariffe, TbTipoPagamento, TbModalitaPagamento (6 totali)
 - **Accounts app**: User (Django built-in), ProfiloUtente, RuoloUtente, LogAccesso (4 modelli custom)
-- **TOTALE**: 16 modelli
+- **TOTALE**: 17 modelli
 
 ---
 
 ### Setup & Database
 ```bash
-# Creare database MySQL dallo schema (eseguire per primo!)
+# Creare il database GMR vuoto (eseguire per primo!); le tabelle le crea 'migrate'
 mysql -u root < database_creation.sql
 
 # Applicare tutte le migrazioni Django
@@ -284,8 +323,8 @@ python manage.py runserver 8001
 # Eseguire test Django
 python manage.py test
 
-# Verificare sintassi dello script di creazione database
-python database_creation.sql  # via tab SQL di phpMyAdmin
+# Verificare che modelli e migrazioni siano allineati (deve rispondere "No changes detected")
+python manage.py makemigrations --check --dry-run
 
 # Verificare interfaccia admin per struttura modelli
 python manage.py shell  # poi: from magazzino.models import *
@@ -409,8 +448,9 @@ Automatico per ogni PezzoRicambio.immagine upload:
 | PyMySQL | 1.1.2 | Driver MySQL (non mysqlclient) |
 | crispy-forms + crispy-bootstrap5 | 2.5 + 2025.6 | Rendering form |
 | argon2-cffi | 25.1.0 | Hashing password |
+| playwright | 1.64.1 | Importazione dati dal Portale SCM (usa Google Chrome installato, login manuale) |
 
-**Nessuna REST API di terze parti**; tutti i dati locali. Punti di integrazione esterna: dati SCM (ModelloMacchinaSCM, MatricolaMacchinaSCM) importati via management command.
+**Nessuna REST API di terze parti**; tutti i dati locali. Punti di integrazione esterna: dati SCM (ModelloMacchinaSCM, MatricolaMacchinaSCM) importati via management command; **portale ricambi SCM** (`shop.scmgroup.com`) letto da `magazzino/scm_portale.py` con login manuale (vedi "Importazione dati dal Portale SCM").
 
 ---
 
@@ -469,7 +509,7 @@ python manage.py populate_db  # Ri-carica dati test
 
 # Errore connessione MySQL "Connection refused"
 # → XAMPP: MySQL non avviato. Avviare → MySQL admin
-# → O eseguire: mysql -u root < database_creation.sql
+# → O eseguire: mysql -u root < database_creation.sql  (poi python manage.py migrate)
 
 # Errore "Foreign key constraint fails" su DELETE
 # → Verificare se modello ha FK con PROTECT (categoria_padre, etc)
@@ -619,6 +659,28 @@ logger.info(f"[AUDIT_TABELLE] utente={user.username} tabella={nome_tabella} mode
 
 **Stato**: ✅ Implementato v1.1.2 | ⏳ In attesa verifica visuale
 
+### Importazione dati dal Portale SCM (v1.2.0 - 03/11/2026)
+
+**Flusso**: form articolo → pulsante **"Recupera da SCM"** → `RecuperaDatiSCMView` (`POST /articoli/scm/recupera/`, JSON) → `scm_portale.cerca_codice()` → il form si precompila (non salva da solo). Pulsante **"Accedi al portale SCM"** → `AvviaLoginSCMView` (`POST/GET /articoli/scm/login/`) → `avvia_login_in_background()`.
+
+**Regole per AI agent**:
+- Login **sempre manuale** (Microsoft + MFA) dall'operatore, con Chrome **visibile**; mai credenziali nel codice, nel DB, nei log o nei test. Alternativa da terminale: `python manage.py scm_login`.
+- Profilo browser e cookie in `.scm_browser_profile/` (ignorato da git, come `Portale Ricambi SCM/Info url e accesso.md`). Mai committarli.
+- Niente modalità headless (scelta voluta). Per l'import massivo futuro: **pause casuali** tra i codici e limite di codici per esecuzione.
+- Pulsanti ed endpoint solo con `CanEditMixin` (gli endpoint JSON rispondono 403, non redirect).
+- La logica di lettura sta in `magazzino/scm_portale.py`: l'estrazione grezza gira nel browser (`_SCRIPT_ESTRAZIONE`), l'interpretazione è Python puro (`interpreta_dati_grezzi`) e va testata senza rete. I test **non** devono mai contattare il portale (usare `mock`).
+- Selettori della pagina prodotto (SAP Commerce): `.product-main-info .discount-price del .amount.price` (listino/barrato), `ins .amount.price` (finale), `.stock-status` ("Disponibile N" / "In arrivo N"), JSON-LD `Product` (immagini, `offers.price`). Pagina: `/p/<codice>` (404 = codice inesistente).
+
+**Dati**:
+- Nuovi campi facoltativi su `PezzoRicambio`: `prezzo_listino_scm` (prezzo barrato = **cliente**), `prezzo_acquisto_scm` (prezzo finale = **a noi**, dopo 3% sconto online + 20% riservato), `disponibilita_scm`, `stato_disponibilita_scm`, `dati_scm_aggiornati_il`. Prezzi sempre **IVA esclusa**.
+- `StoricoDatiSCM` (`storico_dati_scm`, append-only): una riga per ogni nuovo `dati_scm_aggiornati_il` salvato (`_registra_storico_scm`, `get_or_create` su articolo + `rilevato_il`). Non modificare le righe esistenti.
+- Articolo senza prezzo sul portale ("Articolo attualmente non disponibile"): si importano descrizione, foto e stato "Non disponibile", **non** si toccano i prezzi esistenti e **non** si scrive lo storico. Non confonderlo con la sessione scaduta (`SessioneScadutaSCM` solo se la pagina non è autenticata).
+- La foto del portale (URL pubblico) viene scaricata dal campo `immagine_url` esistente del form solo se l'articolo non ha già una foto; le immagini `missing_product` sono ignorate.
+
+**Test**: `PortaleSCMInterpretazioneTests`, `RecuperaDatiSCMTests` in `magazzino/tests.py` (37 test totali nel progetto).
+
+Dettagli e prossimi passi (import massivo da elenco codici): vedi MEMORIA_TECNICA_SVILUPPO.md.
+
 ### Regola Workspace - Memoria Tecnica Centralizzata
 La memoria tecnica non viene scritta come testo narrativo nei file workspace (`.vscode/*`).
 Le note restano consolidate in:
@@ -655,7 +717,8 @@ Le note restano consolidate in:
 | Come testo in locale? | `populate_db` carica dati test; accedi con admin / admin | [README.md](README.md#L10-L25) |
 | Come gestisco backup database? | **3 metodi**: Web UI (/backup/), management command, script PowerShell emergenza | [BACKUP_RECOVERY_GUIDE.md](BACKUP_RECOVERY_GUIDE.md) |
 | Come accedo tabelle clienti? | **Interfaccia web**: /gestione-tabelle/ (solo ADMIN/GESTORE) | [magazzino/views.py](magazzino/views.py#L2009-L2100) |
-| File sensibili a non committare? | `settings.py` (SECRET_KEY), `.env` (se usato), `media/articoli/` | [.gitignore](../.gitignore) |
+| Come importo i dati di un articolo da SCM? | Pulsante "Recupera da SCM" nel form articolo; login manuale (mai credenziali nel codice); prezzi IVA esclusa; storico in `StoricoDatiSCM` | [magazzino/scm_portale.py](magazzino/scm_portale.py) |
+| File sensibili a non committare? | `settings.py` (SECRET_KEY), `.env` (se usato), `media/articoli/`, `.scm_browser_profile/` (sessione portale SCM), `Portale Ricambi SCM/Info url e accesso.md` (credenziali) | [.gitignore](../.gitignore) |
 
 ---
 
@@ -694,7 +757,7 @@ Dopo import tabelle clienti:
 - **0 contatti** (tabella gestibile ma popolata manualmente)
 - **TOTALE**: 74 record clienti + dati magazzino completi
 
-→ Usare per sviluppo; reset con `mysql -u root < database_creation.sql` + `python manage.py migrate` + `python manage.py populate_db`
+→ Usare per sviluppo; reset con `mysql -u root -e "DROP DATABASE IF EXISTS GMR"` + `mysql -u root < database_creation.sql` + `python manage.py migrate` + `python manage.py populate_db`
 
 ---
 
@@ -702,7 +765,7 @@ Dopo import tabelle clienti:
 
 ```bash
 # SETUP INIZIALE (eseguire una volta)
-mysql -u root < database_creation.sql     # Crea DB da schema
+mysql -u root < database_creation.sql     # Crea il DB GMR vuoto (tabelle: migrate)
 python manage.py migrate                   # Applica migrazioni Django
 python manage.py populate_db               # Carica dati test (8 cat, 5 fornitori, 19 articoli)
 python manage.py import_tbappellativo      # Importa 7 record appellativi
@@ -710,6 +773,7 @@ python manage.py import_tbcategoriaiva     # Importa 7 record categorie IVA
 python manage.py import_tbcategorietariffe # Importa 21 record categorie tariffe
 python manage.py import_tbtipopagamento    # Importa 23 record tipi pagamento
 python manage.py import_tbmodalitapagamento # Importa 8 record modalità pagamento
+python manage.py scm_login                 # Login manuale al portale SCM (alternativa al pulsante nel form)
 
 # SVILUPPO QUOTIDIANO
 python manage.py runserver                 # Avvia server porta 8000
@@ -732,7 +796,7 @@ python manage.py restore_backup             # Ripristina da backup (interattivo)
 ## ✅ ELENCO PUNTI DA VERIFICARE MANUALMENTE
 
 1. **Test Suite**
-   - [ ] Eseguire `python manage.py test` → atteso 20/20 test verdi
+   - [ ] Eseguire `python manage.py test` → atteso 37/37 test verdi
    - [ ] Eseguire specificamente `python manage.py test magazzino.tests.GestioneTabelleRecordTests` → 3/3 pass
    - [ ] Verificare no test regressions
 
@@ -777,10 +841,18 @@ python manage.py restore_backup             # Ripristina da backup (interattivo)
    - [ ] `magazzino/views.py` contiene `ModificaRecordTabellaView` (~linea 2297)
    - [ ] `magazzino/tests.py` contiene classe `GestioneTabelleRecordTests` (3 test)
 
+9. **Importazione dal Portale SCM (v1.2.0)**
+   - [ ] `/articoli/<id>/update/`: sotto il Codice SCM compaiono i pulsanti piccoli "Recupera da SCM" e "Accedi al portale SCM" (non coprono il campo)
+   - [ ] "Accedi al portale SCM" apre Chrome; dopo il login Microsoft la finestra si chiude da sola e il recupero parte
+   - [ ] "Recupera da SCM" con un codice reale compila descrizione, prezzo listino, prezzo acquisto, disponibilità; dopo il salvataggio il dettaglio articolo mostra una riga in "Storico Prezzi e Disponibilità SCM"
+   - [ ] Articolo senza prezzo (es. `0001310282E`): descrizione/foto importate, prezzi esistenti invariati, nessuna riga di storico
+   - [ ] Operatore/Visualizzatore: gli endpoint `/articoli/scm/*` rispondono 403
+   - [ ] `git status` non mostra `.scm_browser_profile/` né `Portale Ricambi SCM/Info url e accesso.md`
+
 ---
 
-**Documento completato**: 10 maggio 2026  
-**Versione**: v1.1.1 (Piano 1 Stabilizzazione)  
+**Documento aggiornato**: 3 novembre 2026 (v1.2.0 - Importazione dal Portale SCM); impianto originale 10 maggio 2026  
+**Versione**: v1.2.0 (Importazione dal Portale SCM; base v1.1.1 Piano 1 Stabilizzazione)  
 **Status**: ✅ Pronto per produzione  
 
 ---
@@ -794,5 +866,5 @@ python manage.py restore_backup             # Ripristina da backup (interattivo)
 | `python manage.py migrate` | Applica migrazioni database | Esegui SEMPRE dopo `git pull` |
 | `python manage.py test magazzino` | Esegui test app magazzino | Validazione pre-push |
 | `python manage.py runserver 8001` | Server porta alternativa | Se 8000 è occupata |
-| `mysql -u root < database_creation.sql` | Ricrea DB da zero | **ATTENZIONE**: cancella dati |
+| `mysql -u root < database_creation.sql` | Crea il DB GMR vuoto (solo se non esiste) | Non tocca dati; lo schema lo crea `migrate` |
 | `grep -r "TODO\|FIXME" magazzino/` | Cerca task pendenti | Trovare aree incomplete |

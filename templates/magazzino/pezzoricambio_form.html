@@ -141,12 +141,26 @@
                             <div class="col-lg-4 col-md-6 mb-2">
                                 <label for="{{ form.codice_scm.id_for_label }}" class="form-label">{{ form.codice_scm.label }}</label>
                                 {{ form.codice_scm }}
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" id="btn-recupera-scm"
+                                            data-url="{% url 'magazzino:articolo_scm_recupera' %}"
+                                            data-ha-immagine="{% if form.instance.immagine %}1{% else %}0{% endif %}"
+                                            title="Recupera descrizione, prezzi, disponibilità e foto dal portale SCM">
+                                        <i class="fas fa-cloud-download-alt"></i> Recupera da SCM
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" id="btn-login-scm"
+                                            data-url="{% url 'magazzino:articolo_scm_login' %}"
+                                            title="Apre Chrome sul portale SCM: fai il login con il tuo account Microsoft">
+                                        <i class="fas fa-sign-in-alt"></i> Accedi al portale SCM
+                                    </button>
+                                </div>
                                 {% if form.codice_scm.help_text %}
                                 <small class="text-muted d-block mt-1">{{ form.codice_scm.help_text }}</small>
                                 {% endif %}
                                 {% if form.codice_scm.errors %}
                                 <div class="invalid-feedback d-block">{{ form.codice_scm.errors.0 }}</div>
                                 {% endif %}
+                                <div id="esito-recupero-scm" class="small mt-1" role="status"></div>
                             </div>
                             <div class="col-lg-4 col-md-6 mb-2">
                                 <label for="{{ form.descrizione_scm.id_for_label }}" class="form-label">{{ form.descrizione_scm.label }}</label>
@@ -156,11 +170,53 @@
                                 {% endif %}
                             </div>
                             <div class="col-lg-4 col-md-6 mb-2">
+                                <label for="{{ form.codice_sostitutivo.id_for_label }}" class="form-label">{{ form.codice_sostitutivo.label }}</label>
+                                {{ form.codice_sostitutivo }}
+                                {% if form.codice_sostitutivo.help_text %}
+                                <small class="text-muted d-block mt-1">{{ form.codice_sostitutivo.help_text }}</small>
+                                {% endif %}
+                                {% if form.codice_sostitutivo.errors %}
+                                <div class="invalid-feedback d-block">{{ form.codice_sostitutivo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-2">
+                                <label for="{{ form.prezzo_listino_scm.id_for_label }}" class="form-label">{{ form.prezzo_listino_scm.label }}</label>
+                                {{ form.prezzo_listino_scm }}
+                                {% if form.prezzo_listino_scm.errors %}
+                                <div class="invalid-feedback d-block">{{ form.prezzo_listino_scm.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-2">
                                 <label for="{{ form.prezzo_acquisto_scm.id_for_label }}" class="form-label">{{ form.prezzo_acquisto_scm.label }}</label>
                                 {{ form.prezzo_acquisto_scm }}
                                 {% if form.prezzo_acquisto_scm.errors %}
                                 <div class="invalid-feedback d-block">{{ form.prezzo_acquisto_scm.errors.0 }}</div>
                                 {% endif %}
+                            </div>
+                            <div class="col-lg-2 col-md-3 mb-2">
+                                <label for="{{ form.disponibilita_scm.id_for_label }}" class="form-label">Disponibilità SCM</label>
+                                {{ form.disponibilita_scm }}
+                                {% if form.disponibilita_scm.errors %}
+                                <div class="invalid-feedback d-block">{{ form.disponibilita_scm.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-lg-2 col-md-3 mb-2">
+                                <label for="{{ form.stato_disponibilita_scm.id_for_label }}" class="form-label">Stato SCM</label>
+                                {{ form.stato_disponibilita_scm }}
+                                {% if form.stato_disponibilita_scm.errors %}
+                                <div class="invalid-feedback d-block">{{ form.stato_disponibilita_scm.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12 mb-2">
+                                {{ form.dati_scm_aggiornati_il }}
+                                <small class="text-muted" id="data-rilevamento-scm">
+                                    {% if form.instance.dati_scm_aggiornati_il %}
+                                    Dati SCM rilevati il {{ form.instance.dati_scm_aggiornati_il|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                    Dati SCM mai rilevati dal portale
+                                    {% endif %}
+                                    (prezzi IVA esclusa). Ad ogni salvataggio con un nuovo rilevamento viene registrata una riga nello storico.
+                                </small>
                             </div>
                             <div class="col-lg-4 col-md-6 mb-2">
                                 <label for="{{ form.modello_macchina_scm.id_for_label }}" class="form-label">{{ form.modello_macchina_scm.label }}</label>
@@ -456,6 +512,143 @@
     </div>
 </div>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const pulsante = document.getElementById('btn-recupera-scm');
+    if (!pulsante) {
+        return;
+    }
+    const campo = (id) => document.getElementById(id);
+    const campoCodice = campo('{{ form.codice_scm.id_for_label }}');
+    const esito = campo('esito-recupero-scm');
+    const etichettaData = campo('data-rilevamento-scm');
+    const testoPulsante = pulsante.innerHTML;
+
+    function mostraEsito(testo, classe) {
+        esito.className = 'small mt-1 ' + classe;
+        esito.textContent = testo;
+    }
+
+    function impostaValore(id, valore) {
+        const elemento = campo(id);
+        if (elemento && valore !== null && valore !== undefined) {
+            elemento.value = valore;
+        }
+    }
+
+    async function recupera() {
+        const codice = campoCodice.value.trim().toUpperCase();
+        if (!/^[A-Z0-9]{11}$/.test(codice)) {
+            mostraEsito('Inserisci prima un Codice SCM di 11 caratteri alfanumerici.', 'text-danger');
+            campoCodice.focus();
+            return;
+        }
+        campoCodice.value = codice;
+
+        pulsante.disabled = true;
+        pulsante.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Recupero in corso...';
+        mostraEsito('Interrogazione del portale SCM in corso (può richiedere qualche secondo)...', 'text-muted');
+
+        const dati = new FormData();
+        dati.append('codice_scm', codice);
+        dati.append('csrfmiddlewaretoken', document.querySelector('#articolo-form [name=csrfmiddlewaretoken]').value);
+
+        try {
+            const risposta = await fetch(pulsante.dataset.url, { method: 'POST', body: dati, credentials: 'same-origin' });
+            let corpo = null;
+            try {
+                corpo = await risposta.json();
+            } catch (e) {
+                throw new Error('Risposta inattesa dal server (sessione scaduta o permessi insufficienti).');
+            }
+            if (!risposta.ok || !corpo.ok) {
+                throw new Error(corpo.errore || 'Recupero dati non riuscito.');
+            }
+
+            const d = corpo.dati;
+            impostaValore('{{ form.descrizione_scm.id_for_label }}', d.descrizione);
+            const descrizione = campo('{{ form.descrizione.id_for_label }}');
+            if (descrizione && !descrizione.value.trim()) {
+                descrizione.value = d.descrizione;
+            }
+            impostaValore('{{ form.prezzo_listino_scm.id_for_label }}', d.prezzo_listino);
+            impostaValore('{{ form.prezzo_acquisto_scm.id_for_label }}', d.prezzo_acquisto);
+            impostaValore('{{ form.disponibilita_scm.id_for_label }}', d.disponibilita);
+            impostaValore('{{ form.stato_disponibilita_scm.id_for_label }}', d.stato_disponibilita);
+            const haPrezzi = d.prezzo_listino !== null || d.prezzo_acquisto !== null;
+            if (haPrezzi) {
+                impostaValore('{{ form.dati_scm_aggiornati_il.id_for_label }}', d.rilevato_il);
+            }
+
+            const fileImmagine = campo('{{ form.immagine.id_for_label }}');
+            const haImmagine = pulsante.dataset.haImmagine === '1' || (fileImmagine && fileImmagine.files.length > 0);
+            let notaFoto = ' Nessuna foto disponibile sul portale.';
+            if (d.url_immagine) {
+                if (haImmagine) {
+                    notaFoto = ' Foto già presente: non sostituita.';
+                } else {
+                    impostaValore('{{ form.immagine_url.id_for_label }}', d.url_immagine);
+                    notaFoto = ' La foto del portale verrà scaricata al salvataggio.';
+                }
+            }
+
+            const quando = new Date(d.rilevato_il).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
+            if (etichettaData && haPrezzi) {
+                etichettaData.textContent = 'Dati SCM rilevati il ' + quando + ' (prezzi IVA esclusa). Salva l\'articolo per registrarli nello storico.';
+            }
+            mostraEsito('Dati recuperati dal portale SCM.' + notaFoto + (d.nota ? ' ' + d.nota : '') + ' Controlla i campi e salva.', d.nota ? 'text-warning' : 'text-success');
+        } catch (errore) {
+            mostraEsito(errore.message, 'text-danger');
+        } finally {
+            pulsante.disabled = false;
+            pulsante.innerHTML = testoPulsante;
+        }
+    }
+
+    pulsante.addEventListener('click', recupera);
+
+    // Login manuale: Chrome si apre sul PC del server, l'operatore accede con il proprio account Microsoft
+    const pulsanteLogin = campo('btn-login-scm');
+    if (pulsanteLogin) {
+        const testoLogin = pulsanteLogin.innerHTML;
+        pulsanteLogin.addEventListener('click', async function() {
+            pulsanteLogin.disabled = true;
+            pulsante.disabled = true;
+            pulsanteLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Login in corso...';
+            mostraEsito('Si è aperta una finestra di Chrome: accedi con il tuo account Microsoft (MFA inclusa). La finestra si chiude da sola.', 'text-muted');
+            const csrf = document.querySelector('#articolo-form [name=csrfmiddlewaretoken]').value;
+            try {
+                const avvio = await fetch(pulsanteLogin.dataset.url, { method: 'POST', headers: { 'X-CSRFToken': csrf }, credentials: 'same-origin' });
+                const corpoAvvio = await avvio.json().catch(() => null);
+                if (!avvio.ok || !corpoAvvio || !corpoAvvio.ok) {
+                    throw new Error((corpoAvvio && corpoAvvio.errore) || 'Impossibile avviare il login.');
+                }
+                let stato = null;
+                do {
+                    await new Promise(r => setTimeout(r, 2000));
+                    const risposta = await fetch(pulsanteLogin.dataset.url, { credentials: 'same-origin' });
+                    stato = await risposta.json();
+                } while (stato.in_corso);
+
+                if (!stato.esito) {
+                    throw new Error(stato.messaggio || 'Accesso non completato.');
+                }
+                pulsanteLogin.disabled = false;
+                pulsanteLogin.innerHTML = testoLogin;
+                pulsante.disabled = false;
+                await recupera();
+                return;
+            } catch (errore) {
+                mostraEsito(errore.message, 'text-danger');
+            }
+            pulsanteLogin.disabled = false;
+            pulsanteLogin.innerHTML = testoLogin;
+            pulsante.disabled = false;
+        });
+    }
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

@@ -1,7 +1,7 @@
 # 🏭 Gestione Magazzino Ricambi Goose By Matteo
 
-**Status**: ✅ v1.1.2 UNIFORMAZIONE UX COMPLETATA | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
-**Completamento**: 47 view totali | 16 modelli | 40+ template | 4 ruoli | **10 tabelle gestibili** | **Sistema Backup** | **Audit Logging** | **20 Test** | **Uniformazione Dettagli Articolo**
+**Status**: ✅ v1.2.0 IMPORTAZIONE DAL PORTALE SCM | Django 5.2.8 | MySQL 10.4 | Bootstrap 5.3  
+**Completamento**: 49 view totali | 17 modelli | 40+ template | 4 ruoli | **10 tabelle gestibili** | **Sistema Backup** | **Audit Logging** | **37 Test** | **Importazione articolo dal Portale SCM + Storico prezzi**
 
 ---
 
@@ -9,23 +9,24 @@
 
 1. [Avvio Rapido](#-avvio-rapido-3-comandi)
 2. [Stato Applicazione](#-stato-applicazione)
-3. [Ultime Modifiche v1.1.2](#-ultime-modifiche-v112---uniformazione-ux-dettaglio-articolo)
-4. [Setup Passo-Passo](#-setup-passo-passo)
-5. [Decisioni Architetturali](#-decisioni-architetturali-critiche)
-6. [Modelli Dati](#-modelli-dati-16-totali)
-7. [View & URL](#-view--url-22-class-based-view)
-8. [Permessi](#-permessi-basati-su-ruolo)
-9. [Uniformazione UX Articoli](#-uniformazione-ux-articoli)
-10. [Gestione Tabelle](#%EF%B8%8F-sistema-gestione-tabelle-clienti)
-11. [Audit Logging](#-audit-logging-per-modifiche-tabelle)
-12. [Sicurezza](#-implementazione-sicurezza)
-13. [Dati Test](#-dati-di-test-populate_dbpy)
-14. [Comandi Utili](#%EF%B8%8F-comandi-utili)
-15. [Troubleshooting](#-troubleshooting)
-16. [Struttura Progetto](#-struttura-progetto)
-17. [Backup & Recovery](#-backup--recovery)
-18. [Come Contribuire](#-come-contribuire)
-19. [Licenza](#-licenza)
+3. [Importazione dal Portale SCM (v1.2.0)](#-ultime-modifiche-v120---importazione-dati-dal-portale-scm)
+4. [Ultime Modifiche v1.1.2](#-ultime-modifiche-v112---uniformazione-ux-dettaglio-articolo)
+5. [Setup Passo-Passo](#-setup-passo-passo)
+6. [Decisioni Architetturali](#-decisioni-architetturali-critiche)
+7. [Modelli Dati](#-modelli-dati-17-totali)
+8. [View & URL](#-view--url-24-class-based-view)
+9. [Permessi](#-permessi-basati-su-ruolo)
+10. [Uniformazione UX Articoli](#-uniformazione-ux-articoli)
+11. [Gestione Tabelle](#%EF%B8%8F-sistema-gestione-tabelle-clienti)
+12. [Audit Logging](#-audit-logging-per-modifiche-tabelle)
+13. [Sicurezza](#-implementazione-sicurezza)
+14. [Dati Test](#-dati-di-test-populate_dbpy)
+15. [Comandi Utili](#%EF%B8%8F-comandi-utili)
+16. [Troubleshooting](#-troubleshooting)
+17. [Struttura Progetto](#-struttura-progetto)
+18. [Backup & Recovery](#-backup--recovery)
+19. [Come Contribuire](#-come-contribuire)
+20. [Licenza](#-licenza)
 
 ---
 
@@ -52,22 +53,91 @@ python manage.py runserver
 
 | Componente | Stato | Dettagli |
 |-----------|-------|---------|
-| **Backend Django 5.2.8** | ✅ Completo | 47 CBV totali (22 magazzino + 25 altre), 16 modelli ORM, 5 form |
-| **Database MySQL 10.4** | ✅ Operativo | 77 movimenti, 19 articoli, **+74 record clienti (6 tabelle)** |
+| **Backend Django 5.2.8** | ✅ Completo | 49 CBV totali (24 magazzino + 25 altre), 17 modelli ORM, 5 form |
+| **Database MySQL 10.4** | ✅ Operativo | Schema gestito dalle migrazioni Django (23); dati reali nel DB `GMR` |
 | **Frontend Bootstrap 5.3** | ✅ Completo | 40+ template HTML responsive, Font Awesome 6.4 |
 | **Modulo Clienti - Fase 1** | ✅ **COMPLETATA** | **6 tabelle gestibili + modifica record reale** |
 | **Sistema Gestione Tabelle** | ✅ **IMPLEMENTATO** | **Interfaccia web per visualizzare + modificare tabelle clienti (ADMIN/GESTORE)** |
 | **Modifica Record Tabelle** | ✅ **PIANO 1** | **View generica ModificaRecordTabellaView con whitelist + validazione permessi** |
 | **Audit Logging Tabelle** | ✅ **PIANO 1** | **Logger strutturato con marker [AUDIT_TABELLE] e diff campi + file logs/django.log** |
+| **Importazione dal Portale SCM** | ✅ **v1.2.0** | **Pulsanti "Recupera da SCM" / "Accedi al portale SCM" nel form articolo: descrizione, prezzo listino e acquisto (no IVA), disponibilità, foto** |
+| **Storico Prezzi SCM** | ✅ **v1.2.0** | **Tabella `storico_dati_scm`: ogni rilevamento salvato resta congelato con data/ora e operatore** |
 | **Uniformazione Dettagli Articolo** | ✅ **v1.1.2** | **Riordinamento gruppi + breadcrumb gerarchia categoria** |
 | **Sistema Backup Database** | ✅ **COMPLETATO** | **3 metodi ripristino: Web, Management Command, PowerShell emergenza** |
 | **Autenticazione** | ✅ Funzionante | Login/logout, 4 ruoli, ProfiloUtente, LogAccesso |
 | **Permessi** | ✅ Implementati | CanEditMixin, CanViewMixin, controlli basati su ruolo |
 | **CRUD Operazioni** | ✅ Testate | Categoria, PezzoRicambio, Fornitore, MovimentoMagazzino, Giacenza, Inventario |
 | **Report & Statistiche** | ✅ Funzionanti | Dashboard, report_giacenze, report_movimenti |
-| **Suite Test** | ✅ **20 VERDI** | **Inclusi 3 test gestione tabelle (modifica, permessi, visibilità)** |
+| **Suite Test** | ✅ **37 VERDI** | **Inclusi test gestione tabelle, interpretazione dati portale SCM, endpoint recupero/login e storico (portale simulato con mock)** |
 | **Sicurezza** | ✅ Implementata | Protezione CSRF, hashing Argon2, session security, CSS compatibile |
 | **Deploy** | ✅ Pronto | Pronto per produzione con Gunicorn + Nginx |
+
+---
+
+## 📌 ULTIME MODIFICHE v1.2.0 - IMPORTAZIONE DATI DAL PORTALE SCM
+
+### 🎯 Sintesi
+Dal form articolo, dato un **Codice SCM** (11 caratteri), il sistema legge la pagina dell'articolo sul portale ricambi SCM (`shop.scmgroup.com`) e precompila descrizione, prezzi, disponibilità e foto. Ogni rilevamento salvato resta **congelato in uno storico**, perché prezzo e quantità SCM cambiano nel tempo.
+
+### 🧭 Come si usa
+1. Apri un articolo in **Crea** o **Modifica** (`/articoli/create/`, `/articoli/<id>/update/`) e scrivi il Codice SCM.
+2. Clicca **Accedi al portale SCM** (solo se serve, vedi sotto): si apre una finestra di Chrome, accedi con il tuo account Microsoft (MFA inclusa). La finestra si chiude da sola e il recupero parte in automatico.
+3. Clicca **Recupera da SCM**: si compilano i campi (il form **non salva da solo**).
+4. Controlla i valori e **salva**. Se i prezzi sono stati rilevati, si aggiunge una riga allo storico (visibile nel dettaglio articolo).
+
+| Campo form | Origine sul portale | Note |
+|-----------|---------------------|------|
+| Descrizione Codice SCM | Nome articolo | Anche **Descrizione** se è vuota |
+| Prezzo listino SCM (cliente) | Prezzo **barrato** | = prezzo al cliente finale, **IVA esclusa** |
+| Prezzo di acquisto SCM (a noi) | Prezzo **finale** | Dopo 3% sconto online + 20% sconto riservato, **IVA esclusa** |
+| Disponibilità SCM + Stato SCM | "Disponibile N" / "In arrivo N" | Lo stato è salvato accanto al numero |
+| Foto | Immagine prodotto | Scaricata dal server al salvataggio, **solo se l'articolo non ha già una foto**; il segnaposto "NO IMAGE" è ignorato |
+| Dati SCM rilevati il | Data/ora del recupero | Campo nascosto: è la chiave dello storico |
+
+Casi particolari:
+- **Articolo senza prezzo sul portale** (es. "Articolo attualmente non disponibile"): si importano comunque descrizione, foto e stato "Non disponibile" con una nota gialla. I prezzi già presenti **non vengono toccati** e **non** si crea una riga di storico.
+- **Codice inesistente**: messaggio "non presente nel portale SCM".
+- **Sessione scaduta**: messaggio con l'invito a usare **Accedi al portale SCM**.
+- Il recupero apre una finestra di Chrome **visibile** per qualche secondo (scelta voluta, niente modalità invisibile).
+
+### 🔐 Autenticazione e sicurezza
+- Il login Microsoft con MFA lo fa **sempre l'operatore a mano**. Nessuna password viene scritta nel codice, nel database o nei log.
+- La sessione resta in un profilo browser locale `.scm_browser_profile/` (cartella **ignorata da git**, come il file con le credenziali `Portale Ricambi SCM/Info url e accesso.md`).
+- Pulsanti e endpoint sono riservati a chi ha `CanEditMixin` (ADMIN, GESTORE_MAGAZZINO); gli altri ricevono 403.
+- Il browser si apre **sul PC dove gira il server**: la funzione è pensata per uso locale (server e operatore sullo stesso PC). Serve Google Chrome installato.
+- Ogni login e recupero è registrato nel log con marker `[SCM_PORTALE]` e username.
+- L'accesso automatico a un portale cliente può non essere gradito al fornitore: usare **un codice alla volta, al bisogno**. Per l'import massivo (prossima fase) sono previste pause casuali e un limite di codici per esecuzione.
+
+### 🗄️ Modello dati (migrazione `0023_dati_scm_storico`)
+Nuovi campi **facoltativi** su `PezzoRicambio`: `prezzo_listino_scm`, `disponibilita_scm`, `stato_disponibilita_scm`, `dati_scm_aggiornati_il`; `prezzo_acquisto_scm` esisteva già e ora significa "prezzo a noi, IVA esclusa".
+Nuovo modello **`StoricoDatiSCM`** (tabella `storico_dati_scm`, append-only): articolo, `rilevato_il`, `prezzo_listino`, `prezzo_acquisto`, `disponibilita`, `stato_disponibilita`, `operatore`. Una riga per ogni nuovo `dati_scm_aggiornati_il` salvato: salvare due volte lo stesso rilevamento non crea duplicati. Se l'articolo viene cancellato, lo storico viene cancellato con lui (CASCADE).
+
+### 🧱 Componenti
+| File | Ruolo |
+|------|-------|
+| `magazzino/scm_portale.py` | `cerca_codice()` (Playwright + Chrome, pagina `/p/<codice>`), `esegui_login_manuale()`, `avvia_login_in_background()`, interpretazione dei dati in Python puro (`interpreta_dati_grezzi`) |
+| `magazzino/views.py` | `RecuperaDatiSCMView` (`POST /articoli/scm/recupera/`), `AvviaLoginSCMView` (`POST/GET /articoli/scm/login/`), `_registra_storico_scm()` |
+| `magazzino/management/commands/scm_login.py` | Login manuale da terminale (alternativa al pulsante) |
+| `templates/magazzino/pezzoricambio_form.html` | Pulsanti, campi SCM e JavaScript di recupero/login |
+| `templates/magazzino/pezzoricambio_detail.html` | Campi SCM e tabella "Storico Prezzi e Disponibilità SCM" |
+| `magazzino/admin.py` | `StoricoDatiSCMAdmin` in sola lettura |
+| `magazzino/tests.py` | `PortaleSCMInterpretazioneTests`, `RecuperaDatiSCMTests` |
+
+### 🧪 Test & Verifica
+```bash
+python manage.py test magazzino.tests.PortaleSCMInterpretazioneTests magazzino.tests.RecuperaDatiSCMTests
+python manage.py test        # suite completa: 37 test verdi
+```
+I test non contattano mai il portale reale (portale simulato con `mock`). Verifica manuale effettuata su articoli reali con e senza prezzo, e con codice inesistente.
+
+### 🛠️ Installazione (nuovo PC)
+```bash
+pip install -r requirements.txt     # include playwright (usa Chrome già installato: nessun download del browser)
+python manage.py migrate            # applica 0023 (fare prima un backup)
+```
+
+### ⏭️ Prossimi passi
+Importazione massiva da elenco di codici (con pause casuali e limite per esecuzione) riusando `cerca_codice`; in futuro prezzi multi-fornitore.
 
 ---
 
@@ -184,8 +254,9 @@ Nel gruppo Dati Articolo, sotto il campo Categoria, visualizzazione gerarchia:
 ### Pagina Dettaglio Articolo (`/articoli/<id>/`)
 
 #### Ordine Sezioni (v1.1.2)
-1. **Dati SCM** — Codici e riferimenti macchina
-   - Codice SCM, Descrizione SCM, Prezzo Acquisto SCM (✓ nuovo in v1.1.2)
+1. **Dati SCM** — Codici, prezzi e riferimenti macchina SCM
+   - Codice SCM, Descrizione SCM, Codice Sostitutivo
+   - Prezzo Listino SCM (cliente), Prezzo Acquisto SCM (a noi), Disponibilità SCM con data di rilevamento (v1.2.0, prezzi IVA esclusa)
    - Modello Macchina, Matricola Macchina
 
 2. **Dati Fornitore** — Riferimenti commerciali
@@ -203,7 +274,10 @@ Nel gruppo Dati Articolo, sotto il campo Categoria, visualizzazione gerarchia:
    - Quantità Disponibile, Impegnata, Prenotata, Libera
    - Timestamp ultimo aggiornamento
 
-5. **Ultimi Movimenti** (Bottom) — Audit trail
+5. **Storico Prezzi e Disponibilità SCM** (Bottom, v1.2.0) — Rilevazioni dal portale SCM
+   - Tabella: Rilevato il, Listino (cliente), Acquisto (a noi), Disponibilità SCM, Operatore
+
+6. **Ultimi Movimenti** (Bottom) — Audit trail
    - Tabella: Data, Tipo, Quantità, Operatore, Documento
 
 #### Allineamento con Pagina Modifica (`/articoli/<id>/update/`)
@@ -240,8 +314,12 @@ Ordine sezioni identico tra dettaglio e form per coerenza UX e riduzione cogniti
 - **MySQL 5.7+** (via XAMPP 10.4)
 - **pip** (incluso con Python)
 - **Virtual Environment** (già creato: `venv/`)
+- **Google Chrome** (solo per l'importazione dal Portale SCM, v1.2.0: Playwright lo usa direttamente, nessun download aggiuntivo)
 
 ### 1️⃣ Creare il Database
+
+Lo script `database_creation.sql` crea **solo il database vuoto `GMR`**. Tabelle e colonne
+sono create e aggiornate esclusivamente dalle migrazioni Django (passo 3): non creare tabelle a mano.
 
 **Opzione A: Tramite phpMyAdmin (Consigliato)**
 
@@ -294,8 +372,8 @@ Crea:
 - **8 categorie** gerarchiche (Motori, Trasmissioni, Componenti Meccanici, Idraulica, Pneumatica, Controllo, Connettori, Varia)
 - **14 unità di misura** via tbUnitaMisura (Pz, Lt, Mt, Set, Coppia, Conf, Ore, gg, km, etc.)
 - **5 fornitori** (MotorTech, HydraulicSys, ElectroComponents, FastSupply, QualityParts)
-- **19 articoli** con giacenze associate
-- **77 movimenti** ultimi 30 giorni (CARICO/SCARICO/RETTIFICA/RESO)
+- **19 articoli** con giacenze associate (dati demo di `populate_db`, non i dati reali)
+- **77 movimenti** ultimi 30 giorni (CARICO/SCARICO/RETTIFICA/RESO) (dati demo)
 - **4 utenti test**:
   - `admin` / `admin` (ADMIN - Accesso completo)
   - `gestore` / `gestore` (GESTORE_MAGAZZINO - CRUD + Report)
@@ -330,9 +408,9 @@ Accedere: **http://localhost:8000/accounts/login/** con credenziali `admin` / `a
 
 ---
 
-## 📊 MODELLI DATI (16 TOTALI)
+## 📊 MODELLI DATI (17 TOTALI)
 
-### Dominio Magazzino (9 modelli)
+### Dominio Magazzino (10 modelli)
 
 ```
 Categoria
@@ -361,7 +439,9 @@ Fornitore
 
 PezzoRicambio (Articles)
 ├── codice_interno: CharField(max_length=50, unique=True)
-├── codice_scm: CharField(max_length=50, blank=True)
+├── codice_scm: CharField(max_length=11, unique, null=True) - 11 caratteri alfanumerici
+├── descrizione_scm: CharField(max_length=200, null=True)
+├── codice_sostitutivo: ForeignKey(self, null=True) - "A è sostituito da B"
 ├── codice_fornitore: CharField(max_length=50, blank=True)
 ├── descrizione: TextField()
 ├── categoria: ForeignKey(Categoria)
@@ -369,8 +449,24 @@ PezzoRicambio (Articles)
 ├── fornitore: ForeignKey(Fornitore)
 ├── giacenza_minima: PositiveIntegerField()
 ├── giacenza_massima: PositiveIntegerField()
-├── prezzo_acquisto: DecimalField(max_digits=10, decimal_places=2)
+├── prezzo_acquisto: DecimalField(max_digits=10, decimal_places=2) - prezzo fornitore
+├── prezzo_acquisto_scm: DecimalField(null=True) - prezzo a noi da SCM, IVA esclusa
+├── prezzo_listino_scm: DecimalField(null=True) - prezzo al cliente da SCM, IVA esclusa (v1.2.0)
+├── disponibilita_scm: IntegerField(null=True) - quantità a magazzino SCM (v1.2.0)
+├── stato_disponibilita_scm: CharField(max_length=30, blank=True) - "Disponibile", "In arrivo" (v1.2.0)
+├── dati_scm_aggiornati_il: DateTimeField(null=True) - data/ora ultimo rilevamento (v1.2.0)
 └── è_attivo: BooleanField(default=True)
+
+StoricoDatiSCM (v1.2.0 - rilevazioni dal portale SCM, append-only)
+├── articolo: ForeignKey(PezzoRicambio, CASCADE, related_name='storico_scm')
+├── rilevato_il: DateTimeField()
+├── prezzo_listino: DecimalField(null=True)
+├── prezzo_acquisto: DecimalField(null=True)
+├── disponibilita: IntegerField(null=True)
+├── stato_disponibilita: CharField(max_length=30, blank=True)
+├── operatore: CharField(max_length=150, blank=True)
+└── creato_il: DateTimeField(auto_now_add=True)
+db_table='storico_dati_scm' - una riga per ogni rilevamento salvato (articolo + rilevato_il)
 
 Giacenza (Stock Levels)
 ├── pezzo: OneToOneField(PezzoRicambio)
@@ -464,7 +560,7 @@ TbModalitaPagamento
 
 ---
 
-## 🎯 VIEW & URL (22 CLASS-BASED VIEW)
+## 🎯 VIEW & URL (24 CLASS-BASED VIEW)
 
 ### URL Magazzino
 ```
@@ -480,6 +576,8 @@ TbModalitaPagamento
 /articoli/<id>/                → PezzoRicambioDetailView
 /articoli/<id>/update/         → PezzoRicambioUpdateView
 /articoli/<id>/delete/         → PezzoRicambioDeleteView
+/articoli/scm/recupera/        → RecuperaDatiSCMView (POST, JSON - ADMIN/GESTORE)
+/articoli/scm/login/           → AvviaLoginSCMView (POST avvia login, GET stato - ADMIN/GESTORE)
 
 /fornitori/                    → FornitoreListView
 /fornitori/create/             → FornitoreCreateView
@@ -807,6 +905,9 @@ python manage.py dumpdata > backup.json      # Esportare tutti i dati
 python manage.py loaddata backup.json        # Importare dati
 python manage.py populate_db                 # Caricare dati test
 
+# Portale SCM (v1.2.0)
+python manage.py scm_login                   # Login manuale al portale SCM da terminale (alternativa al pulsante nel form)
+python -m playwright --version               # Verifica installazione Playwright
 # Utilities
 python manage.py shell                # Shell Python interattivo
 python manage.py check                # Verificare problemi
@@ -839,7 +940,7 @@ mysql -u root GMR
 | "Connessione database rifiutata" | MySQL non in esecuzione | Avviare XAMPP → START su MySQL |
 | "Tabella non esiste" dopo git pull | Migrazioni non applicate | `python manage.py migrate` |
 | "Foreign key constraint fails" | FK con PROTECT previene delete | Eliminare dipendenze prima o usare CASCADE |
-| "Table doesn't exist" | Database non creato | `mysql -u root < database_creation.sql` |
+| "Table doesn't exist" | Migrazioni non applicate | `python manage.py migrate` (DB assente: prima `mysql -u root < database_creation.sql`) |
 
 ### Errori Django
 
@@ -850,6 +951,18 @@ mysql -u root GMR
 | "TemplateDoesNotExist" | File template mancante | Verificare path in templates/ |
 | "Permission Denied su CRUD" | Ruolo utente insufficiente | Verificare ProfiloUtente.ruolo in admin |
 | "Login fallisce con password corretta" | Dati test non caricati | `python manage.py populate_db` |
+
+### Errori Portale SCM (v1.2.0)
+
+| Problema | Causa | Soluzione |
+|----------|-------|----------|
+| "Sessione del portale SCM scaduta" | La sessione Microsoft/SCM è scaduta (dura poco) | Clic su **Accedi al portale SCM** nel form, oppure `python manage.py scm_login` |
+| "Impossibile avviare Google Chrome" | Chrome non installato o profilo bloccato | Installare Chrome; chiudere eventuali finestre rimaste aperte del profilo `.scm_browser_profile/` |
+| "Un altro recupero ... già in corso" | Due richieste insieme (il profilo Chrome è uno solo) | Attendere qualche secondo e riprovare |
+| "Il codice ... non è presente nel portale SCM" | Codice errato o non a catalogo | Verificare il codice sul portale |
+| Articolo importato senza prezzi | Il portale non espone il prezzo ("Articolo attualmente non disponibile") | Normale: i prezzi esistenti non vengono modificati; inserirli a mano se servono |
+| La finestra di login non si chiude | Accesso non completato | Completare il login Microsoft entro 5 minuti; poi riprovare |
+| "ModuleNotFoundError: playwright" | Dipendenza non installata | `pip install -r requirements.txt` |
 
 ### Errori Permessi Comuni
 
@@ -994,16 +1107,18 @@ GestioneMagazzinoRicambi Goose/
 │   └── migrations/            # Migrazioni database
 │
 ├── magazzino/                 # App Magazzino
-│   ├── models.py              # 16 modelli (11 magazzino + 6 clienti)
-│   ├── views.py               # 47 CBV totali
+│   ├── models.py              # 17 modelli (12 magazzino + 6 clienti, incl. StoricoDatiSCM)
+│   ├── views.py               # 49 CBV totali
 │   ├── forms.py               # Form Django con crispy-forms
 │   ├── urls.py                # 40+ URL routes
 │   ├── admin.py               # Admin interface
 │   ├── backup_manager.py      # Gestione backup DB
+│   ├── scm_portale.py         # Recupero dati articolo dal portale SCM (Playwright + Chrome)
 │   ├── management/
 │   │   └── commands/
 │   │       ├── populate_db.py # Dati test magazzino
 │   │       ├── create_backup.py
+│   │       ├── scm_login.py   # Login manuale al portale SCM
 │   │       └── import_tb*.py  # Import tabelle clienti
 │   └── migrations/            # Migrazioni database
 │
@@ -1146,7 +1261,8 @@ I backup includono:
 | **MEMORIA_TECNICA_SVILUPPO.md** | **Memory centrale sviluppo recente** | **Developer, AI Agents** |
 | **AGENTS.md** | **Patterns architettura per AI agents** | **Copilot/AI Development** |
 
-**Nota**: START_HERE.md, QUICK_START.md, PROJECT_STATUS.md sono stati consolidati in questo README.
+**Nota**: START_HERE.md, QUICK_START.md, PROJECT_STATUS.md sono stati consolidati in questo README.  
+La cartella `Portale Ricambi SCM/` contiene materiale di riferimento sul portale (screenshot e note); il file `Info url e accesso.md` può contenere credenziali ed è escluso da git.
 
 ---
 
@@ -1200,7 +1316,7 @@ I backup includono:
 
 ```bash
 # SETUP INIZIALE (eseguire una volta)
-mysql -u root < database_creation.sql     # Crea DB da schema
+mysql -u root < database_creation.sql     # Crea il DB GMR vuoto (le tabelle le crea migrate)
 python manage.py migrate                   # Applica migrazioni Django
 python manage.py populate_db               # Carica dati test (8 cat, 5 fornitori, 19 articoli)
 python manage.py import_tbappellativo      # Importa 7 record appellativi
@@ -1213,6 +1329,7 @@ python manage.py import_tbmodalitapagamento # Importa 8 record modalità pagamen
 python manage.py runserver                 # Avvia server porta 8000
 python manage.py shell                     # Django shell per debug modelli
 python manage.py test                      # Esegui test suite
+python manage.py scm_login                 # Login manuale al portale SCM (importazione articoli)
 
 # TROUBLESHOOTING
 python test_db_connection.py               # Verifica connessione MySQL
@@ -1239,6 +1356,7 @@ python manage.py restore_backup             # Ripristina da backup (interattivo)
 | Come testo in locale? | `populate_db` carica dati test; accedi con admin / admin | [README.md](#-avvio-rapido-3-comandi) |
 | Come gestisco backup database? | **3 metodi**: Web UI (/backup/), management command, script PowerShell emergenza | [BACKUP_RECOVERY_GUIDE.md](BACKUP_RECOVERY_GUIDE.md) |
 | Come accedo tabelle clienti? | **Interfaccia web**: /gestione-tabelle/ (solo ADMIN/GESTORE) | [magazzino/views.py](magazzino/views.py#L2009-L2100) |
+| Come importo i dati di un articolo da SCM? | Pulsante **Recupera da SCM** nel form articolo (login manuale, mai credenziali nel codice); prezzi IVA esclusa; storico in `StoricoDatiSCM` | [magazzino/scm_portale.py](magazzino/scm_portale.py) |
 
 ---
 
@@ -1319,7 +1437,12 @@ Per mantenere coerenza tra sviluppo, manuali e operativita quotidiana, la memori
 
 - **[MEMORIA_TECNICA_SVILUPPO.md](MEMORIA_TECNICA_SVILUPPO.md)** - Decisioni operative recenti & timeline interventi
 
-Sintesi ultimo aggiornamento (10/05/2026):
+Sintesi ultimo aggiornamento (03/11/2026):
+- importazione dei dati di un articolo dal portale ricambi SCM (descrizione, prezzo listino e acquisto IVA esclusa, disponibilità, foto) con login manuale e pulsanti nel form articolo,
+- nuovo storico `StoricoDatiSCM` dei rilevamenti (migrazione 0023, DB reale allineato dopo backup),
+- decisioni: Chrome visibile (no headless), pause casuali nel futuro import massivo.
+
+Sintesi aggiornamento precedente (10/05/2026):
 - dashboard con nuovi indicatori articoli,
 - doppio layout dashboard con scelta persistente per sessione,
 - miglioramenti UX/validazione su form "Aggiungi Nuovo Articolo",
@@ -1454,8 +1577,9 @@ Hai domande o hai bisogno di aiuto? Ecco come contattarci:
 **Q: Come resetto i dati di test?**
 A: 
 ```bash
-mysql -u root < database_creation.sql
-python manage.py migrate
+mysql -u root -e "DROP DATABASE IF EXISTS GMR"   # ATTENZIONE: cancella tutti i dati
+mysql -u root < database_creation.sql             # ricrea il DB vuoto
+python manage.py migrate                          # ricrea tutte le tabelle
 python manage.py populate_db
 ```
 
@@ -1525,6 +1649,7 @@ Se trovi un bug:
 - [x] Documentazione README completa
 - [x] Overview architettura (consolidato in README)
 - [x] Guida gestione utenti
+- [x] Importazione articolo dal Portale SCM con storico prezzi (v1.2.0)
 - [ ] Unit test (futuro)
 - [ ] Ottimizzazione performance (futuro)
 - [ ] REST API (futuro)
@@ -1533,8 +1658,8 @@ Se trovi un bug:
 
 **Creato**: 30 Novembre 2025  
 **Status**: ✅ Pronto per Produzione  
-**Versione**: 1.1.0  
-**Ultimo Aggiornamento**: 4 Maggio 2026 (Aggiunto: Sezione Contributi, Licenza, Supporto)
+**Versione**: 1.2.0  
+**Ultimo Aggiornamento**: 3 Novembre 2026 (Importazione dal Portale SCM + storico prezzi)
 
 ---
 

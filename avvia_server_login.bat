@@ -13,6 +13,19 @@ if not exist "%PYTHON%" (
     exit /b 1
 )
 
+echo Verifico la connessione al database MySQL...
+"%PYTHON%" test_db_connection.py
+
+if errorlevel 1 (
+    echo.
+    echo Avvio interrotto: il database MySQL non e' raggiungibile.
+    echo Motivo probabile: XAMPP non e' aperto oppure il servizio MySQL non e' avviato.
+    echo Avvia MySQL da XAMPP e riesegui questo file.
+    echo.
+    pause
+    exit /b 1
+)
+
 echo Avvio il server Django...
 start "Django GMR" "%PYTHON%" manage.py runserver
 

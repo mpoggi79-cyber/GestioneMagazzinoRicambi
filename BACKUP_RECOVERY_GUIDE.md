@@ -1,10 +1,14 @@
 # 🆘 GUIDA RIPRISTINO DATABASE - PROCEDURE EMERGENZA
 
 **Progetto**: Gestione Magazzino Ricambi Goose  
-**Data**: 11 Maggio 2026 (Agg. Piano 1 Stabilizzazione)  
-**Versione**: 1.1.1
+**Data**: 3 Novembre 2026 (Agg. v1.2.0 Importazione dal Portale SCM)  
+**Versione**: 1.2.0
 
-**Status**: ✅ v1.1.1 PIANO 1 STABILIZZAZIONE COMPLETATO | Database: MySQL 10.4 | **Backup manager integrato**
+**Status**: ✅ v1.2.0 | Database: MySQL 10.4 | **Backup manager integrato**
+
+### 📌 Allineamento Tecnico (03/11/2026)
+
+Sistema backup invariato. Novità v1.2.0: la tabella `storico_dati_scm` è inclusa nei backup; fare **sempre un backup prima di applicare la migrazione `0023`** (`python manage.py migrate`).
 
 ### 📌 Allineamento Tecnico (11/05/2026)
 
@@ -348,7 +352,7 @@ Dopo ogni ripristino, verifica:
 ## 🔒 SICUREZZA BACKUP
 
 ### Cosa Include il Backup
-✅ Tutte le tabelle database  
+✅ Tutte le tabelle database (compreso lo storico prezzi SCM `storico_dati_scm`)  
 ✅ Struttura completa (CREATE TABLE)  
 ✅ Tutti i dati (INSERT)  
 ✅ Stored procedures e trigger  
@@ -360,6 +364,7 @@ Dopo ogni ripristino, verifica:
 ❌ File di log (`logs/`)  
 ❌ Impostazioni Django (`config/settings.py`)  
 ❌ Virtual environment (`venv/`)  
+❌ Sessione del portale SCM (`.scm_browser_profile/`): volutamente fuori dai backup (equivale a un accesso al portale); dopo un ripristino del PC rifare il login con "Accedi al portale SCM"  
 
 **IMPORTANTE**: Per backup completo, copia anche manualmente:
 - `media/articoli/` → Immagini articoli
@@ -396,5 +401,5 @@ In caso di problemi critici non risolvibili:
 
 ---
 
-**Fine Guida** - Aggiornato: 11 Maggio 2026 🚀  
-**Versione**: 1.1.1 (Piano 1 Stabilizzazione)
+**Fine Guida** - Aggiornato: 3 Novembre 2026 🚀  
+**Versione**: 1.2.0 (Importazione dal Portale SCM)

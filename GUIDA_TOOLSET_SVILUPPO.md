@@ -134,10 +134,12 @@ Comando:
 python manage.py restore_backup
 ```
 
-Necessita: reset DB completo da schema (attenzione: distruttivo)
+Necessita: reset DB completo (attenzione: distruttivo)
 Comando:
 ```powershell
+mysql -u root -e "DROP DATABASE IF EXISTS GMR"
 mysql -u root < database_creation.sql
+python manage.py migrate
 ```
 
 Necessita: ricaricare dati demo
@@ -209,6 +211,7 @@ Per questa codebase:
 3. Verifica: `python manage.py test`
 4. Backup periodico: `python manage.py create_backup`
 5. Prima del push: black, ruff, test
+6. Prima di una nuova migrazione sul DB reale: backup (`BackupManager().create_backup()` o dalla pagina `/backup/`), poi `python manage.py migrate`
 
 ## Troubleshooting essenziale
 Necessita: modulo non trovato
@@ -217,6 +220,15 @@ Comandi:
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
+
+Necessita: importazione dal portale SCM non parte
+Comandi:
+```powershell
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt   # installa playwright
+python manage.py scm_login        # login manuale (richiede Google Chrome installato)
+```
+Note: Playwright usa il Chrome già installato (nessun `playwright install`); la sessione si salva in `.scm_browser_profile/` (ignorata da git). Dettagli in [MANUALE_AMMINISTRATORE.md](MANUALE_AMMINISTRATORE.md#-portale-scm---importazione-articoli).
 
 Necessita: migrazioni incoerenti
 Comandi:

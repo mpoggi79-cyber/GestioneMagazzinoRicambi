@@ -315,14 +315,17 @@ class PezzoRicambioForm(forms.ModelForm):
     class Meta:
         model = PezzoRicambio
         fields = (
-            'codice_interno', 'codice_scm', 'descrizione_scm', 
+            'codice_interno', 'codice_scm', 'descrizione_scm', 'codice_sostitutivo',
             'modello_macchina_scm', 'matricola_macchina_scm', 'codice_fornitore',
             'descrizione', 'categoria', 'fornitore', 'unita_misura', 'giacenza_minima',
-            'giacenza_massima', 'prezzo_acquisto', 'prezzo_acquisto_scm', 
+            'giacenza_massima', 'prezzo_acquisto', 'prezzo_acquisto_scm',
+            'prezzo_listino_scm', 'disponibilita_scm', 'stato_disponibilita_scm',
+            'dati_scm_aggiornati_il',
             'stato_disponibilita', 'immagine', 'stato_attivo'
         )
         widgets = {
             'matricola_macchina_scm': MatricolaSelectWidget(attrs={'class': 'form-select'}),
+            'dati_scm_aggiornati_il': forms.HiddenInput(),
             'categoria': forms.HiddenInput(),  # Campo nascosto, valorizzato da JS
             'immagine': forms.ClearableFileInput(attrs={
                 'class': 'form-control',
@@ -394,6 +397,16 @@ class PezzoRicambioForm(forms.ModelForm):
             'placeholder': _('Descrizione'),
         })
         self.fields['descrizione_scm'].required = False
+
+        self.fields['codice_sostitutivo'].widget.attrs.update({
+            'class': 'form-select',
+        })
+        self.fields['codice_sostitutivo'].required = False
+        self.fields['codice_sostitutivo'].empty_label = _('--- Nessuno ---')
+        queryset_sostitutivi = PezzoRicambio.objects.filter(stato_attivo=True).order_by('codice_interno')
+        if self.instance and self.instance.pk:
+            queryset_sostitutivi = queryset_sostitutivi.exclude(pk=self.instance.pk)
+        self.fields['codice_sostitutivo'].queryset = queryset_sostitutivi
         
         self.fields['modello_macchina_scm'].widget.attrs.update({
             'class': 'form-select',
@@ -447,7 +460,7 @@ class PezzoRicambioForm(forms.ModelForm):
         self.fields['giacenza_massima'].initial = self.instance.giacenza_massima or 100
         
         # Prezzi
-        for field in ['prezzo_acquisto', 'prezzo_acquisto_scm']:
+        for field in ['prezzo_acquisto', 'prezzo_acquisto_scm', 'prezzo_listino_scm']:
             self.fields[field].widget.attrs.update({
                 'class': 'form-control',
                 'type': 'number',
@@ -458,7 +471,21 @@ class PezzoRicambioForm(forms.ModelForm):
             self.fields[field].required = False
 
         self.fields['prezzo_acquisto'].label = _('Prezzo di acquisto Fornitore')
-        self.fields['prezzo_acquisto_scm'].label = _('Prezzo di acquisto SCM')
+        self.fields['prezzo_acquisto_scm'].label = _('Prezzo di acquisto SCM (a noi, no IVA)')
+        self.fields['prezzo_listino_scm'].label = _('Prezzo listino SCM (cliente, no IVA)')
+
+        self.fields['disponibilita_scm'].widget.attrs.update({
+            'class': 'form-control',
+            'type': 'number',
+            'min': '0',
+        })
+        self.fields['disponibilita_scm'].required = False
+        self.fields['stato_disponibilita_scm'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': _('Es. Disponibile, In arrivo'),
+        })
+        self.fields['stato_disponibilita_scm'].required = False
+        self.fields['dati_scm_aggiornati_il'].required = False
         
         # Stato disponibilità
         self.fields['stato_disponibilita'].widget.attrs.update({
@@ -571,6 +598,19 @@ class PezzoRicambioForm(forms.ModelForm):
                 raise forms.ValidationError({
                     'codice_scm': _('Esiste già un articolo con questo Codice SCM')
                 })
+
+        # Il sostitutivo non può essere l'articolo stesso né creare un ciclo (A -> B -> A).
+        sostitutivo = cleaned_data.get('codice_sostitutivo')
+        if sostitutivo and self.instance and self.instance.pk:
+            visitati = set()
+            corrente = sostitutivo
+            while corrente and corrente.pk not in visitati:
+                if corrente.pk == self.instance.pk:
+                    raise forms.ValidationError({
+                        'codice_sostitutivo': _('Il codice sostitutivo crea un ciclo di sostituzioni')
+                    })
+                visitati.add(corrente.pk)
+                corrente = corrente.codice_sostitutivo
         
         return cleaned_data
 

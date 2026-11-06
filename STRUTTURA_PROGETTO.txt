@@ -30,12 +30,13 @@
 │   │   └── migrations/                    ✅ Database migrations (1 migration)
 │   │
 │   ├── magazzino/                         ✅ APP GESTIONE MAGAZZINO (CORE)
-│   │   ├── models.py                      ✅ 16 Modelli custom:
-│   │   │                                     MAGAZZINO (11):
+│   │   ├── models.py                      ✅ 17 Modelli custom:
+│   │   │                                     MAGAZZINO (12):
 │   │   │                                     • Categoria (self-FK gerarchica)
 │   │   │                                     • TbUnitaMisura (sostituisce UnitaMisura)
 │   │   │                                     • Fornitore
-│   │   │                                     • PezzoRicambio (con immagini)
+│   │   │                                     • PezzoRicambio (con immagini e dati SCM)
+│   │   │                                     • StoricoDatiSCM (rilevazioni prezzi/disponibilità SCM)
 │   │   │                                     • Giacenza (1:1 con PezzoRicambio)
 │   │   │                                     • MovimentoMagazzino (audit trail)
 │   │   │                                     • Inventario
@@ -50,10 +51,11 @@
 │   │   │                                     • TbCategorieTariffe
 │   │   │                                     • TbTipoPagamento
 │   │   │                                     • TbModalitaPagamento
-│   │   ├── views.py                       ✅ 47 CBV totali:
+│   │   ├── views.py                       ✅ 49 CBV totali:
 │   │   │                                     • DashboardView
 │   │   │                                     • CRUD Categoria (List, Create, Update, Delete)
 │   │   │                                     • CRUD PezzoRicambio (List, Create, Detail, Update, Delete)
+│   │   │                                     • Portale SCM (RecuperaDatiSCMView, AvviaLoginSCMView)
 │   │   │                                     • CRUD Fornitore (List, Create, Detail, Update, Delete)
 │   │   │                                     • CRUD ModelloSCM / MatricolaSCM
 │   │   │                                     • CRUD Movimento (List, Create, Detail)
@@ -66,6 +68,8 @@
 │   │   ├── urls.py                        ✅ 40+ URL routes
 │   │   ├── admin.py                       ✅ Admin registrazioni personalizzate
 │   │   ├── backup_manager.py              ✅ BackupManager (gestione backup DB)
+│   │   ├── scm_portale.py                 ✅ Recupero dati articolo dal portale SCM
+│   │   │                                     (Playwright + Chrome, login manuale, profilo .scm_browser_profile/)
 │   │   ├── signals.py                     ✅ Signals:
 │   │   │                                     • post_save MovimentoMagazzino → aggiorna Giacenza
 │   │   │                                     • pre_save PezzoRicambio → resize immagini (800x800)
@@ -81,8 +85,9 @@
 │   │   │       ├── import_tbtipopagamento.py ✅ Importa 23 tipi pagamento da CSV
 │   │   │       ├── import_tbmodalitapagamento.py ✅ Importa 8 modalità pagamento da CSV
 │   │   │       ├── create_backup.py        ✅ Crea backup DB compresso
+│   │   │       ├── scm_login.py            ✅ Login manuale al portale SCM (apre Chrome)
 │   │   │       └── restore_backup.py       ✅ Ripristino backup interattivo
-│   │   └── migrations/                    ✅ Database migrations (0001 - 0020+)
+│   │   └── migrations/                    ✅ Database migrations (0001 - 0023; 0023 = dati SCM + storico)
 │   │
 │   ├── templates/                         ✅ TEMPLATE HTML (40+ totali)
 │   │   ├── base.html                      ✅ Template base (navbar, sidebar, footer)
@@ -127,7 +132,7 @@
 │       └── Scripts/activate.ps1           ✅ Attivazione PowerShell
 │
 ├── 🗄️ DATABASE & BACKUP
-│   ├── database_creation.sql              ✅ Schema MySQL iniziale (9 tabelle base)
+│   ├── database_creation.sql              ✅ Crea solo il DB GMR vuoto (schema = migrazioni Django)
 │   └── backups/                           ✅ Backup automatici DB compressi (.sql.gz)
 │       └── backup_GMR_YYYYMMDD_HHMMSS.sql.gz
 │
@@ -151,7 +156,11 @@
 │   ├── BACKUP_RECOVERY_GUIDE.md           ✅ 3 metodi ripristino DB (emergenza inclusa)
 │   ├── ANALISI_TABELLE_CSV.md             ✅ Struttura delle 13 tabelle CSV sorgente
 │   ├── ANALISI_TABELLE_ESISTENTI.md       ✅ Struttura e dati delle 16 tabelle DB
-│   └── STRUTTURA_PROGETTO.txt             ✅ Questo file
+│   ├── STRUTTURA_PROGETTO.txt             ✅ Questo file
+│   ├── MEMORIA_TECNICA_SVILUPPO.md        ✅ Memoria tecnica centrale (decisioni e timeline, incl. Portale SCM)
+│   ├── AGENTS.md                          ✅ Istruzioni e pattern per AI agent
+│   └── Portale Ricambi SCM/               ✅ Materiale di riferimento sul portale SCM (screenshot, note);
+│                                             "Info url e accesso.md" può contenere credenziali → escluso da git
 │
 ├── 🔧 SCRIPT OPERATIVI
 │   ├── restore_db_emergency.ps1           ✅ Ripristino DB emergenza (senza Django)
@@ -163,27 +172,31 @@
 ├── 📦 CONFIGURAZIONE
 │   ├── manage.py                          ✅ Django management tool
 │   ├── requirements.txt                   ✅ Dipendenze Python
-│   ├── .gitignore                         ✅ Regole git (esclude venv, media, .env)
+│   ├── .gitignore                         ✅ Regole git (esclude venv, media, .env, .scm_browser_profile/, credenziali portale SCM)
 │   ├── .pylintrc                          ✅ Configurazione linter Python
 │   └── LICENSE                            ✅ Licenza MIT
 
 ================================================================================
-                         STATISTICHE PROGETTO v1.1
+                         STATISTICHE PROGETTO v1.2.0
 ================================================================================
 
-MODELLI DJANGO (16 custom):
-• App magazzino:    11 (Categoria, TbUnitaMisura, Fornitore, PezzoRicambio,
-                       Giacenza, MovimentoMagazzino, Inventario, DettaglioInventario,
-                       ModelloMacchinaSCM, MatricolaMacchinaSCM, Configurazione)
+MODELLI DJANGO (17 custom):
+• App magazzino:    12 (Categoria, TbUnitaMisura, Fornitore, PezzoRicambio,
+                       StoricoDatiSCM, Giacenza, MovimentoMagazzino, Inventario,
+                       DettaglioInventario, ModelloMacchinaSCM, MatricolaMacchinaSCM,
+                       Configurazione)
 • Clienti Fase 1:   6 (TbAppellativo, TbCategoriaIVA, TbContatti,
                        TbCategorieTariffe, TbTipoPagamento, TbModalitaPagamento)
 • App accounts:     2 custom (ProfiloUtente, LogAccesso) + User (Django built-in)
 
 VIEWS & URL:
-• Views totali:     47 CBV
+• Views totali:     49 CBV
 • URL routes:       40+
 • Forms:            8+
-• Admin registrazioni: 12+
+• Admin registrazioni: 13+
+
+TEST:
+• Suite:            37 test (python manage.py test), portale SCM sempre simulato (mock)
 
 TEMPLATE HTML:
 • Totale:           40+
@@ -192,7 +205,7 @@ TEMPLATE HTML:
 • Magazzino:        33+
 
 DATABASE:
-• Tabelle custom:   16+
+• Tabelle custom:   17+
 • Record test:      ~170+ (77 movimenti, 19 articoli, 74 clienti, 4 utenti)
 • Driver:           PyMySQL 1.1.2 (pure Python, compatibile XAMPP)
 
@@ -212,6 +225,7 @@ DIPENDENZE PRINCIPALI:
 • django-crispy-forms 2.5
 • crispy-bootstrap5 2025.6
 • Pillow (elaborazione immagini)
+• Playwright 1.64.1 (importazione dal portale SCM; richiede Google Chrome installato)
 
 ================================================================================
                       CREDENZIALI UTENTI TEST
@@ -234,6 +248,7 @@ DATABASE:
 • Login:              http://localhost:8000/accounts/login/
 • Dashboard:          http://localhost:8000/
 • Articoli:           http://localhost:8000/articoli/
+• Recupero dati SCM:  dal form articolo (pulsanti "Recupera da SCM" / "Accedi al portale SCM", ADMIN/GESTORE)
 • Movimenti:          http://localhost:8000/movimenti/
 • Giacenze:           http://localhost:8000/giacenze/
 • Report giacenze:    http://localhost:8000/report/giacenze/
@@ -261,6 +276,6 @@ Per first setup completo (nuovo ambiente):
 
 ================================================================================
 Creato:        30 Novembre 2025
-Ultima modifica: 23 Aprile 2026
-Versione:      1.1
+Ultima modifica: 3 Novembre 2026 (v1.2.0 - Importazione dal Portale SCM)
+Versione:      1.2.0
 ================================================================================

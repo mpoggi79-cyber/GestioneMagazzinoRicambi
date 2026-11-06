@@ -19,6 +19,8 @@ staticfiles/
 
 # Database MySQL (escludi dump locali, mantieni script setup)
 *.sql
+backups/
+*.accdb
 !database_creation.sql
 !populate_scm_tables.sql
 
@@ -27,6 +29,10 @@ staticfiles/
 .env.*
 settings_local.py
 config/settings_local.py
+
+# Portale SCM: credenziali e profilo browser con sessione autenticata
+Portale Ricambi SCM/Info url e accesso.md
+.scm_browser_profile/
 
 # Logs & Cache
 logs/

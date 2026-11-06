@@ -1,6 +1,6 @@
 # 📊 ANALISI TABELLE ESISTENTI DATABASE
 
-**Data Analisi**: 23 Aprile 2026  
+**Data Analisi**: 23 Aprile 2026 (aggiornata il 3 Novembre 2026: nuova tabella `storico_dati_scm` e colonne SCM su `pezzi_ricambio`, vedi sezione 4)  
 **Database**: MySQL 10.4 via PyMySQL  
 **Fonte**: Export da modelli Django esistenti + Importazione CSV Fase 1  
 
@@ -230,6 +230,40 @@
 | modificato_il | DATETIME | - | Timestamp ultima modifica |
 
 **⚠️ NOTA**: Questa tabella ha FK a `unita_misura` che verrà sostituita da `tbUnitaMisura`.
+
+> **Aggiornamento 03/11/2026 (v1.2.0, migrazione 0023)** - l'elenco colonne sopra è lo snapshot del 23/04/2026. Colonne aggiunte nel tempo per i dati SCM (tutte facoltative):
+>
+> | Colonna | Tipo | Descrizione |
+> |---------|------|-------------|
+> | descrizione_scm | VARCHAR(200) | Descrizione del codice SCM |
+> | id_articolo_sostitutivo | INT **FK** | → pezzi_ricambio (sostituzione tra codici) |
+> | prezzo_acquisto_scm | DECIMAL(10,2) | Prezzo a noi da SCM, **IVA esclusa** |
+> | prezzo_listino_scm | DECIMAL(10,2) | Prezzo al cliente (listino SCM), **IVA esclusa** (v1.2.0) |
+> | disponibilita_scm | INT | Quantità a magazzino SCM all'ultimo rilevamento (v1.2.0) |
+> | stato_disponibilita_scm | VARCHAR(30) | "Disponibile", "In arrivo", "Non disponibile" (v1.2.0) |
+> | dati_scm_aggiornati_il | DATETIME | Data/ora ultimo rilevamento dal portale SCM (v1.2.0) |
+
+---
+
+## 4️⃣-bis storico_dati_scm (v1.2.0)
+
+**Descrizione**: Rilevazioni storiche di prezzi e disponibilità SCM per articolo (append-only, una riga per rilevamento salvato)  
+**Nome Tabella**: `storico_dati_scm`  
+**Relazione**: N:1 con `pezzi_ricambio` (CASCADE)
+
+| Colonna | Tipo | FK | Descrizione |
+|---------|------|-----|-------------|
+| id_storico_scm | INT | **PK** | ID rilevazione |
+| id_articolo | INT | **FK** | → pezzi_ricambio |
+| rilevato_il | DATETIME | - | Data/ora del rilevamento dal portale |
+| prezzo_listino | DECIMAL(10,2) | NULL | Prezzo al cliente, IVA esclusa |
+| prezzo_acquisto | DECIMAL(10,2) | NULL | Prezzo a noi, IVA esclusa |
+| disponibilita | INT | NULL | Quantità a magazzino SCM |
+| stato_disponibilita | VARCHAR(30) | - | Dicitura del portale |
+| operatore | VARCHAR(150) | - | Username di chi ha salvato |
+| creato_il | DATETIME | - | Timestamp inserimento |
+
+Indice su (`id_articolo`, `rilevato_il`).
 
 ---
 

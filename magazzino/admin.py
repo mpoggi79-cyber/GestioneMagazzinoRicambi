@@ -11,6 +11,7 @@ from .models import (
     ModelloMacchinaSCM,
     MatricolaMacchinaSCM,
     PezzoRicambio,
+    StoricoDatiSCM,
     Giacenza,
     MovimentoMagazzino,
     Inventario,
@@ -151,7 +152,7 @@ class PezzoRicambioAdmin(admin.ModelAdmin):
     
     fieldsets = (
         (_('Codici'), {
-            'fields': ('codice_interno', 'codice_scm', 'codice_fornitore', 'codice_alternativo')
+            'fields': ('codice_interno', 'codice_scm', 'codice_fornitore', 'codice_sostitutivo')
         }),
         (_('Descrizione e Classificazione'), {
             'fields': ('descrizione', 'categoria', 'unita_misura')
@@ -160,7 +161,10 @@ class PezzoRicambioAdmin(admin.ModelAdmin):
             'fields': ('giacenza_minima', 'giacenza_massima')
         }),
         (_('Prezzi'), {
-            'fields': ('prezzo_acquisto', 'prezzo_acquisto_scm')
+            'fields': ('prezzo_acquisto', 'prezzo_acquisto_scm', 'prezzo_listino_scm')
+        }),
+        (_('Disponibilità SCM'), {
+            'fields': ('disponibilita_scm', 'stato_disponibilita_scm', 'dati_scm_aggiornati_il')
         }),
         (_('Stato'), {
             'fields': ('stato_attivo',)
@@ -170,6 +174,20 @@ class PezzoRicambioAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+@admin.register(StoricoDatiSCM)
+class StoricoDatiSCMAdmin(admin.ModelAdmin):
+    """Storico rilevazioni SCM: append-only, solo consultazione"""
+    list_display = ('articolo', 'rilevato_il', 'prezzo_listino', 'prezzo_acquisto', 'disponibilita', 'operatore')
+    list_filter = ('rilevato_il',)
+    search_fields = ('articolo__codice_interno', 'articolo__codice_scm')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 # ============================================================================

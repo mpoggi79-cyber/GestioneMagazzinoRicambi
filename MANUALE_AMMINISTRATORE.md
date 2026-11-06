@@ -1,10 +1,23 @@
 # 👨‍💼 MANUALE AMMINISTRATORE - GESTIONE MAGAZZINO RICAMBI
 
-**Versione**: 1.1.1 (Piano 1 Stabilizzazione) | **Data**: 11 Maggio 2026 | **Audience**: System Admin, IT Staff, Support
+**Versione**: 1.2.0 (Importazione dal Portale SCM) | **Data**: 3 Novembre 2026 | **Audience**: System Admin, IT Staff, Support
 
 ---
 
-## 📌 NOTA AGGIORNAMENTO RECENTE (11/05/2026)
+## 📌 NOTA AGGIORNAMENTO RECENTE (03/11/2026)
+
+**Status**: ✅ v1.2.0 IMPORTAZIONE DAL PORTALE SCM
+
+**Cosa è cambiato per gli amministratori**:
+1. ✅ Nel form articolo i pulsanti **Recupera da SCM** e **Accedi al portale SCM** leggono dal portale ricambi SCM descrizione, prezzi (IVA esclusa), disponibilità e foto
+2. ✅ Nuova tabella `storico_dati_scm` con tutti i rilevamenti salvati (migrazione `0023`)
+3. ✅ Nuova dipendenza `playwright` e uso di Google Chrome sul PC del server
+4. ✅ Test suite: 37 test
+5. ✅ Procedura completa: vedi la sezione [Portale SCM - Importazione Articoli](#-portale-scm---importazione-articoli)
+
+Dopo `git pull`: `pip install -r requirements.txt` e `python manage.py migrate` (**backup prima**).
+
+## 📌 AGGIORNAMENTO PRECEDENTE (11/05/2026)
 
 **Status**: ✅ v1.1.1 PIANO 1 STABILIZZAZIONE COMPLETATO
 
@@ -17,7 +30,7 @@ Questo manuale è allineato alle decisioni operative di Piano 1. Riferimenti:
 2. ✅ Audit logging strutturato con marker [AUDIT_TABELLE]
 3. ✅ Fix visibilità record inattivi (tbunitamisura, tbprestazioni, modelli_scm)
 4. ✅ Compatibilità CSS cross-browser
-5. ✅ Test suite espansa a 20 test
+5. ✅ Test suite espansa a 20 test (oggi 37)
 
 **Per gli Amministratori**: Nessun cambio nelle procedure di base. Tutte le operazioni rimangono invariate.
 
@@ -30,11 +43,12 @@ Questo manuale è allineato alle decisioni operative di Piano 1. Riferimenti:
 3. [Gestione Ruoli e Permessi](#-gestione-ruoli-e-permessi)
 4. [Database Management](#-database-management)
 5. [Backup e Recovery](#-backup-e-recovery)
-6. [Troubleshooting](#-troubleshooting)
-7. [Sicurezza](#-sicurezza)
-8. [Performance & Monitoring](#-performance--monitoring)
-9. [Deployment](#-deployment)
-10. [Comandi Amministrativi](#-comandi-amministrativi)
+6. [Portale SCM - Importazione Articoli](#-portale-scm---importazione-articoli)
+7. [Troubleshooting](#-troubleshooting)
+8. [Sicurezza](#-sicurezza)
+9. [Performance & Monitoring](#-performance--monitoring)
+10. [Deployment](#-deployment)
+11. [Comandi Amministrativi](#-comandi-amministrativi)
 
 ---
 
@@ -441,9 +455,58 @@ tar -czf gmr_monthly_$(date +\%Y\%m).tar.gz /backups/gmr_full_*.sql
 **Scenario 3: Hard Drive Failure**
 1. Ripristina ambiente Python (venv)
 2. Reinstalla dipendenze: `pip install -r requirements.txt`
-3. Ricrea database da schema: `mysql -u root < database_creation.sql`
-4. Carichi backup dati: `mysql -u root GMR < backup_completo.sql`
-5. Migra schema Django: `python manage.py migrate`
+3. Ricrea il database vuoto: `mysql -u root < database_creation.sql`
+4. Carica backup dati: `mysql -u root GMR < backup_completo.sql` (contiene già lo schema)
+5. Allinea eventuali migrazioni mancanti: `python manage.py migrate`
+
+---
+
+## 🔌 PORTALE SCM - IMPORTAZIONE ARTICOLI
+
+### A cosa serve
+Dato il **Codice SCM** di un articolo, il sistema legge la pagina sul portale ricambi SCM (`shop.scmgroup.com`) e compila descrizione, prezzo listino (cliente), prezzo di acquisto (a noi), disponibilità SCM e foto. Tutti i prezzi sono **IVA esclusa**. Ogni rilevamento salvato resta nello **storico** dell'articolo (prezzi e quantità SCM cambiano nel tempo).
+
+### Requisiti (una tantum per PC)
+```bash
+pip install -r requirements.txt     # installa playwright
+python manage.py migrate            # applica la migrazione 0023 (storico) - fare prima un backup
+```
+- **Google Chrome** installato sul PC dove gira il server (Playwright lo usa, nessun download aggiuntivo).
+- Il browser si apre **sul PC del server**: la funzione è pensata per uso locale (server e operatore sullo stesso PC). Su un server remoto senza schermo **non funziona**.
+- Account SCM dell'operatore (Microsoft con MFA) già abilitato sul portale.
+
+### Uso quotidiano (ADMIN e GESTORE_MAGAZZINO)
+1. Apri l'articolo in modifica (`/articoli/<id>/update/`) o crea un nuovo articolo e inserisci il **Codice SCM** (11 caratteri).
+2. Se non hai una sessione valida (o è scaduta): clicca **Accedi al portale SCM**. Si apre Chrome: accedi a mano con il tuo account Microsoft e completa la MFA. La finestra si chiude da sola (attesa massima 5 minuti) e il recupero parte in automatico.
+3. Clicca **Recupera da SCM** (si apre una finestra Chrome per pochi secondi): i campi si compilano ma **nulla viene salvato**.
+4. Controlla i valori e **salva**: se sono stati rilevati i prezzi, nel dettaglio articolo compare una nuova riga in "Storico Prezzi e Disponibilità SCM".
+
+Alternativa da terminale per il solo login: `python manage.py scm_login`.
+
+### Casi particolari
+| Situazione | Comportamento |
+|-----------|---------------|
+| Articolo senza prezzo sul portale ("Articolo attualmente non disponibile") | Si importano descrizione, foto e stato "Non disponibile"; i prezzi esistenti **non** vengono modificati; nessuna riga di storico |
+| Codice inesistente | Messaggio "non presente nel portale SCM" |
+| Sessione scaduta | Messaggio con invito a usare **Accedi al portale SCM** (la sessione dura poco, anche meno di un'ora) |
+| Articolo con foto già presente | La foto del portale **non** la sostituisce |
+| Utente OPERATORE/VISUALIZZATORE | Pulsanti non utilizzabili (403) |
+
+### Sicurezza e conformità
+- **Nessuna password viene salvata**: il login lo fa sempre l'operatore a mano. Non inserire credenziali in codice, `.env`, database o log.
+- La sessione resta nel profilo browser locale `.scm_browser_profile/`: cartella **ignorata da git**, da non copiare né condividere (equivale a un accesso al portale).
+- Il file `Portale Ricambi SCM/Info url e accesso.md` può contenere credenziali ed è **escluso da git**: non rimuovere l'esclusione da `.gitignore`.
+- Ogni login e recupero è registrato in `logs/django.log` con il marker `[SCM_PORTALE]` e lo username:
+  ```bash
+  findstr /C:"[SCM_PORTALE]" logs\django.log
+  ```
+- L'accesso automatico a un portale cliente può non essere gradito al fornitore: usare **un codice alla volta, al bisogno**. In caso di dubbi sui termini d'uso, chiedere al referente SCM un export dati ufficiale.
+
+### Storico prezzi (`storico_dati_scm`)
+- Una riga per ogni rilevamento salvato: articolo, data/ora, prezzo listino, prezzo acquisto, disponibilità, stato, operatore.
+- Solo consultazione: nell'admin Django (`/admin/magazzino/storicodatiscm/`) è in sola lettura; non si modifica né si aggiunge a mano.
+- Se si elimina un articolo, il suo storico viene eliminato con lui.
+- È incluso nei backup del database come ogni altra tabella.
 
 ---
 
@@ -731,6 +794,7 @@ def report_giacenze(request):
 ☐ Email settings configurate (se usato)
 ☐ HTTPS certificato installato
 ☐ Firewall configurato (port 80, 443)
+☐ Importazione dal Portale SCM: usabile solo se server e operatore sono sullo stesso PC con Chrome (su server remoto senza schermo non funziona)
 ```
 
 ### Production Server Setup (Gunicorn + Nginx)
@@ -822,6 +886,7 @@ python manage.py collectstatic            # Copia file static
 
 # CUSTOM
 python manage.py populate_db              # Carica dati test
+python manage.py scm_login                # Login manuale al portale SCM (apre Chrome)
 ```
 
 ### MySQL Commands (Utility)

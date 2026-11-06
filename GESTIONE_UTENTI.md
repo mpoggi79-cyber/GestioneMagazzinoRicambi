@@ -17,19 +17,23 @@
 - Può creare, modificare ed eliminare utenti
 - Può cambiare i ruoli degli utenti
 - Può resettare le password
+- Può usare l'importazione dal portale SCM nel form articolo (pulsanti "Recupera da SCM" / "Accedi al portale SCM")
 
 ### 2. **Gestore Magazzino (GESTORE_MAGAZZINO)**
 - Può visualizzare tutti gli utenti
 - Può vedere i dettagli degli utenti
 - NON può creare/modificare utenti
+- Può usare l'importazione dal portale SCM nel form articolo (con il **proprio** account Microsoft SCM)
 
 ### 3. **Operatore (OPERATORE)**
 - Può vedere solo il proprio profilo
 - Può cambiare la propria password
+- NON può usare l'importazione dal portale SCM (risposta 403)
 
 ### 4. **Visualizzatore (VISUALIZZATORE)**
 - Può vedere solo il proprio profilo
 - Può cambiare la propria password
+- NON può usare l'importazione dal portale SCM (risposta 403)
 
 ## 📍 Come Accedere
 
@@ -291,6 +295,14 @@ I log sono disponibili in:
 
 ---
 
+## 🧠 Memoria Tecnica Sviluppo (Agg. 03/11/2026 - Importazione dal Portale SCM)
+
+### Aggiornamento v1.2.0
+
+- Nuova funzione nel form articolo: **Recupera da SCM** / **Accedi al portale SCM** (solo ADMIN e GESTORE_MAGAZZINO, stessi permessi di `CanEditMixin`).
+- Il login al portale SCM usa l'account Microsoft di chi lo esegue sul PC: la sessione del portale è **una sola per PC** (profilo `.scm_browser_profile/`). Ogni login e recupero è registrato in `logs/django.log` con `[SCM_PORTALE]` e lo username Django di chi ha cliccato.
+- Nessuna modifica a ruoli, utenti o password. Dettagli: [MANUALE_AMMINISTRATORE.md](MANUALE_AMMINISTRATORE.md#-portale-scm---importazione-articoli).
+
 ## 🧠 Memoria Tecnica Sviluppo (Agg. 11/05/2026 - Piano 1 Stabilizzazione)
 
 ### Allineamento Sviluppo Recente
@@ -306,7 +318,7 @@ Riferimenti tecnici centrali:
 2. ✅ Audit logging strutturato [AUDIT_TABELLE]
 3. ✅ Fix visibilità record inattivi (tbunitamisura e similar)
 4. ✅ Compatibilità CSS (rimosso `:has()`)
-5. ✅ Test suite: 20 test totali (3 nuovi)
+5. ✅ Test suite: 20 test totali (3 nuovi; oggi 37 con l'importazione SCM)
 
 **Implicazioni per Gestione Utenti**:
 - Nessuna modifica ai ruoli o autorizzazioni utenti
@@ -396,7 +408,7 @@ Per qualsiasi problema o domanda, controlla i log in `logs/django.log` o contatt
 
 ---
 
-**Ultima modifica:** 11 Maggio 2026
-**Versione:** 1.1.1 (Piano 1 Stabilizzazione)
+**Ultima modifica:** 3 Novembre 2026
+**Versione:** 1.2.0 (Importazione dal Portale SCM)
 **Sviluppatore:** Sistema GMR - Gestione Magazzino Ricambi
 **Status:** ✅ Pronto per produzione

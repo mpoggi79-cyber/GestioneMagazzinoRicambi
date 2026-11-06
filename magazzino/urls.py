@@ -32,6 +32,8 @@ urlpatterns = [
     path('articoli/<int:pk>/', views.PezzoRicambioDetailView.as_view(), name='articolo_detail'),
     path('articoli/<int:pk>/update/', views.PezzoRicambioUpdateView.as_view(), name='articolo_update'),
     path('articoli/<int:pk>/delete/', views.PezzoRicambioDeleteView.as_view(), name='articolo_delete'),
+    path('articoli/scm/recupera/', views.RecuperaDatiSCMView.as_view(), name='articolo_scm_recupera'),
+    path('articoli/scm/login/', views.AvviaLoginSCMView.as_view(), name='articolo_scm_login'),
     
     # FORNITORI
     path('fornitori/', views.FornitoreListView.as_view(), name='fornitore_list'),

@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django import forms as django_forms
 from django.views.generic import (
     TemplateView, ListView, DetailView, CreateView, 
-    UpdateView, DeleteView, FormView
+    UpdateView, DeleteView, FormView, View
 )
 from django.forms import modelform_factory
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -31,8 +31,9 @@ from .forms import (
     CategoriaForm, PezzoRicambioForm, FornitoreForm, 
     MovimentoMagazzinoForm, InventarioForm
 )
+from . import scm_portale
 from .models import (
-    Categoria, UnitaMisura, Fornitore, PezzoRicambio, 
+    Categoria, UnitaMisura, Fornitore, PezzoRicambio, StoricoDatiSCM,
     Giacenza, MovimentoMagazzino, Inventario, DettaglioInventario,
     ModelloMacchinaSCM, MatricolaMacchinaSCM,
     TbAppellativo, TbTipoPagamento, TbCategoriaIVA, TbCategorieTariffe, TbContatti, TbPrestazioni, TbModalitaPagamento
@@ -696,8 +697,26 @@ class PezzoRicambioDetailView(CanViewMixin, DetailView):
         context['ultimi_movimenti'] = articolo.movimenti.select_related(
             'fornitore'
         ).order_by('-data_movimento')[:10]
+        context['storico_scm'] = articolo.storico_scm.all()[:50]
         
         return context
+
+
+def _registra_storico_scm(articolo, operatore):
+    """Congela nello storico i dati SCM dell'articolo se provengono da un nuovo rilevamento dal portale."""
+    if not articolo.dati_scm_aggiornati_il:
+        return
+    StoricoDatiSCM.objects.get_or_create(
+        articolo=articolo,
+        rilevato_il=articolo.dati_scm_aggiornati_il,
+        defaults={
+            'prezzo_listino': articolo.prezzo_listino_scm,
+            'prezzo_acquisto': articolo.prezzo_acquisto_scm,
+            'disponibilita': articolo.disponibilita_scm,
+            'stato_disponibilita': articolo.stato_disponibilita_scm,
+            'operatore': operatore,
+        }
+    )
 
 
 class PezzoRicambioCreateView(CanEditMixin, CreateView):
@@ -715,6 +734,7 @@ class PezzoRicambioCreateView(CanEditMixin, CreateView):
         # Crea automaticamente la giacenza
         response = super().form_valid(form)
         articolo = self.object
+        _registra_storico_scm(articolo, self.request.user.username)
         
         Giacenza.objects.get_or_create(
             articolo=articolo,
@@ -796,6 +816,7 @@ class PezzoRicambioUpdateView(CanEditMixin, UpdateView):
             form.instance.categoria = form.cleaned_data['categoria']
         
         response = super().form_valid(form)
+        _registra_storico_scm(self.object, self.request.user.username)
         
         # Verifica se è stata aggiunta un'immagine dove prima non c'era
         ha_immagine_ora = bool(self.object.immagine)
@@ -822,6 +843,44 @@ class PezzoRicambioUpdateView(CanEditMixin, UpdateView):
     def form_invalid(self, form):
         logger.warning(f"Form invalida per articolo: {form.errors}")
         return super().form_invalid(form)
+
+
+class RecuperaDatiSCMView(CanEditMixin, View):
+    """Recupera dal portale SCM i dati di un codice per precompilare il form articolo (non salva nulla)"""
+
+    def handle_no_permission(self):
+        return JsonResponse({'ok': False, 'errore': 'Non hai i permessi necessari per questa azione.'}, status=403)
+
+    def post(self, request, *args, **kwargs):
+        codice_scm = (request.POST.get('codice_scm') or '').strip().upper()
+        try:
+            dati = scm_portale.cerca_codice(codice_scm)
+        except scm_portale.CodiceNonTrovatoSCM as errore:
+            return JsonResponse({'ok': False, 'errore': str(errore)}, status=404)
+        except scm_portale.SessioneScadutaSCM as errore:
+            return JsonResponse({'ok': False, 'errore': str(errore)}, status=401)
+        except scm_portale.ErroreSCM as errore:
+            logger.warning(f"Recupero dati SCM fallito per {codice_scm}: {errore}")
+            return JsonResponse({'ok': False, 'errore': str(errore)}, status=503)
+
+        logger.info(f"[SCM_PORTALE] utente={request.user.username} codice={codice_scm} recupero dati riuscito")
+        return JsonResponse({'ok': True, 'dati': dati.come_dizionario()})
+
+
+class AvviaLoginSCMView(CanEditMixin, View):
+    """Apre Chrome sul portale SCM per il login manuale dell'operatore (Microsoft + MFA)"""
+
+    def handle_no_permission(self):
+        return JsonResponse({'ok': False, 'errore': 'Non hai i permessi necessari per questa azione.'}, status=403)
+
+    def post(self, request, *args, **kwargs):
+        avviato = scm_portale.avvia_login_in_background()
+        if avviato:
+            logger.info(f"[SCM_PORTALE] utente={request.user.username} avviato login manuale")
+        return JsonResponse({'ok': True, 'avviato': avviato})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({'ok': True, **scm_portale.stato_login()})
 
 
 class PezzoRicambioDeleteView(CanEditMixin, DeleteView):

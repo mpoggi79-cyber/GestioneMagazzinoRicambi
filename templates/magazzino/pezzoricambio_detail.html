@@ -37,12 +37,51 @@
                     <dt class="col-sm-4">Descrizione SCM:</dt>
                     <dd class="col-sm-8">{{ articolo.descrizione_scm|default:"N/A" }}</dd>
 
-                    <dt class="col-sm-4">Prezzo Acquisto SCM:</dt>
+                    <dt class="col-sm-4">Codice Sostitutivo:</dt>
                     <dd class="col-sm-8">
-                        {% if articolo.prezzo_acquisto_scm %}
-                        € {{ articolo.prezzo_acquisto_scm }}
+                        {% if articolo.codice_sostitutivo %}
+                        <a href="{% url 'magazzino:articolo_detail' articolo.codice_sostitutivo.id_articolo %}">
+                            {{ articolo.codice_sostitutivo.codice_scm|default:articolo.codice_sostitutivo.codice_interno }}
+                            - {{ articolo.codice_sostitutivo.descrizione }}
+                        </a>
                         {% else %}
                         <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </dd>
+
+                    {% for vecchio in articolo.sostituisce.all %}
+                    {% if forloop.first %}<dt class="col-sm-4">Sostituisce:</dt><dd class="col-sm-8">{% endif %}
+                    <div><a href="{% url 'magazzino:articolo_detail' vecchio.id_articolo %}">{{ vecchio.codice_scm|default:vecchio.codice_interno }} - {{ vecchio.descrizione }}</a></div>
+                    {% if forloop.last %}</dd>{% endif %}
+                    {% endfor %}
+
+                    <dt class="col-sm-4">Prezzo Listino SCM (cliente):</dt>
+                    <dd class="col-sm-8">
+                        {% if articolo.prezzo_listino_scm is not None %}
+                        € {{ articolo.prezzo_listino_scm }} <small class="text-muted">IVA esclusa</small>
+                        {% else %}
+                        <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Prezzo Acquisto SCM (a noi):</dt>
+                    <dd class="col-sm-8">
+                        {% if articolo.prezzo_acquisto_scm %}
+                        € {{ articolo.prezzo_acquisto_scm }} <small class="text-muted">IVA esclusa</small>
+                        {% else %}
+                        <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Disponibilità SCM:</dt>
+                    <dd class="col-sm-8">
+                        {% if articolo.disponibilita_scm is not None %}
+                        {{ articolo.stato_disponibilita_scm }} {{ articolo.disponibilita_scm }}
+                        {% else %}
+                        <span class="text-muted">N/A</span>
+                        {% endif %}
+                        {% if articolo.dati_scm_aggiornati_il %}
+                        <small class="text-muted d-block">Rilevato il {{ articolo.dati_scm_aggiornati_il|date:"d/m/Y H:i" }}</small>
                         {% endif %}
                     </dd>
 
@@ -241,6 +280,44 @@
                 {% endif %}
             </div>
         </div>
+    </div>
+</div>
+
+<!-- STORICO DATI SCM -->
+<div class="card mt-3">
+    <div class="card-header">
+        <i class="fas fa-history"></i> Storico Prezzi e Disponibilità SCM
+    </div>
+    <div class="card-body p-0">
+        {% if storico_scm %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Rilevato il</th>
+                        <th class="text-end">Listino (cliente)</th>
+                        <th class="text-end">Acquisto (a noi)</th>
+                        <th>Disponibilità SCM</th>
+                        <th>Operatore</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for riga in storico_scm %}
+                    <tr>
+                        <td>{{ riga.rilevato_il|date:"d/m/Y H:i" }}</td>
+                        <td class="text-end">{% if riga.prezzo_listino is not None %}€ {{ riga.prezzo_listino }}{% else %}-{% endif %}</td>
+                        <td class="text-end">{% if riga.prezzo_acquisto is not None %}€ {{ riga.prezzo_acquisto }}{% else %}-{% endif %}</td>
+                        <td>{% if riga.disponibilita is not None %}{{ riga.stato_disponibilita }} {{ riga.disponibilita }}{% else %}-{% endif %}</td>
+                        <td>{{ riga.operatore|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <small class="text-muted d-block p-2">Prezzi IVA esclusa.</small>
+        {% else %}
+        <p class="p-3 text-center text-muted">Nessuna rilevazione dal portale SCM registrata</p>
+        {% endif %}
     </div>
 </div>
 
